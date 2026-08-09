@@ -111,9 +111,29 @@ body {
 
 		<script src="index.js"></script>
 		<script>
-const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":false,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":99895316,"index.wasm":39509339},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
+const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":false,"executable":"index","experimentalVK":false,"fileSizes":{"index.wasm":39509339},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4,"locale":"en"};
 const GODOT_THREADS_ENABLED = false;
+const SPLIT_PACK_MANIFEST = 'index.pck.e7225001f3355d03.parts.json';
 const engine = new Engine(GODOT_CONFIG);
+const WEB_STATE = {
+	mode: 'loading',
+	packageBytesLoaded: 0,
+	packageBytesTotal: 124543120,
+	packageSha256: 'e7225001f3355d03e1f3006271695c56b879390849a3421d1dfbfe036f2930ec',
+};
+window.render_game_to_text = () => JSON.stringify({
+	coordinateSystem: 'Godot canvas; origin top-left, x right, y down',
+	mode: WEB_STATE.mode,
+	canvas: {
+		width: document.getElementById('canvas').width,
+		height: document.getElementById('canvas').height,
+	},
+	package: {
+		loaded: WEB_STATE.packageBytesLoaded,
+		total: WEB_STATE.packageBytesTotal,
+		sha256: WEB_STATE.packageSha256,
+	},
+});
 
 (function () {
 	const statusOverlay = document.getElementById('status');
@@ -151,6 +171,7 @@ const engine = new Engine(GODOT_CONFIG);
 
 	function displayFailureNotice(err) {
 		console.error(err);
+		WEB_STATE.mode = 'error';
 		if (err instanceof Error) {
 			setStatusNotice(err.message);
 		} else if (typeof err === 'string') {
@@ -160,6 +181,50 @@ const engine = new Engine(GODOT_CONFIG);
 		}
 		setStatusMode('notice');
 		initializing = false;
+	}
+
+	async function sha256Hex(buffer) {
+		if (!globalThis.crypto || !globalThis.crypto.subtle) {
+			throw new Error('This browser cannot verify the game package.');
+		}
+		const digest = await globalThis.crypto.subtle.digest('SHA-256', buffer);
+		return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, '0')).join('');
+	}
+
+	async function loadSplitPack() {
+		const manifestResponse = await fetch(SPLIT_PACK_MANIFEST, { cache: 'no-store' });
+		if (!manifestResponse.ok) {
+			throw new Error(`Game package manifest failed to load (${manifestResponse.status}).`);
+		}
+		const manifest = await manifestResponse.json();
+		if (manifest.schema !== 'bm2-godot-web-split-pack-v1'
+				|| !manifest.original || !Number.isSafeInteger(manifest.original.size)
+				|| !Array.isArray(manifest.parts) || manifest.parts.length === 0) {
+			throw new Error('Game package manifest is invalid.');
+		}
+
+		const pack = new Uint8Array(manifest.original.size);
+		let offset = 0;
+		statusProgress.value = 0;
+		statusProgress.max = manifest.original.size;
+		for (const part of manifest.parts) {
+			const response = await fetch(part.file);
+			if (!response.ok) {
+				throw new Error(`Game package part failed to load (${response.status}).`);
+			}
+			const buffer = await response.arrayBuffer();
+			if (buffer.byteLength !== part.size || await sha256Hex(buffer) !== part.sha256) {
+				throw new Error(`Game package part failed integrity verification: ${part.file}`);
+			}
+			pack.set(new Uint8Array(buffer), offset);
+			offset += buffer.byteLength;
+			WEB_STATE.packageBytesLoaded = offset;
+			statusProgress.value = offset;
+		}
+		if (offset !== manifest.original.size || await sha256Hex(pack.buffer) !== manifest.original.sha256) {
+			throw new Error('The reconstructed game package failed integrity verification.');
+		}
+		return pack.buffer;
 	}
 
 	const missing = Engine.getMissingFeatures({
@@ -199,7 +264,11 @@ const engine = new Engine(GODOT_CONFIG);
 		}
 	} else {
 		setStatusMode('progress');
-		engine.startGame({
+		Promise.all([
+			Engine.load('index', GODOT_CONFIG.fileSizes['index.wasm']),
+			loadSplitPack(),
+		]).then(([, pack]) => engine.preloadFile(pack, 'index.pck')).then(() => engine.start({
+			'args': ['--main-pack', 'index.pck'],
 			'onProgress': function (current, total) {
 				if (current > 0 && total > 0) {
 					statusProgress.value = current;
@@ -209,7 +278,8 @@ const engine = new Engine(GODOT_CONFIG);
 					statusProgress.removeAttribute('max');
 				}
 			},
-		}).then(() => {
+		})).then(() => {
+			WEB_STATE.mode = 'running';
 			setStatusMode('hidden');
 		}, displayFailureNotice);
 	}
@@ -217,4 +287,3 @@ const engine = new Engine(GODOT_CONFIG);
 		</script>
 	</body>
 </html>
-
