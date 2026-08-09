@@ -116,13 +116,13 @@ const requestedLocale = new URLSearchParams(window.location.search).get('locale'
 GODOT_CONFIG.locale = requestedLocale || navigator.language || 'en';
 document.documentElement.lang = GODOT_CONFIG.locale.toLowerCase().startsWith('ko') ? 'ko' : 'en';
 const GODOT_THREADS_ENABLED = false;
-const SPLIT_PACK_MANIFEST = 'index.pck.eaa8280ef0869875.parts.json';
+const SPLIT_PACK_MANIFEST = 'index.pck.ea0d603697f1374e.parts.json';
 const engine = new Engine(GODOT_CONFIG);
 const WEB_STATE = {
 	mode: 'loading',
 	packageBytesLoaded: 0,
-	packageBytesTotal: 131277484,
-	packageSha256: 'eaa8280ef0869875ddc1aec2757f6f1ad175cb30a07780b443ba6dd5f3924609',
+	packageBytesTotal: 131282732,
+	packageSha256: 'ea0d603697f1374ede34f6db4a00b606c3f92a4347eca1d327bfb2fabdf9f6bf',
 };
 window.render_game_to_text = () => JSON.stringify({
 	coordinateSystem: 'Godot canvas; origin top-left, x right, y down',

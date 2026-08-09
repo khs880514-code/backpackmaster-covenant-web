@@ -1,6 +1,6 @@
 {
 	"schema": "bg2.orbit_qa_site.v1",
-	"generated_at": "2026-08-09T11:12:20",
+	"generated_at": "2026-08-09T13:25:05",
 	"coordinate_system": "canvas origin top-left; +x right; +y down; normalized trajectory positions are projected from the player anchor",
 	"weapon_order": [
 		"sword",
@@ -74,7 +74,7 @@
 				"hit_power": 0.8,
 				"impact": 40.0,
 				"knockback": 320.0,
-				"life": 0.24,
+				"life": 0.26,
 				"range": 101.52,
 				"reach": 36.72,
 				"recoil": 34.0,
@@ -107,6 +107,11 @@
 						4.0,
 						5.0
 					]
+				},
+				"phase_timing": {
+					"prep_end": 0.3,
+					"impact_end": 0.62,
+					"recovery_end": 1.0
 				},
 				"weapon_offset": [
 					0.0,
@@ -270,7 +275,7 @@
 			"identity": {},
 			"combo": {
 				"cone": 0.32,
-				"cooldown": 0.73,
+				"cooldown": 0.7957,
 				"bleed_damage_mul": 0.05,
 				"bleed_duration": 1.2,
 				"bleed_tick_interval": 0.4,
@@ -284,7 +289,7 @@
 				"hit_power": 0.8,
 				"impact": 92.0,
 				"knockback": 320.0,
-				"life": 0.22,
+				"life": 0.38,
 				"range": 108.0,
 				"reach": 56.16,
 				"recoil": 34.0,
@@ -318,6 +323,11 @@
 						5.0
 					]
 				},
+				"phase_timing": {
+					"prep_end": 0.52,
+					"impact_end": 0.72,
+					"recovery_end": 1.0
+				},
 				"weapon_offset": [
 					4.0,
 					-6.0
@@ -335,7 +345,7 @@
 							"t": 0.0,
 							"position": [
 								0.159,
-								-0.746
+								-0.18
 							],
 							"rotation_deg": -78.0
 						},
@@ -344,7 +354,7 @@
 							"t": 0.24,
 							"position": [
 								-0.339,
-								-0.638
+								-0.2
 							],
 							"rotation_deg": -118.0
 						},
@@ -353,34 +363,34 @@
 							"t": 0.32,
 							"position": [
 								-0.086,
-								-0.818
+								-0.16
 							],
 							"rotation_deg": -96.0
 						},
 						{
 							"id": "p03",
-							"t": 0.42,
+							"t": 0.48,
 							"position": [
 								0.798,
-								-0.539
+								-0.08
 							],
 							"rotation_deg": -34.0
 						},
 						{
 							"id": "p04",
-							"t": 0.5,
+							"t": 0.58,
 							"position": [
 								0.999,
-								0.035
+								0.0
 							],
 							"rotation_deg": 2.0
 						},
 						{
 							"id": "p05",
-							"t": 0.58,
+							"t": 0.66,
 							"position": [
 								0.861,
-								0.384
+								0.2
 							],
 							"rotation_deg": 24.0
 						},
@@ -389,7 +399,7 @@
 							"t": 0.72,
 							"position": [
 								0.842,
-								0.029
+								0.08
 							],
 							"rotation_deg": 2.0
 						},
@@ -398,7 +408,7 @@
 							"t": 0.86,
 							"position": [
 								0.563,
-								-0.544
+								-0.1
 							],
 							"rotation_deg": -44.0
 						},
@@ -407,7 +417,7 @@
 							"t": 1.0,
 							"position": [
 								0.159,
-								-0.746
+								-0.18
 							],
 							"rotation_deg": -78.0
 						}
@@ -885,7 +895,7 @@
 				"hit_power": 1.0,
 				"impact": 35.0,
 				"knockback": 456.0,
-				"life": 0.32,
+				"life": 0.3,
 				"range": 97.2,
 				"reach": 30.0,
 				"recoil": 38.0,
@@ -920,6 +930,11 @@
 						4.0,
 						5.0
 					]
+				},
+				"phase_timing": {
+					"prep_end": 0.32,
+					"impact_end": 0.64,
+					"recovery_end": 1.0
 				},
 				"weapon_offset": [
 					-2.0,
@@ -1065,12 +1080,12 @@
 			"identity": {},
 			"combo": {
 				"cone": 0.04,
-				"cooldown": 0.9504,
+				"cooldown": 1.0384,
 				"equipment_pose": "focused_heavy_slam",
 				"hit_power": 1.0,
 				"impact": 80.0,
 				"knockback": 410.4,
-				"life": 0.36,
+				"life": 0.42,
 				"range": 88.2,
 				"reach": 30.0,
 				"recoil": 38.0,
@@ -1106,6 +1121,11 @@
 						5.0
 					]
 				},
+				"phase_timing": {
+					"prep_end": 0.56,
+					"impact_end": 0.74,
+					"recovery_end": 1.0
+				},
 				"weapon_offset": [
 					2.0,
 					-8.0
@@ -1122,91 +1142,91 @@
 							"id": "p00",
 							"t": 0.0,
 							"position": [
-								0.257,
-								-0.381
+								0.18,
+								-0.18
 							],
-							"rotation_deg": -56.0
+							"rotation_deg": -70.0
 						},
 						{
 							"id": "p01",
-							"t": 0.22,
+							"t": 0.28,
 							"position": [
-								0.031,
-								-0.298
+								0.05,
+								-0.2
 							],
-							"rotation_deg": -84.0
+							"rotation_deg": -88.0
 						},
 						{
 							"id": "p02",
-							"t": 0.3,
+							"t": 0.4,
 							"position": [
-								0.031,
-								-0.298
+								0.05,
+								-0.2
 							],
-							"rotation_deg": -84.0
+							"rotation_deg": -88.0
 						},
 						{
 							"id": "p03",
-							"t": 0.36,
+							"t": 0.48,
 							"position": [
-								0.242,
+								0.25,
 								-0.14
 							],
-							"rotation_deg": -30.0
+							"rotation_deg": -40.0
 						},
 						{
 							"id": "p04",
-							"t": 0.42,
+							"t": 0.54,
 							"position": [
-								0.594,
-								-0.084
+								0.62,
+								-0.08
+							],
+							"rotation_deg": -18.0
+						},
+						{
+							"id": "p05",
+							"t": 0.58,
+							"position": [
+								0.82,
+								0.02
+							],
+							"rotation_deg": 0.0
+						},
+						{
+							"id": "p06",
+							"t": 0.64,
+							"position": [
+								1.0,
+								0.16
+							],
+							"rotation_deg": 18.0
+						},
+						{
+							"id": "p07",
+							"t": 0.74,
+							"position": [
+								0.72,
+								0.04
 							],
 							"rotation_deg": -8.0
 						},
 						{
-							"id": "p05",
-							"t": 0.48,
-							"position": [
-								0.995,
-								0.105
-							],
-							"rotation_deg": 6.0
-						},
-						{
-							"id": "p06",
-							"t": 0.54,
-							"position": [
-								0.921,
-								0.335
-							],
-							"rotation_deg": 20.0
-						},
-						{
-							"id": "p07",
-							"t": 0.68,
-							"position": [
-								0.718,
-								-0.05
-							],
-							"rotation_deg": -4.0
-						},
-						{
 							"id": "p08",
-							"t": 0.86,
+							"t": 0.88,
 							"position": [
-								0.41,
-								-0.32
+								0.4,
+								-0.1
 							],
-							"rotation_deg": -38.0
+							"rotation_deg": -40.0
 						},
 						{
 							"id": "p09",
 							"t": 1.0,
 							"position": [
-								0.257,
-								-0.381
+								0.18,
+								-0.18
 							],
-							"rotation_deg": -56.0
+							"rotation_deg": -70.0
 						}
 					],
 					"hit": {
@@ -1683,7 +1703,7 @@
 				"hit_power": 0.65,
 				"impact": 14.0,
 				"knockback": 230.0,
-				"life": 0.3,
+				"life": 0.28,
 				"pierce": 3,
 				"range": 90.2,
 				"reach": 86.0,
@@ -1718,6 +1738,11 @@
 						5.0
 					]
 				},
+				"phase_timing": {
+					"prep_end": 0.28,
+					"impact_end": 0.58,
+					"recovery_end": 1.0
+				},
 				"weapon_offset": [
 					28.0,
 					0.0
@@ -1734,7 +1759,7 @@
 							"id": "p00",
 							"position": [
 								0.3,
-								-0.1
+								-0.24
 							],
 							"rotation_deg": -58.0,
 							"t": 0.0
@@ -1743,7 +1768,7 @@
 							"id": "p01",
 							"position": [
 								0.22,
-								-0.12
+								-0.28
 							],
 							"rotation_deg": -50.0,
 							"t": 0.12
@@ -1752,7 +1777,7 @@
 							"id": "p02",
 							"position": [
 								0.58,
-								-0.16
+								-0.2
 							],
 							"rotation_deg": -74.0,
 							"t": 0.24
@@ -1761,7 +1786,7 @@
 							"id": "p03",
 							"position": [
 								0.88,
-								-0.1
+								-0.08
 							],
 							"rotation_deg": -95.0,
 							"t": 0.34
@@ -1770,7 +1795,7 @@
 							"id": "p04",
 							"position": [
 								1.0,
-								0.02
+								0.12
 							],
 							"rotation_deg": -112.0,
 							"t": 0.44
@@ -1779,7 +1804,7 @@
 							"id": "p05",
 							"position": [
 								0.94,
-								0.1
+								0.28
 							],
 							"rotation_deg": -122.0,
 							"t": 0.56
@@ -1788,7 +1813,7 @@
 							"id": "p06",
 							"position": [
 								0.62,
-								0.06
+								0.18
 							],
 							"rotation_deg": -96.0,
 							"t": 0.72
@@ -1797,7 +1822,7 @@
 							"id": "p07",
 							"position": [
 								0.4,
-								-0.02
+								0.0
 							],
 							"rotation_deg": -70.0,
 							"t": 0.86
@@ -1806,7 +1831,7 @@
 							"id": "p08",
 							"position": [
 								0.3,
-								-0.1
+								-0.2
 							],
 							"rotation_deg": -58.0,
 							"t": 1.0
@@ -1869,12 +1894,12 @@
 			"identity": {},
 			"combo": {
 				"cone": 0.84,
-				"cooldown": 1.2096,
+				"cooldown": 1.3216,
 				"equipment_pose": "long_piercing_thrust",
 				"hit_power": 0.65,
 				"impact": 10.0,
 				"knockback": 230.0,
-				"life": 0.28,
+				"life": 0.38,
 				"pierce": 2,
 				"range": 114.4,
 				"reach": 110.0,
@@ -1909,6 +1934,11 @@
 						5.0
 					]
 				},
+				"phase_timing": {
+					"prep_end": 0.54,
+					"impact_end": 0.7,
+					"recovery_end": 1.0
+				},
 				"weapon_offset": [
 					38.0,
 					0.0
@@ -1926,7 +1956,7 @@
 							"t": 0.0,
 							"position": [
 								0.631,
-								-0.426
+								-0.12
 							],
 							"rotation_deg": -34.0
 						},
@@ -1935,7 +1965,7 @@
 							"t": 0.26,
 							"position": [
 								0.379,
-								-0.485
+								-0.14
 							],
 							"rotation_deg": -52.0
 						},
@@ -1944,22 +1974,22 @@
 							"t": 0.34,
 							"position": [
 								0.601,
-								-0.405
+								-0.12
 							],
 							"rotation_deg": -34.0
 						},
 						{
 							"id": "p03",
-							"t": 0.42,
+							"t": 0.46,
 							"position": [
 								0.892,
-								-0.157
+								-0.06
 							],
 							"rotation_deg": -10.0
 						},
 						{
 							"id": "p04",
-							"t": 0.48,
+							"t": 0.54,
 							"position": [
 								1.0,
 								0.0
@@ -1968,10 +1998,10 @@
 						},
 						{
 							"id": "p05",
-							"t": 0.56,
+							"t": 0.62,
 							"position": [
 								0.978,
-								0.034
+								0.04
 							],
 							"rotation_deg": 2.0
 						},
@@ -1980,7 +2010,7 @@
 							"t": 0.7,
 							"position": [
 								0.851,
-								-0.181
+								-0.04
 							],
 							"rotation_deg": -12.0
 						},
@@ -1989,7 +2019,7 @@
 							"t": 0.86,
 							"position": [
 								0.7,
-								-0.341
+								-0.1
 							],
 							"rotation_deg": -26.0
 						},
@@ -1998,7 +2028,7 @@
 							"t": 1.0,
 							"position": [
 								0.631,
-								-0.426
+								-0.12
 							],
 							"rotation_deg": -34.0
 						}
@@ -2502,6 +2532,11 @@
 						5.0
 					]
 				},
+				"phase_timing": {
+					"prep_end": 0.36,
+					"impact_end": 0.66,
+					"recovery_end": 1.0
+				},
 				"weapon_offset": [
 					36.0,
 					0.0
@@ -2545,7 +2580,7 @@
 							"id": "p03",
 							"position": [
 								0.88,
-								-0.18
+								-0.12
 							],
 							"rotation_deg": -24.0,
 							"t": 0.38
@@ -2554,7 +2589,7 @@
 							"id": "p04",
 							"position": [
 								1.0,
-								-0.02
+								0.08
 							],
 							"rotation_deg": -5.0,
 							"t": 0.5
@@ -2563,7 +2598,7 @@
 							"id": "p05",
 							"position": [
 								0.98,
-								0.08
+								0.2
 							],
 							"rotation_deg": 4.0,
 							"t": 0.58
@@ -2572,7 +2607,7 @@
 							"id": "p06",
 							"position": [
 								0.58,
-								-0.08
+								0.04
 							],
 							"rotation_deg": -18.0,
 							"t": 0.72
@@ -2581,7 +2616,7 @@
 							"id": "p07",
 							"position": [
 								0.38,
-								-0.18
+								-0.12
 							],
 							"rotation_deg": -42.0,
 							"t": 0.86
@@ -2653,12 +2688,12 @@
 			"identity": {},
 			"combo": {
 				"cone": 0.84,
-				"cooldown": 1.8252,
+				"cooldown": 1.9942,
 				"equipment_pose": "long_piercing_thrust",
 				"hit_power": 1.25,
 				"impact": 6.0,
 				"knockback": 520.0,
-				"life": 0.5,
+				"life": 0.58,
 				"pierce": 3,
 				"range": 133.12,
 				"reach": 136.0,
@@ -2693,6 +2728,11 @@
 						5.0
 					]
 				},
+				"phase_timing": {
+					"prep_end": 0.56,
+					"impact_end": 0.76,
+					"recovery_end": 1.0
+				},
 				"weapon_offset": [
 					58.0,
 					0.0
@@ -2711,8 +2751,8 @@
 						{
 							"id": "p00",
 							"position": [
-								0.394,
-								-0.069
+								0.36,
+								-0.08
 							],
 							"rotation_deg": -10.0,
 							"t": 0.0
@@ -2720,8 +2760,8 @@
 						{
 							"id": "p01",
 							"position": [
-								0.155,
-								-0.039
+								0.12,
+								-0.06
 							],
 							"rotation_deg": -14.0,
 							"t": 0.34
@@ -2729,20 +2769,20 @@
 						{
 							"id": "p02",
 							"position": [
-								0.698,
-								-0.049
+								0.55,
+								-0.04
 							],
 							"rotation_deg": -4.0,
-							"t": 0.42
+							"t": 0.46
 						},
 						{
 							"id": "p03",
 							"position": [
-								1.0,
-								0.0
+								0.88,
+								-0.02
 							],
 							"rotation_deg": 0.0,
-							"t": 0.48
+							"t": 0.52
 						},
 						{
 							"id": "p04",
@@ -2751,31 +2791,31 @@
 								0.0
 							],
 							"rotation_deg": 0.0,
-							"t": 0.56
+							"t": 0.58
 						},
 						{
 							"id": "p05",
 							"position": [
-								1.0,
-								0.0
+								0.98,
+								0.02
 							],
 							"rotation_deg": 0.0,
-							"t": 0.62
+							"t": 0.66
 						},
 						{
 							"id": "p06",
 							"position": [
-								0.599,
-								-0.042
+								0.58,
+								-0.02
 							],
 							"rotation_deg": -4.0,
-							"t": 0.8
+							"t": 0.82
 						},
 						{
 							"id": "p07",
 							"position": [
-								0.394,
-								-0.069
+								0.36,
+								-0.08
 							],
 							"rotation_deg": -10.0,
 							"t": 1.0
@@ -2840,7 +2880,7 @@
 				"hit_power": 1.6,
 				"impact": 38.0,
 				"knockback": 864.0,
-				"life": 0.36,
+				"life": 0.38,
 				"range": 116.64,
 				"reach": 62.0,
 				"recoil": 62.0,
@@ -2875,6 +2915,11 @@
 						4.0,
 						5.0
 					]
+				},
+				"phase_timing": {
+					"prep_end": 0.38,
+					"impact_end": 0.68,
+					"recovery_end": 1.0
 				},
 				"weapon_offset": [
 					-10.0,
@@ -3028,12 +3073,12 @@
 			"identity": {},
 			"combo": {
 				"cone": 0.06,
-				"cooldown": 1.2636,
+				"cooldown": 1.3806,
 				"equipment_pose": "focused_heavy_slam",
 				"hit_power": 1.65,
 				"impact": 96.0,
 				"knockback": 777.6,
-				"life": 0.32,
+				"life": 0.5,
 				"range": 105.84,
 				"reach": 62.0,
 				"recoil": 62.0,
@@ -3069,6 +3114,11 @@
 						5.0
 					]
 				},
+				"phase_timing": {
+					"prep_end": 0.58,
+					"impact_end": 0.78,
+					"recovery_end": 1.0
+				},
 				"weapon_offset": [
 					0.0,
 					-16.0
@@ -3085,8 +3135,8 @@
 							"id": "p00",
 							"t": 0.0,
 							"position": [
-								0.417,
-								-0.432
+								0.3,
+								-0.18
 							],
 							"rotation_deg": -46.0
 						},
@@ -3094,8 +3144,8 @@
 							"id": "p01",
 							"t": 0.3,
 							"position": [
-								-0.106,
-								-0.427
+								-0.1,
+								-0.22
 							],
 							"rotation_deg": -104.0
 						},
@@ -3103,35 +3153,35 @@
 							"id": "p02",
 							"t": 0.38,
 							"position": [
-								-0.106,
-								-0.427
+								-0.1,
+								-0.22
 							],
 							"rotation_deg": -104.0
 						},
 						{
 							"id": "p03",
-							"t": 0.48,
+							"t": 0.52,
 							"position": [
-								0.677,
-								-0.246
+								0.45,
+								-0.12
 							],
 							"rotation_deg": -20.0
 						},
 						{
 							"id": "p04",
-							"t": 0.54,
+							"t": 0.58,
 							"position": [
-								0.99,
-								0.139
+								0.85,
+								0.06
 							],
 							"rotation_deg": 8.0
 						},
 						{
 							"id": "p05",
-							"t": 0.6,
+							"t": 0.64,
 							"position": [
-								0.932,
-								0.303
+								1.0,
+								0.2
 							],
 							"rotation_deg": 18.0
 						},
@@ -3139,8 +3189,8 @@
 							"id": "p06",
 							"t": 0.72,
 							"position": [
-								0.8,
-								-0.028
+								0.78,
+								0.04
 							],
 							"rotation_deg": -2.0
 						},
@@ -3148,8 +3198,8 @@
 							"id": "p07",
 							"t": 0.88,
 							"position": [
-								0.56,
-								-0.35
+								0.52,
+								-0.12
 							],
 							"rotation_deg": -32.0
 						},
@@ -3157,8 +3207,8 @@
 							"id": "p08",
 							"t": 1.0,
 							"position": [
-								0.417,
-								-0.432
+								0.3,
+								-0.18
 							],
 							"rotation_deg": -46.0
 						}
@@ -3261,6 +3311,11 @@
 						4.0,
 						5.0
 					]
+				},
+				"phase_timing": {
+					"prep_end": 0.42,
+					"impact_end": 0.72,
+					"recovery_end": 1.0
 				},
 				"weapon_offset": [
 					-16.0,
@@ -3450,12 +3505,12 @@
 			"identity": {},
 			"combo": {
 				"cone": 0.08,
-				"cooldown": 1.6308,
+				"cooldown": 1.7818,
 				"equipment_pose": "focused_heavy_slam",
 				"hit_power": 2.1,
 				"impact": 90.0,
 				"knockback": 1015.2,
-				"life": 0.68,
+				"life": 0.78,
 				"range": 121.52,
 				"reach": 76.0,
 				"recoil": 86.0,
@@ -3491,6 +3546,11 @@
 						5.0
 					]
 				},
+				"phase_timing": {
+					"prep_end": 0.62,
+					"impact_end": 0.82,
+					"recovery_end": 1.0
+				},
 				"weapon_offset": [
 					0.0,
 					-20.0
@@ -3509,8 +3569,8 @@
 						{
 							"id": "p00",
 							"position": [
-								0.198,
-								-0.545
+								0.16,
+								-0.22
 							],
 							"rotation_deg": -70.0,
 							"t": 0.0
@@ -3518,8 +3578,8 @@
 						{
 							"id": "p01",
 							"position": [
-								-0.361,
-								-0.374
+								-0.3,
+								-0.25
 							],
 							"rotation_deg": -134.0,
 							"t": 0.36
@@ -3527,8 +3587,8 @@
 						{
 							"id": "p02",
 							"position": [
-								-0.361,
-								-0.374
+								-0.3,
+								-0.25
 							],
 							"rotation_deg": -134.0,
 							"t": 0.44
@@ -3536,35 +3596,35 @@
 						{
 							"id": "p03",
 							"position": [
-								0.913,
-								0.297
+								0.62,
+								-0.08
 							],
 							"rotation_deg": 18.0,
-							"t": 0.56
+							"t": 0.58
 						},
 						{
 							"id": "p04",
 							"position": [
-								0.829,
-								0.559
+								0.9,
+								0.08
 							],
 							"rotation_deg": 34.0,
-							"t": 0.62
+							"t": 0.64
 						},
 						{
 							"id": "p05",
 							"position": [
-								0.809,
-								0.588
+								1.0,
+								0.23
 							],
 							"rotation_deg": 36.0,
-							"t": 0.72
+							"t": 0.7
 						},
 						{
 							"id": "p06",
 							"position": [
 								0.82,
-								-0.029
+								0.06
 							],
 							"rotation_deg": -2.0,
 							"t": 0.84
@@ -3572,8 +3632,8 @@
 						{
 							"id": "p07",
 							"position": [
-								0.458,
-								-0.475
+								0.45,
+								-0.12
 							],
 							"rotation_deg": -46.0,
 							"t": 0.94
@@ -3581,8 +3641,8 @@
 						{
 							"id": "p08",
 							"position": [
-								0.198,
-								-0.545
+								0.16,
+								-0.22
 							],
 							"rotation_deg": -70.0,
 							"t": 1.0
@@ -4807,7 +4867,8 @@
 					0.5,
 					0.18
 				],
-				"block_radius": 22.0
+				"block_radius": 22.0,
+				"projectile_response": "block"
 			},
 			"identity": {},
 			"combo": {
@@ -4821,7 +4882,7 @@
 				"hit_power": 0.495,
 				"impact": 24.0,
 				"knockback": 660.8,
-				"life": 0.26,
+				"life": 0.22,
 				"range": 66.24,
 				"reach": 58.0,
 				"recoil": 18.0,
@@ -4858,6 +4919,11 @@
 						5.0
 					]
 				},
+				"phase_timing": {
+					"prep_end": 0.24,
+					"impact_end": 0.62,
+					"recovery_end": 1.0
+				},
 				"weapon_offset": [
 					0.0,
 					0.0
@@ -4877,7 +4943,7 @@
 							"id": "p00",
 							"position": [
 								0.1,
-								-0.52
+								-0.2
 							],
 							"rotation_deg": 0.0,
 							"t": 0.0
@@ -4886,7 +4952,7 @@
 							"id": "p01",
 							"position": [
 								0.38,
-								-0.38
+								-0.18
 							],
 							"rotation_deg": 0.0,
 							"t": 0.14
@@ -4895,7 +4961,7 @@
 							"id": "p02",
 							"position": [
 								0.52,
-								-0.06
+								-0.08
 							],
 							"rotation_deg": 0.0,
 							"t": 0.28
@@ -4904,7 +4970,7 @@
 							"id": "p03",
 							"position": [
 								0.38,
-								0.34
+								0.12
 							],
 							"rotation_deg": 0.0,
 							"t": 0.42
@@ -4913,7 +4979,7 @@
 							"id": "p04",
 							"position": [
 								0.08,
-								0.52
+								0.2
 							],
 							"rotation_deg": 0.0,
 							"t": 0.56
@@ -4922,7 +4988,7 @@
 							"id": "p05",
 							"position": [
 								-0.1,
-								0.3
+								0.1
 							],
 							"rotation_deg": 0.0,
 							"t": 0.7
@@ -4931,7 +4997,7 @@
 							"id": "p06",
 							"position": [
 								-0.12,
-								-0.12
+								-0.05
 							],
 							"rotation_deg": 0.0,
 							"t": 0.82
@@ -4940,7 +5006,7 @@
 							"id": "p07",
 							"position": [
 								0.1,
-								-0.52
+								-0.2
 							],
 							"rotation_deg": 0.0,
 							"t": 1.0
@@ -4997,14 +5063,15 @@
 					0.5,
 					0.18
 				],
-				"block_radius": 22.0
+				"block_radius": 22.0,
+				"projectile_response": "block"
 			},
 			"identity": {},
 			"combo": {
 				"bounce_pause": 0.025,
 				"catch_duration": 0.08,
 				"cone": 0.46,
-				"cooldown": 1.0908,
+				"cooldown": 1.1918,
 				"curve_height": 16.0,
 				"equipment_pose": "shield_boomerang_throw",
 				"flight_speed": 860.0,
@@ -5047,6 +5114,11 @@
 						4.0,
 						5.0
 					]
+				},
+				"phase_timing": {
+					"prep_end": 0.34,
+					"impact_end": 0.58,
+					"recovery_end": 1.0
 				},
 				"weapon_offset": [
 					10.0,
@@ -5105,7 +5177,8 @@
 					0.5,
 					0.16
 				],
-				"block_radius": 30.0
+				"block_radius": 30.0,
+				"projectile_response": "deflect"
 			},
 			"identity": {},
 			"combo": {
@@ -5119,12 +5192,12 @@
 				"hit_power": 0.585,
 				"impact": 24.0,
 				"knockback": 778.8,
-				"life": 0.28,
+				"life": 0.34,
 				"range": 69.12,
 				"reach": 62.0,
 				"recoil": 22.0,
 				"return_speed_mul": 1.2,
-				"shield_flight_path": "kite_weave",
+				"shield_flight_path": "kite_charge",
 				"spin_speed": 14.0,
 				"strength": 0.96,
 				"stun": 0.18,
@@ -5156,6 +5229,11 @@
 						5.0
 					]
 				},
+				"phase_timing": {
+					"prep_end": 0.34,
+					"impact_end": 0.68,
+					"recovery_end": 1.0
+				},
 				"weapon_offset": [
 					0.0,
 					0.0
@@ -5175,7 +5253,7 @@
 							"id": "p00",
 							"position": [
 								0.12,
-								-0.12
+								-0.45
 							],
 							"rotation_deg": 0.0,
 							"t": 0.0
@@ -5184,7 +5262,7 @@
 							"id": "p01",
 							"position": [
 								0.05,
-								-0.18
+								-0.4
 							],
 							"rotation_deg": 0.0,
 							"t": 0.14
@@ -5193,7 +5271,7 @@
 							"id": "p02",
 							"position": [
 								0.52,
-								-0.08
+								-0.25
 							],
 							"rotation_deg": 0.0,
 							"t": 0.3
@@ -5202,7 +5280,7 @@
 							"id": "p03",
 							"position": [
 								0.82,
-								0.02
+								0.0
 							],
 							"rotation_deg": 0.0,
 							"t": 0.42
@@ -5211,7 +5289,7 @@
 							"id": "p04",
 							"position": [
 								0.78,
-								0.12
+								0.25
 							],
 							"rotation_deg": 0.0,
 							"t": 0.54
@@ -5220,7 +5298,7 @@
 							"id": "p05",
 							"position": [
 								0.42,
-								0.14
+								0.45
 							],
 							"rotation_deg": 0.0,
 							"t": 0.72
@@ -5229,7 +5307,7 @@
 							"id": "p06",
 							"position": [
 								0.18,
-								0.02
+								0.15
 							],
 							"rotation_deg": 0.0,
 							"t": 0.88
@@ -5238,7 +5316,7 @@
 							"id": "p07",
 							"position": [
 								0.12,
-								-0.12
+								-0.45
 							],
 							"rotation_deg": 0.0,
 							"t": 1.0
@@ -5295,26 +5373,27 @@
 					0.5,
 					0.16
 				],
-				"block_radius": 30.0
+				"block_radius": 30.0,
+				"projectile_response": "deflect"
 			},
 			"identity": {},
 			"combo": {
 				"bounce_pause": 0.05,
 				"catch_duration": 0.13,
 				"cone": 0.5,
-				"cooldown": 1.296,
+				"cooldown": 1.416,
 				"curve_height": 28.0,
 				"equipment_pose": "shield_boomerang_throw",
 				"flight_speed": 650.0,
 				"hit_power": 0.8736,
 				"impact": 8.0,
 				"knockback": 844.8,
-				"life": 0.32,
+				"life": 0.4,
 				"range": 111.36,
 				"reach": 80.0,
 				"recoil": 22.0,
 				"return_speed_mul": 1.2,
-				"shield_flight_path": "kite_weave",
+				"shield_flight_path": "kite_charge",
 				"spin_speed": 14.0,
 				"strength": 0.96,
 				"stun": 0.18,
@@ -5345,6 +5424,11 @@
 						4.0,
 						5.0
 					]
+				},
+				"phase_timing": {
+					"prep_end": 0.42,
+					"impact_end": 0.7,
+					"recovery_end": 1.0
 				},
 				"weapon_offset": [
 					12.0,
@@ -5403,7 +5487,8 @@
 					0.5,
 					0.14
 				],
-				"block_radius": 42.0
+				"block_radius": 42.0,
+				"projectile_response": "reflect"
 			},
 			"identity": {},
 			"combo": {
@@ -5420,7 +5505,7 @@
 				"impact_radius": 56.0,
 				"impact_vfx_mode": "slam",
 				"knockback": 967.6,
-				"life": 0.32,
+				"life": 0.52,
 				"range": 74.88,
 				"reach": 68.0,
 				"recoil": 28.0,
@@ -5457,6 +5542,11 @@
 						5.0
 					]
 				},
+				"phase_timing": {
+					"prep_end": 0.46,
+					"impact_end": 0.76,
+					"recovery_end": 1.0
+				},
 				"weapon_offset": [
 					0.0,
 					0.0
@@ -5476,7 +5566,7 @@
 							"id": "p00",
 							"position": [
 								0.1,
-								-0.72
+								-0.8
 							],
 							"rotation_deg": 0.0,
 							"t": 0.0
@@ -5512,7 +5602,7 @@
 							"id": "p04",
 							"position": [
 								0.1,
-								0.72
+								0.8
 							],
 							"rotation_deg": 0.0,
 							"t": 0.62
@@ -5539,7 +5629,7 @@
 							"id": "p07",
 							"position": [
 								0.1,
-								-0.72
+								-0.8
 							],
 							"rotation_deg": 0.0,
 							"t": 1.0
@@ -5596,14 +5686,15 @@
 					0.5,
 					0.14
 				],
-				"block_radius": 42.0
+				"block_radius": 42.0,
+				"projectile_response": "reflect"
 			},
 			"identity": {},
 			"combo": {
 				"bounce_pause": 1.0,
 				"catch_duration": 0.2,
 				"cone": 0.56,
-				"cooldown": 1.5768,
+				"cooldown": 1.7228,
 				"curve_height": 40.0,
 				"equipment_pose": "shield_boomerang_throw",
 				"flight_speed": 470.0,
@@ -5613,7 +5704,7 @@
 				"impact_radius": 56.0,
 				"impact_vfx_mode": "slam",
 				"knockback": 1049.6,
-				"life": 0.36,
+				"life": 0.58,
 				"range": 120.64,
 				"reach": 86.0,
 				"recoil": 28.0,
@@ -5649,6 +5740,11 @@
 						4.0,
 						5.0
 					]
+				},
+				"phase_timing": {
+					"prep_end": 0.56,
+					"impact_end": 0.78,
+					"recovery_end": 1.0
 				},
 				"weapon_offset": [
 					14.0,
@@ -8500,15 +8596,15 @@
 	"sources": {
 		"combat": {
 			"path": "res://assets/data/combat/aria_combat.json",
-			"sha256": "d810ec0a9ad808f36bd9a32f0f05ea5a6b6f75492b008f36ec988f615fef30e2"
+			"sha256": "3b082b83c986880b7c3a8014b03b0aaea67ad10d549a9f3d1ed37ae8b33ea9e5"
 		},
 		"motion": {
 			"path": "res://assets/data/combat/weapon_directional_vfx_profiles.json",
-			"sha256": "2a94f3b5d3357c2dead7f76b6fc09b3dba34afda9819a51a5f54f1b8dba25a8a"
+			"sha256": "efeca94c2583aced7659ed883f8bb4453206481b3e8ee83ff869fbc1b27cc05b"
 		},
 		"catalog": {
 			"path": "res://assets/ui/backpack/items/weapon_catalog.json",
-			"sha256": "7cd6058e73a7b7079920360caebc08d65b07d217fe29e28feb21cf04d04058b5"
+			"sha256": "89c2c0ff628a0f9a0411c279ec8c59423a7979a21c7665912aa49337b5c18f1c"
 		}
 	}
 }

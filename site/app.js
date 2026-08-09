@@ -67,7 +67,7 @@
     category: "all",
     selectedWeapon: "sword",
     formation: "side",
-    progress: 0,
+    elapsedSeconds: 0,
     playing: true,
     speed: 1,
     rangeScale: 2,
@@ -84,11 +84,27 @@
   const imageCache = new Map();
 
   const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+  const LOOP_SECONDS = 4;
   const lerp = (a, b, t) => a + (b - a) * t;
   const ease = (t) => t * t * (3 - 2 * t);
   const keyFor = (weaponId, axis) => `${weaponId}:${axis}`;
   const labelFor = (weaponId) => LABELS[weaponId] ?? weaponId.replaceAll("_", " ").toUpperCase();
   const format = (value, digits = 1) => Number(value ?? 0).toFixed(digits);
+
+  function axisPlayback(row, elapsedSeconds = state.elapsedSeconds) {
+    const combo = row?.combo ?? {};
+    const life = Math.max(Number(combo.life ?? 0.3), 0.01);
+    const cooldown = Math.max(Number(combo.cooldown ?? life), life);
+    const localSeconds = ((Math.max(0, elapsedSeconds) % cooldown) + cooldown) % cooldown;
+    const active = localSeconds < life;
+    const progress = active ? clamp(localSeconds / life, 0, 1) : 0;
+    const timing = combo.phase_timing ?? { prep_end: 0.35, impact_end: 0.68, recovery_end: 1 };
+    let phase = "대기";
+    if (active && progress < Number(timing.prep_end ?? 0.35)) phase = "준비";
+    else if (active && progress < Number(timing.impact_end ?? 0.68)) phase = "타격";
+    else if (active) phase = "회수";
+    return { active, cooldown, life, localSeconds, progress, phase, timing };
+  }
 
   function collectElements() {
     for (const id of [
@@ -157,7 +173,7 @@
       updateAllText();
     });
     elements.timeline.addEventListener("input", (event) => {
-      state.progress = Number(event.target.value);
+      state.elapsedSeconds = Number(event.target.value);
       state.playing = false;
       syncPlayButton();
       updateProgressText();
@@ -229,7 +245,7 @@
 
   function togglePlay() {
     state.playing = !state.playing;
-    if (state.playing && state.progress >= 0.999) state.progress = 0;
+    if (state.playing && state.elapsedSeconds >= LOOP_SECONDS) state.elapsedSeconds = 0;
     syncPlayButton();
   }
 
@@ -238,7 +254,7 @@
   }
 
   function resetProgress() {
-    state.progress = 0;
+    state.elapsedSeconds = 0;
     elements.timeline.value = "0";
     updateProgressText();
     render();
@@ -255,9 +271,8 @@
   }
 
   function updateProgressText() {
-    const pct = Math.round(state.progress * 100);
-    elements.timeline.value = String(state.progress);
-    elements["progress-readout"].textContent = `${pct}%`;
+    elements.timeline.value = String(state.elapsedSeconds);
+    elements["progress-readout"].textContent = `${format(state.elapsedSeconds, 2)} / ${format(LOOP_SECONDS, 2)}초`;
   }
 
   function updateAllText() {
@@ -311,8 +326,8 @@
   function shieldPathLabel(path) {
     return {
       round_arc: "원호 튕김",
-      kite_weave: "S자 직조",
-      tower_battering: "중량 돌진",
+      kite_charge: "직선 방패 돌진",
+      tower_battering: "문짝 중량 강타",
     }[path] ?? path;
   }
 
@@ -437,9 +452,9 @@
     const points = [];
     for (let index = 0; index <= steps; index++) {
       const raw = index / steps;
-      const t = ["kite_weave", "tower_battering"].includes(mode) ? raw * raw : ease(raw);
-      const lateral = mode === "kite_weave"
-        ? Math.sin(Math.PI * 2 * t) * amplitude
+      const t = ["kite_charge", "tower_battering"].includes(mode) ? raw * raw : ease(raw);
+      const lateral = mode === "kite_charge"
+        ? 0
         : Math.sin(Math.PI * t) * amplitude * (mode === "tower_battering" ? 0.16 : 1);
       points.push([lerp(start[0], end[0], t) + side[0] * lateral, lerp(start[1], end[1], t) + side[1] * lateral]);
     }
@@ -543,12 +558,14 @@
       { row: pair.vertical, scale: state.rangeScale, targetDepth, x: 648, y: 418, w: 616, h: 384, title: `세로 · 확대 ×${format(state.rangeScale, 2)}`, color: COLORS.pink },
     ];
     const pixelsPerUnit = fitPixelsPerUnit(panels, true, 1.75);
-    for (const panel of panels) drawPanel(ctx, panel, pixelsPerUnit, state.progress, state.formation, true);
+    for (const panel of panels) drawPanel(ctx, panel, pixelsPerUnit, state.elapsedSeconds, state.formation, true);
   }
 
-  function drawPanel(ctx, panel, pixelsPerUnit, progress, formation, detailed) {
+  function drawPanel(ctx, panel, pixelsPerUnit, elapsedSeconds, formation, detailed) {
     const { row, scale, targetDepth, x, y, w, h, title, color } = panel;
     const combo = row.combo;
+    const playback = axisPlayback(row, elapsedSeconds);
+    const progress = playback.progress;
     ctx.save();
     roundedRect(ctx, x, y, w, h, 9);
     ctx.fillStyle = COLORS.panel;
@@ -570,7 +587,7 @@
     ctx.fillText(title, x + 14, y + (detailed ? 24 : 17));
     ctx.fillStyle = COLORS.muted;
     ctx.font = detailed ? "11px ui-monospace, monospace" : "9px ui-monospace, monospace";
-    const metrics = `DMG ${format(combo.damage, 2)}  CD ${format(combo.cooldown, 2)}  RANGE ${format(combo.range * scale)}  ${combo.orbit_archetype}`;
+    const metrics = `${playback.phase} ${format(playback.localSeconds, 2)}s/${format(playback.life, 2)}s  ·  DMG ${format(combo.damage, 2)}  CD ${format(playback.cooldown, 2)}  RANGE ${format(combo.range * scale)}`;
     ctx.fillText(metrics, x + 14, y + (detailed ? 41 : 31));
 
     const center = [x + w * 0.32, y + h * 0.57];
@@ -647,7 +664,7 @@
       const chipLabels = statusChips(combo).map((chip) => chip.label);
       ctx.fillStyle = COLORS.muted;
       ctx.font = "10px ui-monospace, monospace";
-      ctx.fillText(`LIVE ${live.size} / PRED ${predicted.size} / TARGETS ${targets.length}`, x + 14, y + h - 28);
+      ctx.fillText(`PHASE ${playback.phase} · LIVE ${live.size} / PRED ${predicted.size} / TARGETS ${targets.length}`, x + 14, y + h - 28);
       ctx.fillText(chipLabels.length ? chipLabels.join("  ·  ") : countIdentity(combo), x + 14, y + h - 12);
     }
     ctx.restore();
@@ -776,8 +793,8 @@
         { row: pair.vertical, scale: 1, targetDepth, x: 213, y: 6, w: 201, h: 178, title: "V", color: COLORS.pink },
       ];
       const ppu = fitPixelsPerUnit(panels, false, 1.05);
-      drawPanel(ctx, panels[0], ppu, state.progress, state.formation, false);
-      drawPanel(ctx, panels[1], ppu, state.progress, state.formation, false);
+      drawPanel(ctx, panels[0], ppu, state.elapsedSeconds, state.formation, false);
+      drawPanel(ctx, panels[1], ppu, state.elapsedSeconds, state.formation, false);
     }
   }
 
@@ -813,10 +830,7 @@
 
   function advance(seconds) {
     if (!state.playing) return;
-    const pair = currentPair();
-    const duration = Math.max(pair.horizontal?.combo.life ?? 0.3, pair.vertical?.combo.life ?? 0.3, 0.18);
-    state.progress += seconds * state.speed / duration;
-    if (state.progress >= 1) state.progress %= 1;
+    state.elapsedSeconds = (state.elapsedSeconds + seconds * state.speed) % LOOP_SECONDS;
     updateProgressText();
   }
 
@@ -835,8 +849,9 @@
     const summarize = (row, scale) => {
       const geometry = buildGeometry(row, scale, state.formation, targetDepth);
       const targets = formationPoints(state.formation, targetDepth);
+      const playback = axisPlayback(row);
       const predicted = targets.filter((target) => geometry.paths.some((path) => distanceToPath(target, path) <= geometry.hitRadius + 9)).length;
-      const live = targets.filter((target) => geometry.paths.some((path) => distanceToPath(target, partialPath(path, state.progress)) <= geometry.hitRadius + 9)).length;
+      const live = targets.filter((target) => geometry.paths.some((path) => distanceToPath(target, partialPath(path, playback.progress)) <= geometry.hitRadius + 9)).length;
       return {
         axis: row.axis,
         scale,
@@ -844,7 +859,11 @@
         range: Number((row.combo.range * scale).toFixed(2)),
         damage: Number(row.combo.damage.toFixed(3)),
         cooldown: Number(row.combo.cooldown.toFixed(3)),
-        progress: Number(state.progress.toFixed(3)),
+        active: playback.active,
+        phase: playback.phase,
+        localSeconds: Number(playback.localSeconds.toFixed(3)),
+        lifeSeconds: Number(playback.life.toFixed(3)),
+        progress: Number(playback.progress.toFixed(3)),
         liveHits: live,
         predictedHits: predicted,
         status: statusChips(row.combo).map((chip) => chip.label),
@@ -859,6 +878,8 @@
       formation: state.formation,
       playing: state.playing,
       speed: state.speed,
+      elapsedSeconds: Number(state.elapsedSeconds.toFixed(3)),
+      loopSeconds: LOOP_SECONDS,
       rangeScale: state.rangeScale,
       overlays: { trail: state.showTrail, hit: state.showHit, labels: state.showLabels, lateRetarget: state.lateRetarget },
       compare: [
@@ -880,7 +901,7 @@
     state.playing = false;
     syncPlayButton();
     render();
-    return { wasPlaying, progress: state.progress };
+    return { wasPlaying, elapsedSeconds: state.elapsedSeconds };
   };
 
   async function boot() {

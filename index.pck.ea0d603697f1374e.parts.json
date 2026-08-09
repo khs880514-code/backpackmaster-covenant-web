@@ -1,0 +1,25 @@
+{
+  "schema": "bm2-godot-web-split-pack-v1",
+  "original": {
+    "file": "index.pck",
+    "size": 131282732,
+    "sha256": "ea0d603697f1374ede34f6db4a00b606c3f92a4347eca1d327bfb2fabdf9f6bf"
+  },
+  "parts": [
+    {
+      "file": "index.pck.ea0d603697f1374e.part01",
+      "size": 50000000,
+      "sha256": "0f6c591d82d7c7362f692d8a0140f888d663db22649efa263a3da4194620145e"
+    },
+    {
+      "file": "index.pck.ea0d603697f1374e.part02",
+      "size": 50000000,
+      "sha256": "64062e28a3735dfff9deb914d98c4c94beb705de6f540b6736706b07e59d4894"
+    },
+    {
+      "file": "index.pck.ea0d603697f1374e.part03",
+      "size": 31282732,
+      "sha256": "d8cae8829fa9067d7379b4b2fcd819b69f285077d37c898f71830d7c1ef1abc7"
+    }
+  ]
+}
