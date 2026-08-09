@@ -111,15 +111,18 @@ body {
 
 		<script src="index.js"></script>
 		<script>
-const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":false,"executable":"index","experimentalVK":false,"fileSizes":{"index.wasm":39509339},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4,"locale":"en"};
+const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":false,"executable":"index","experimentalVK":false,"fileSizes":{"index.wasm":39509339},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
+const requestedLocale = new URLSearchParams(window.location.search).get('locale');
+GODOT_CONFIG.locale = requestedLocale || navigator.language || 'en';
+document.documentElement.lang = GODOT_CONFIG.locale.toLowerCase().startsWith('ko') ? 'ko' : 'en';
 const GODOT_THREADS_ENABLED = false;
-const SPLIT_PACK_MANIFEST = 'index.pck.e7225001f3355d03.parts.json';
+const SPLIT_PACK_MANIFEST = 'index.pck.eaa8280ef0869875.parts.json';
 const engine = new Engine(GODOT_CONFIG);
 const WEB_STATE = {
 	mode: 'loading',
 	packageBytesLoaded: 0,
-	packageBytesTotal: 124543120,
-	packageSha256: 'e7225001f3355d03e1f3006271695c56b879390849a3421d1dfbfe036f2930ec',
+	packageBytesTotal: 131277484,
+	packageSha256: 'eaa8280ef0869875ddc1aec2757f6f1ad175cb30a07780b443ba6dd5f3924609',
 };
 window.render_game_to_text = () => JSON.stringify({
 	coordinateSystem: 'Godot canvas; origin top-left, x right, y down',

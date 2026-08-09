@@ -1,0 +1,8514 @@
+{
+	"schema": "bg2.orbit_qa_site.v1",
+	"generated_at": "2026-08-09T11:12:20",
+	"coordinate_system": "canvas origin top-left; +x right; +y down; normalized trajectory positions are projected from the player anchor",
+	"weapon_order": [
+		"sword",
+		"rapier",
+		"mace",
+		"greatsword",
+		"spear",
+		"halberd",
+		"lance",
+		"hammer",
+		"great_hammer",
+		"shortbow",
+		"crossbow",
+		"throwing_dagger",
+		"short_wand",
+		"round_shield",
+		"kite_shield",
+		"tower_shield",
+		"staff",
+		"orb_focus",
+		"spellbook",
+		"relic_censer",
+		"coil_launcher",
+		"turret_pack",
+		"bolt_sentry",
+		"bombard_turret",
+		"arc_coil_turret",
+		"saw_turret",
+		"trap_satchel",
+		"snare_bow"
+	],
+	"cases": [
+		{
+			"weapon_id": "sword",
+			"axis": "horizontal",
+			"category": "melee",
+			"damage_family": "melee",
+			"label_key": "item.weapon.sword.name",
+			"motion_role": "melee_slash",
+			"base_axis": "vertical",
+			"weapon_texture": "./project/assets/ui/backpack/items/common_v2/sword_1x2.png",
+			"attack_texture": "./project/assets/combat/vfx/weapons/attack/common/sword_attack_v01.png",
+			"projectile_texture": "",
+			"orbit": {
+				"len": 81.0,
+				"scale": 0.86,
+				"visual_span": 81.0,
+				"grip_point": [
+					0.5,
+					0.78
+				],
+				"tip_point": [
+					0.5,
+					0.08
+				]
+			},
+			"identity": {},
+			"combo": {
+				"cone": 0.06,
+				"cooldown": 0.73,
+				"bleed_damage_mul": 0.05,
+				"bleed_duration": 1.2,
+				"bleed_tick_interval": 0.4,
+				"bleed_sfx": "bleed_tick",
+				"bleed_vfx_mode": "ground_burst",
+				"bleed_vfx_life": 0.15,
+				"bleed_vfx_strength": 0.62,
+				"bleed_vfx_color_core": "#ff2e29",
+				"bleed_vfx_color_edge": "#6b0508",
+				"equipment_pose": "wide_horizontal_slash",
+				"hit_power": 0.8,
+				"impact": 40.0,
+				"knockback": 320.0,
+				"life": 0.24,
+				"range": 101.52,
+				"reach": 36.72,
+				"recoil": 34.0,
+				"strength": 0.8,
+				"stun": 0.1,
+				"target_cap": 0.0,
+				"vfx_mode": "slash",
+				"windup": -115.0,
+				"damage": 6.91770816,
+				"hit_stop": 0.05,
+				"vfx_scale": 1.0,
+				"vfx_speed": 1.0,
+				"particle_count": 0.0,
+				"ring_layers": 0.0,
+				"weapon_rotation_deg": 0.0,
+				"weapon_arc_scale": 0.58,
+				"weapon_scale": 1.0,
+				"vfx_row": 0.0,
+				"hit_shape": "ARC",
+				"phase_frames": {
+					"impact": [
+						2.0,
+						3.0
+					],
+					"prep": [
+						0.0,
+						1.0
+					],
+					"recovery": [
+						4.0,
+						5.0
+					]
+				},
+				"weapon_offset": [
+					0.0,
+					0.0
+				],
+				"impact_offset": [
+					18.0,
+					0.0
+				],
+				"trajectory": {
+					"space": "path_normalized",
+					"kind": "polyline",
+					"samples": [
+						{
+							"id": "p00",
+							"t": 0.0,
+							"position": [
+								-0.25,
+								-0.6
+							],
+							"rotation_deg": -112.0
+						},
+						{
+							"id": "p01",
+							"t": 0.26,
+							"position": [
+								-0.35,
+								-0.65
+							],
+							"rotation_deg": -118.0
+						},
+						{
+							"id": "p02",
+							"t": 0.34,
+							"position": [
+								-0.1,
+								-0.85
+							],
+							"rotation_deg": -104.0
+						},
+						{
+							"id": "p03",
+							"t": 0.44,
+							"position": [
+								0.55,
+								-0.65
+							],
+							"rotation_deg": -62.0
+						},
+						{
+							"id": "p04",
+							"t": 0.52,
+							"position": [
+								1.0,
+								0.05
+							],
+							"rotation_deg": 4.0
+						},
+						{
+							"id": "p05",
+							"t": 0.6,
+							"position": [
+								0.7,
+								0.55
+							],
+							"rotation_deg": 42.0
+						},
+						{
+							"id": "p06",
+							"t": 0.68,
+							"position": [
+								0.55,
+								0.35
+							],
+							"rotation_deg": 32.0
+						},
+						{
+							"id": "p07",
+							"t": 0.8,
+							"position": [
+								0.45,
+								0.1
+							],
+							"rotation_deg": 12.0
+						},
+						{
+							"id": "p08",
+							"t": 0.92,
+							"position": [
+								0.2,
+								-0.2
+							],
+							"rotation_deg": -34.0
+						},
+						{
+							"id": "p09",
+							"t": 1.0,
+							"position": [
+								-0.1,
+								-0.45
+							],
+							"rotation_deg": -76.0
+						}
+					],
+					"hit": {
+						"kind": "swept_circle",
+						"radius": 12.0
+					}
+				},
+				"shake": 0.8,
+				"color_core": [
+					0.550000011920929,
+					0.819999992847443,
+					1.0,
+					1.0
+				],
+				"color_edge": [
+					0.180000007152557,
+					0.479999989271164,
+					1.0,
+					1.0
+				],
+				"axis": "horizontal",
+				"crit_chance_pct": 0.0,
+				"pierce": 0,
+				"block": 0.0,
+				"lifesteal_pct": 0.0,
+				"orbit_path_caps": {
+					"horizontal_arc_deg": 300.0,
+					"horizontal_depth": 330.0,
+					"range_upgrade_cap_pct": 30.0,
+					"vertical_depth": 330.0
+				},
+				"orbit_archetype": "slash_throw"
+			}
+		},
+		{
+			"weapon_id": "sword",
+			"axis": "vertical",
+			"category": "melee",
+			"damage_family": "melee",
+			"label_key": "item.weapon.sword.name",
+			"motion_role": "melee_slash",
+			"base_axis": "vertical",
+			"weapon_texture": "./project/assets/ui/backpack/items/common_v2/sword_1x2.png",
+			"attack_texture": "./project/assets/combat/vfx/weapons/attack/common/sword_attack_v01.png",
+			"projectile_texture": "",
+			"orbit": {
+				"len": 81.0,
+				"scale": 0.86,
+				"visual_span": 81.0,
+				"grip_point": [
+					0.5,
+					0.78
+				],
+				"tip_point": [
+					0.5,
+					0.08
+				]
+			},
+			"identity": {},
+			"combo": {
+				"cone": 0.32,
+				"cooldown": 0.73,
+				"bleed_damage_mul": 0.05,
+				"bleed_duration": 1.2,
+				"bleed_tick_interval": 0.4,
+				"bleed_sfx": "bleed_tick",
+				"bleed_vfx_mode": "ground_burst",
+				"bleed_vfx_life": 0.15,
+				"bleed_vfx_strength": 0.62,
+				"bleed_vfx_color_core": "#ff2e29",
+				"bleed_vfx_color_edge": "#6b0508",
+				"equipment_pose": "focused_vertical_slash",
+				"hit_power": 0.8,
+				"impact": 92.0,
+				"knockback": 320.0,
+				"life": 0.22,
+				"range": 108.0,
+				"reach": 56.16,
+				"recoil": 34.0,
+				"strength": 0.8,
+				"stun": 0.1,
+				"target_cap": 0.0,
+				"vfx_mode": "slash",
+				"windup": -70.0,
+				"damage": 8.68393152,
+				"hit_stop": 0.05,
+				"vfx_scale": 1.0,
+				"vfx_speed": 1.0,
+				"particle_count": 0.0,
+				"ring_layers": 0.0,
+				"weapon_rotation_deg": -28.0,
+				"weapon_arc_scale": 0.38,
+				"weapon_scale": 1.0,
+				"vfx_row": 1.0,
+				"hit_shape": "LINE",
+				"phase_frames": {
+					"impact": [
+						2.0,
+						3.0
+					],
+					"prep": [
+						0.0,
+						1.0
+					],
+					"recovery": [
+						4.0,
+						5.0
+					]
+				},
+				"weapon_offset": [
+					4.0,
+					-6.0
+				],
+				"impact_offset": [
+					38.0,
+					0.0
+				],
+				"trajectory": {
+					"space": "path_normalized",
+					"kind": "polyline",
+					"samples": [
+						{
+							"id": "p00",
+							"t": 0.0,
+							"position": [
+								0.159,
+								-0.746
+							],
+							"rotation_deg": -78.0
+						},
+						{
+							"id": "p01",
+							"t": 0.24,
+							"position": [
+								-0.339,
+								-0.638
+							],
+							"rotation_deg": -118.0
+						},
+						{
+							"id": "p02",
+							"t": 0.32,
+							"position": [
+								-0.086,
+								-0.818
+							],
+							"rotation_deg": -96.0
+						},
+						{
+							"id": "p03",
+							"t": 0.42,
+							"position": [
+								0.798,
+								-0.539
+							],
+							"rotation_deg": -34.0
+						},
+						{
+							"id": "p04",
+							"t": 0.5,
+							"position": [
+								0.999,
+								0.035
+							],
+							"rotation_deg": 2.0
+						},
+						{
+							"id": "p05",
+							"t": 0.58,
+							"position": [
+								0.861,
+								0.384
+							],
+							"rotation_deg": 24.0
+						},
+						{
+							"id": "p06",
+							"t": 0.72,
+							"position": [
+								0.842,
+								0.029
+							],
+							"rotation_deg": 2.0
+						},
+						{
+							"id": "p07",
+							"t": 0.86,
+							"position": [
+								0.563,
+								-0.544
+							],
+							"rotation_deg": -44.0
+						},
+						{
+							"id": "p08",
+							"t": 1.0,
+							"position": [
+								0.159,
+								-0.746
+							],
+							"rotation_deg": -78.0
+						}
+					],
+					"hit": {
+						"kind": "swept_circle",
+						"radius": 12.0
+					}
+				},
+				"shake": 0.8,
+				"color_core": [
+					0.550000011920929,
+					0.819999992847443,
+					1.0,
+					1.0
+				],
+				"color_edge": [
+					0.180000007152557,
+					0.479999989271164,
+					1.0,
+					1.0
+				],
+				"crit_chance_pct": 7.0,
+				"axis": "vertical",
+				"pierce": 0,
+				"block": 0.0,
+				"lifesteal_pct": 0.0,
+				"orbit_path_caps": {
+					"horizontal_arc_deg": 300.0,
+					"horizontal_depth": 330.0,
+					"range_upgrade_cap_pct": 30.0,
+					"vertical_depth": 330.0
+				},
+				"orbit_archetype": "slash_throw"
+			}
+		},
+		{
+			"weapon_id": "rapier",
+			"axis": "horizontal",
+			"category": "melee",
+			"damage_family": "melee",
+			"label_key": "item.weapon.rapier.name",
+			"motion_role": "melee_thrust",
+			"base_axis": "vertical",
+			"weapon_texture": "./project/assets/ui/backpack/items/common_v2/rapier_1x2.png",
+			"attack_texture": "./project/assets/combat/vfx/weapons/attack/common/rapier_attack_v01.png",
+			"projectile_texture": "",
+			"orbit": {
+				"len": 92.0,
+				"scale": 0.86,
+				"visual_span": 92.0,
+				"grip_point": [
+					0.5,
+					0.82
+				],
+				"tip_point": [
+					0.5,
+					0.04
+				]
+			},
+			"identity": {},
+			"combo": {
+				"cone": 0.54,
+				"cooldown": 0.94,
+				"bleed_damage_mul": 0.05,
+				"bleed_duration": 1.2,
+				"bleed_tick_interval": 0.4,
+				"bleed_sfx": "bleed_tick",
+				"bleed_vfx_mode": "ground_burst",
+				"bleed_vfx_life": 0.15,
+				"bleed_vfx_strength": 0.62,
+				"bleed_vfx_color_core": "#ff2e29",
+				"bleed_vfx_color_edge": "#6b0508",
+				"equipment_pose": "precise_fan_thrust",
+				"hit_power": 0.35,
+				"impact": 10.0,
+				"knockback": 130.0,
+				"life": 0.3,
+				"range": 68.88,
+				"reach": 46.0,
+				"recoil": 18.0,
+				"strength": 0.38,
+				"stun": 0.04,
+				"target_cap": 0.0,
+				"vfx_mode": "thrust",
+				"windup": -18.0,
+				"damage": 5.316864,
+				"hit_stop": 0.03,
+				"vfx_scale": 0.95,
+				"vfx_speed": 1.18,
+				"particle_count": 0.0,
+				"ring_layers": 0.0,
+				"weapon_rotation_deg": 0.0,
+				"weapon_arc_scale": 0.2,
+				"weapon_scale": 1.05,
+				"vfx_row": 2.0,
+				"hit_shape": "ARC",
+				"phase_frames": {
+					"impact": [
+						2.0,
+						3.0
+					],
+					"prep": [
+						0.0,
+						1.0
+					],
+					"recovery": [
+						4.0,
+						5.0
+					]
+				},
+				"weapon_offset": [
+					10.0,
+					-2.0
+				],
+				"impact_offset": [
+					52.0,
+					0.0
+				],
+				"trajectory": {
+					"space": "path_normalized",
+					"kind": "polyline",
+					"samples": [
+						{
+							"id": "p00",
+							"t": 0.0,
+							"position": [
+								0.514,
+								-0.347
+							],
+							"rotation_deg": -34.0
+						},
+						{
+							"id": "p01",
+							"t": 0.08,
+							"position": [
+								0.433,
+								-0.339
+							],
+							"rotation_deg": -38.0
+						},
+						{
+							"id": "p02",
+							"t": 0.16,
+							"position": [
+								0.848,
+								-0.451
+							],
+							"rotation_deg": -28.0
+						},
+						{
+							"id": "p03",
+							"t": 0.24,
+							"position": [
+								0.603,
+								-0.268
+							],
+							"rotation_deg": -24.0
+						},
+						{
+							"id": "p04",
+							"t": 0.34,
+							"position": [
+								0.98,
+								0.0
+							],
+							"rotation_deg": 0.0
+						},
+						{
+							"id": "p05",
+							"t": 0.42,
+							"position": [
+								0.658,
+								0.046
+							],
+							"rotation_deg": 4.0
+						},
+						{
+							"id": "p06",
+							"t": 0.52,
+							"position": [
+								0.883,
+								0.469
+							],
+							"rotation_deg": 28.0
+						},
+						{
+							"id": "p07",
+							"t": 0.58,
+							"position": [
+								0.866,
+								0.5
+							],
+							"rotation_deg": 30.0
+						},
+						{
+							"id": "p08",
+							"t": 0.72,
+							"position": [
+								0.75,
+								0.215
+							],
+							"rotation_deg": 16.0
+						},
+						{
+							"id": "p09",
+							"t": 0.88,
+							"position": [
+								0.609,
+								-0.198
+							],
+							"rotation_deg": -18.0
+						},
+						{
+							"id": "p10",
+							"t": 1.0,
+							"position": [
+								0.514,
+								-0.347
+							],
+							"rotation_deg": -34.0
+						}
+					],
+					"hit": {
+						"kind": "swept_circle",
+						"radius": 10.0
+					}
+				},
+				"shake": 0.35,
+				"color_core": [
+					0.920000016689301,
+					0.959999978542328,
+					1.0,
+					1.0
+				],
+				"color_edge": [
+					0.699999988079071,
+					0.839999973773956,
+					1.0,
+					1.0
+				],
+				"pierce": 1,
+				"axis": "horizontal",
+				"crit_chance_pct": 0.0,
+				"block": 0.0,
+				"lifesteal_pct": 0.0,
+				"orbit_path_caps": {
+					"horizontal_depth": 330.0,
+					"range_upgrade_cap_pct": 30.0,
+					"vertical_depth": 480.0
+				},
+				"orbit_archetype": "thrust_line"
+			}
+		},
+		{
+			"weapon_id": "rapier",
+			"axis": "vertical",
+			"category": "melee",
+			"damage_family": "melee",
+			"label_key": "item.weapon.rapier.name",
+			"motion_role": "melee_thrust",
+			"base_axis": "vertical",
+			"weapon_texture": "./project/assets/ui/backpack/items/common_v2/rapier_1x2.png",
+			"attack_texture": "./project/assets/combat/vfx/weapons/attack/common/rapier_attack_v01.png",
+			"projectile_texture": "",
+			"orbit": {
+				"len": 92.0,
+				"scale": 0.86,
+				"visual_span": 92.0,
+				"grip_point": [
+					0.5,
+					0.82
+				],
+				"tip_point": [
+					0.5,
+					0.04
+				]
+			},
+			"identity": {},
+			"combo": {
+				"cone": 0.88,
+				"cooldown": 0.9776,
+				"bleed_damage_mul": 0.05,
+				"bleed_duration": 1.2,
+				"bleed_tick_interval": 0.4,
+				"bleed_sfx": "bleed_tick",
+				"bleed_vfx_mode": "ground_burst",
+				"bleed_vfx_life": 0.15,
+				"bleed_vfx_strength": 0.62,
+				"bleed_vfx_color_core": "#ff2e29",
+				"bleed_vfx_color_edge": "#6b0508",
+				"equipment_pose": "precise_lunge",
+				"hit_power": 0.35,
+				"impact": 8.0,
+				"knockback": 130.0,
+				"life": 0.24,
+				"range": 84.0,
+				"reach": 54.0,
+				"recoil": 18.0,
+				"strength": 0.38,
+				"stun": 0.04,
+				"target_cap": 0.0,
+				"vfx_mode": "thrust",
+				"windup": -8.0,
+				"damage": 7.295232,
+				"hit_stop": 0.03,
+				"vfx_scale": 1.05,
+				"vfx_speed": 1.0,
+				"particle_count": 0.0,
+				"ring_layers": 0.0,
+				"weapon_rotation_deg": 0.0,
+				"weapon_arc_scale": 0.1,
+				"weapon_scale": 1.12,
+				"vfx_row": 3.0,
+				"hit_shape": "LINE",
+				"phase_frames": {
+					"impact": [
+						2.0,
+						3.0
+					],
+					"prep": [
+						0.0,
+						1.0
+					],
+					"recovery": [
+						4.0,
+						5.0
+					]
+				},
+				"weapon_offset": [
+					20.0,
+					0.0
+				],
+				"impact_offset": [
+					86.0,
+					0.0
+				],
+				"trajectory": {
+					"space": "path_normalized",
+					"kind": "polyline",
+					"samples": [
+						{
+							"id": "p00",
+							"t": 0.0,
+							"position": [
+								0.716,
+								-0.075
+							],
+							"rotation_deg": -6.0
+						},
+						{
+							"id": "p01",
+							"t": 0.3,
+							"position": [
+								0.55,
+								-0.019
+							],
+							"rotation_deg": -2.0
+						},
+						{
+							"id": "p02",
+							"t": 0.38,
+							"position": [
+								0.9,
+								0.0
+							],
+							"rotation_deg": 0.0
+						},
+						{
+							"id": "p03",
+							"t": 0.44,
+							"position": [
+								1.0,
+								0.0
+							],
+							"rotation_deg": 0.0
+						},
+						{
+							"id": "p04",
+							"t": 0.5,
+							"position": [
+								1.0,
+								0.0
+							],
+							"rotation_deg": 0.0
+						},
+						{
+							"id": "p05",
+							"t": 0.62,
+							"position": [
+								0.86,
+								0.0
+							],
+							"rotation_deg": 0.0
+						},
+						{
+							"id": "p06",
+							"t": 0.8,
+							"position": [
+								0.749,
+								-0.039
+							],
+							"rotation_deg": -3.0
+						},
+						{
+							"id": "p07",
+							"t": 1.0,
+							"position": [
+								0.716,
+								-0.075
+							],
+							"rotation_deg": -6.0
+						}
+					],
+					"hit": {
+						"kind": "swept_circle",
+						"radius": 9.0
+					}
+				},
+				"shake": 0.35,
+				"color_core": [
+					0.920000016689301,
+					0.959999978542328,
+					1.0,
+					1.0
+				],
+				"color_edge": [
+					0.699999988079071,
+					0.839999973773956,
+					1.0,
+					1.0
+				],
+				"crit_chance_pct": 10.0,
+				"axis": "vertical",
+				"pierce": 0,
+				"block": 0.0,
+				"lifesteal_pct": 0.0,
+				"orbit_path_caps": {
+					"horizontal_depth": 330.0,
+					"range_upgrade_cap_pct": 30.0,
+					"vertical_depth": 480.0
+				},
+				"orbit_archetype": "thrust_line"
+			}
+		},
+		{
+			"weapon_id": "mace",
+			"axis": "horizontal",
+			"category": "melee",
+			"damage_family": "melee",
+			"label_key": "item.weapon.mace.name",
+			"motion_role": "melee_blunt",
+			"base_axis": "vertical",
+			"weapon_texture": "./project/assets/ui/backpack/items/common_v2/mace_1x2.png",
+			"attack_texture": "./project/assets/combat/vfx/weapons/attack/common/mace_attack_v01.png",
+			"projectile_texture": "",
+			"orbit": {
+				"len": 78.0,
+				"scale": 0.86,
+				"visual_span": 78.0,
+				"grip_point": [
+					0.5,
+					0.76
+				],
+				"tip_point": [
+					0.5,
+					0.12
+				]
+			},
+			"identity": {},
+			"combo": {
+				"cone": 0.03,
+				"cooldown": 0.88,
+				"equipment_pose": "wide_shock_slam",
+				"hit_power": 1.0,
+				"impact": 35.0,
+				"knockback": 456.0,
+				"life": 0.32,
+				"range": 97.2,
+				"reach": 30.0,
+				"recoil": 38.0,
+				"slow_pct": 12.0,
+				"slow_seconds": 0.5,
+				"strength": 1.08,
+				"stun": 0.19,
+				"target_cap": 0.0,
+				"vfx_mode": "slam",
+				"windup": -95.0,
+				"damage": 6.440736,
+				"hit_stop": 0.05,
+				"vfx_scale": 1.0,
+				"vfx_speed": 1.0,
+				"particle_count": 8.0,
+				"ring_layers": 1.0,
+				"weapon_rotation_deg": 8.0,
+				"weapon_arc_scale": 0.52,
+				"weapon_scale": 1.08,
+				"vfx_row": 4.0,
+				"hit_shape": "ARC",
+				"phase_frames": {
+					"impact": [
+						2.0,
+						3.0
+					],
+					"prep": [
+						0.0,
+						1.0
+					],
+					"recovery": [
+						4.0,
+						5.0
+					]
+				},
+				"weapon_offset": [
+					-2.0,
+					2.0
+				],
+				"impact_offset": [
+					24.0,
+					2.0
+				],
+				"orbit_anchor": "player",
+				"trajectory": {
+					"space": "path_normalized",
+					"kind": "polyline",
+					"samples": [
+						{
+							"id": "p00",
+							"position": [
+								0.05,
+								-0.55
+							],
+							"rotation_deg": -96.0,
+							"t": 0.0
+						},
+						{
+							"id": "p01",
+							"position": [
+								0.2,
+								-0.62
+							],
+							"rotation_deg": -80.0,
+							"t": 0.18
+						},
+						{
+							"id": "p02",
+							"position": [
+								0.55,
+								-0.48
+							],
+							"rotation_deg": -48.0,
+							"t": 0.32
+						},
+						{
+							"id": "p03",
+							"position": [
+								0.9,
+								-0.12
+							],
+							"rotation_deg": -12.0,
+							"t": 0.46
+						},
+						{
+							"id": "p04",
+							"position": [
+								0.98,
+								0.08
+							],
+							"rotation_deg": 6.0,
+							"t": 0.56
+						},
+						{
+							"id": "p05",
+							"position": [
+								0.62,
+								0.38
+							],
+							"rotation_deg": 32.0,
+							"t": 0.68
+						},
+						{
+							"id": "p06",
+							"position": [
+								0.35,
+								0.12
+							],
+							"rotation_deg": 8.0,
+							"t": 0.84
+						},
+						{
+							"id": "p07",
+							"position": [
+								0.12,
+								-0.35
+							],
+							"rotation_deg": -70.0,
+							"t": 1.0
+						}
+					],
+					"hit": {
+						"kind": "swept_circle",
+						"radius": 18.0
+					}
+				},
+				"shake": 1.0,
+				"color_core": [
+					1.0,
+					0.550000011920929,
+					0.180000007152557,
+					1.0
+				],
+				"color_edge": [
+					0.779999971389771,
+					0.259999990463257,
+					0.0599999986588955,
+					1.0
+				],
+				"axis": "horizontal",
+				"crit_chance_pct": 0.0,
+				"pierce": 0,
+				"block": 0.0,
+				"lifesteal_pct": 0.0,
+				"orbit_path_caps": {
+					"horizontal_radius": 290.0,
+					"range_upgrade_cap_pct": 30.0,
+					"vertical_radius": 260.0
+				},
+				"orbit_archetype": "blunt_slam"
+			}
+		},
+		{
+			"weapon_id": "mace",
+			"axis": "vertical",
+			"category": "melee",
+			"damage_family": "melee",
+			"label_key": "item.weapon.mace.name",
+			"motion_role": "melee_blunt",
+			"base_axis": "vertical",
+			"weapon_texture": "./project/assets/ui/backpack/items/common_v2/mace_1x2.png",
+			"attack_texture": "./project/assets/combat/vfx/weapons/attack/common/mace_attack_v01.png",
+			"projectile_texture": "",
+			"orbit": {
+				"len": 78.0,
+				"scale": 0.86,
+				"visual_span": 78.0,
+				"grip_point": [
+					0.5,
+					0.76
+				],
+				"tip_point": [
+					0.5,
+					0.12
+				]
+			},
+			"identity": {},
+			"combo": {
+				"cone": 0.04,
+				"cooldown": 0.9504,
+				"equipment_pose": "focused_heavy_slam",
+				"hit_power": 1.0,
+				"impact": 80.0,
+				"knockback": 410.4,
+				"life": 0.36,
+				"range": 88.2,
+				"reach": 30.0,
+				"recoil": 38.0,
+				"slow_pct": 12.0,
+				"slow_seconds": 0.5,
+				"strength": 1.08,
+				"stun": 0.26,
+				"target_cap": 0.0,
+				"vfx_mode": "slam",
+				"windup": -65.0,
+				"damage": 7.85769792,
+				"hit_stop": 0.05,
+				"vfx_scale": 1.05,
+				"vfx_speed": 1.0,
+				"particle_count": 8.0,
+				"ring_layers": 1.0,
+				"weapon_rotation_deg": -32.0,
+				"weapon_arc_scale": 0.44,
+				"weapon_scale": 1.12,
+				"vfx_row": 5.0,
+				"hit_shape": "POINT_IMPACT",
+				"phase_frames": {
+					"impact": [
+						2.0,
+						3.0
+					],
+					"prep": [
+						0.0,
+						1.0
+					],
+					"recovery": [
+						4.0,
+						5.0
+					]
+				},
+				"weapon_offset": [
+					2.0,
+					-8.0
+				],
+				"impact_offset": [
+					34.0,
+					10.0
+				],
+				"trajectory": {
+					"space": "path_normalized",
+					"kind": "polyline",
+					"samples": [
+						{
+							"id": "p00",
+							"t": 0.0,
+							"position": [
+								0.257,
+								-0.381
+							],
+							"rotation_deg": -56.0
+						},
+						{
+							"id": "p01",
+							"t": 0.22,
+							"position": [
+								0.031,
+								-0.298
+							],
+							"rotation_deg": -84.0
+						},
+						{
+							"id": "p02",
+							"t": 0.3,
+							"position": [
+								0.031,
+								-0.298
+							],
+							"rotation_deg": -84.0
+						},
+						{
+							"id": "p03",
+							"t": 0.36,
+							"position": [
+								0.242,
+								-0.14
+							],
+							"rotation_deg": -30.0
+						},
+						{
+							"id": "p04",
+							"t": 0.42,
+							"position": [
+								0.594,
+								-0.084
+							],
+							"rotation_deg": -8.0
+						},
+						{
+							"id": "p05",
+							"t": 0.48,
+							"position": [
+								0.995,
+								0.105
+							],
+							"rotation_deg": 6.0
+						},
+						{
+							"id": "p06",
+							"t": 0.54,
+							"position": [
+								0.921,
+								0.335
+							],
+							"rotation_deg": 20.0
+						},
+						{
+							"id": "p07",
+							"t": 0.68,
+							"position": [
+								0.718,
+								-0.05
+							],
+							"rotation_deg": -4.0
+						},
+						{
+							"id": "p08",
+							"t": 0.86,
+							"position": [
+								0.41,
+								-0.32
+							],
+							"rotation_deg": -38.0
+						},
+						{
+							"id": "p09",
+							"t": 1.0,
+							"position": [
+								0.257,
+								-0.381
+							],
+							"rotation_deg": -56.0
+						}
+					],
+					"hit": {
+						"kind": "swept_circle",
+						"radius": 20.0
+					}
+				},
+				"shake": 1.0,
+				"color_core": [
+					1.0,
+					0.550000011920929,
+					0.180000007152557,
+					1.0
+				],
+				"color_edge": [
+					0.779999971389771,
+					0.259999990463257,
+					0.0599999986588955,
+					1.0
+				],
+				"axis": "vertical",
+				"crit_chance_pct": 0.0,
+				"pierce": 0,
+				"block": 0.0,
+				"lifesteal_pct": 0.0,
+				"orbit_path_caps": {
+					"horizontal_radius": 290.0,
+					"range_upgrade_cap_pct": 30.0,
+					"vertical_radius": 260.0
+				},
+				"orbit_archetype": "blunt_slam"
+			}
+		},
+		{
+			"weapon_id": "greatsword",
+			"axis": "horizontal",
+			"category": "melee",
+			"damage_family": "melee",
+			"label_key": "item.weapon.greatsword.name",
+			"motion_role": "melee_slash",
+			"base_axis": "vertical",
+			"weapon_texture": "./project/assets/ui/backpack/items/common_v2/greatsword_1x3.png",
+			"attack_texture": "./project/assets/combat/vfx/weapons/attack/common/greatsword_attack_v01.png",
+			"projectile_texture": "",
+			"orbit": {
+				"len": 118.0,
+				"scale": 0.85,
+				"visual_span": 118.0,
+				"grip_point": [
+					0.5,
+					0.84
+				],
+				"tip_point": [
+					0.5,
+					0.04
+				]
+			},
+			"identity": {},
+			"combo": {
+				"cone": 0.06,
+				"cooldown": 0.94,
+				"bleed_damage_mul": 0.05,
+				"bleed_duration": 1.2,
+				"bleed_tick_interval": 0.4,
+				"bleed_sfx": "bleed_tick",
+				"bleed_vfx_mode": "ground_burst",
+				"bleed_vfx_life": 0.15,
+				"bleed_vfx_strength": 0.62,
+				"bleed_vfx_color_core": "#ff2e29",
+				"bleed_vfx_color_edge": "#6b0508",
+				"equipment_pose": "wide_horizontal_slash",
+				"hit_power": 1.15,
+				"impact": 55.0,
+				"knockback": 520.0,
+				"life": 0.46,
+				"range": 141.0,
+				"reach": 72.0,
+				"recoil": 68.0,
+				"strength": 1.5,
+				"stun": 0.2,
+				"target_cap": 0.0,
+				"vfx_mode": "slash",
+				"windup": -135.0,
+				"damage": 12.10650816,
+				"hit_stop": 0.08,
+				"vfx_scale": 1.55,
+				"vfx_speed": 0.8,
+				"particle_count": 0.0,
+				"ring_layers": 0.0,
+				"weapon_rotation_deg": -8.0,
+				"weapon_arc_scale": 0.78,
+				"weapon_scale": 1.5,
+				"vfx_row": 6.0,
+				"hit_shape": "ARC",
+				"phase_frames": {
+					"impact": [
+						2.0,
+						3.0
+					],
+					"prep": [
+						0.0,
+						1.0
+					],
+					"recovery": [
+						4.0,
+						5.0
+					]
+				},
+				"weapon_offset": [
+					-10.0,
+					0.0
+				],
+				"impact_offset": [
+					40.0,
+					0.0
+				],
+				"trajectory": {
+					"space": "path_normalized",
+					"kind": "polyline",
+					"samples": [
+						{
+							"id": "p00",
+							"position": [
+								0.05,
+								-0.75
+							],
+							"rotation_deg": -86.0,
+							"t": 0.0
+						},
+						{
+							"id": "p01",
+							"position": [
+								0.12,
+								-0.9
+							],
+							"rotation_deg": -82.0,
+							"t": 0.18
+						},
+						{
+							"id": "p02",
+							"position": [
+								0.42,
+								-0.88
+							],
+							"rotation_deg": -64.0,
+							"t": 0.3
+						},
+						{
+							"id": "p03",
+							"position": [
+								0.82,
+								-0.55
+							],
+							"rotation_deg": -38.0,
+							"t": 0.42
+						},
+						{
+							"id": "p04",
+							"position": [
+								1.0,
+								0.05
+							],
+							"rotation_deg": 3.0,
+							"t": 0.52
+						},
+						{
+							"id": "p05",
+							"position": [
+								0.75,
+								0.62
+							],
+							"rotation_deg": 38.0,
+							"t": 0.62
+						},
+						{
+							"id": "p06",
+							"position": [
+								0.2,
+								0.9
+							],
+							"rotation_deg": 70.0,
+							"t": 0.72
+						},
+						{
+							"id": "p07",
+							"position": [
+								0.4,
+								0.3
+							],
+							"rotation_deg": 22.0,
+							"t": 0.82
+						},
+						{
+							"id": "p08",
+							"position": [
+								0.3,
+								-0.12
+							],
+							"rotation_deg": -18.0,
+							"t": 0.92
+						},
+						{
+							"id": "p09",
+							"position": [
+								0.1,
+								-0.52
+							],
+							"rotation_deg": -72.0,
+							"t": 1.0
+						}
+					],
+					"hit": {
+						"kind": "swept_circle",
+						"radius": 20.0
+					}
+				},
+				"shake": 1.15,
+				"color_core": [
+					0.959999978542328,
+					1.0,
+					1.0,
+					1.0
+				],
+				"color_edge": [
+					0.419999986886978,
+					0.579999983310699,
+					0.720000028610229,
+					1.0
+				],
+				"axis": "horizontal",
+				"crit_chance_pct": 0.0,
+				"pierce": 0,
+				"block": 0.0,
+				"lifesteal_pct": 0.0,
+				"orbit_path_caps": {
+					"horizontal_arc_deg": 300.0,
+					"horizontal_depth": 330.0,
+					"range_upgrade_cap_pct": 30.0,
+					"vertical_depth": 330.0
+				},
+				"orbit_archetype": "slash_throw"
+			}
+		},
+		{
+			"weapon_id": "greatsword",
+			"axis": "vertical",
+			"category": "melee",
+			"damage_family": "melee",
+			"label_key": "item.weapon.greatsword.name",
+			"motion_role": "melee_slash",
+			"base_axis": "vertical",
+			"weapon_texture": "./project/assets/ui/backpack/items/common_v2/greatsword_1x3.png",
+			"attack_texture": "./project/assets/combat/vfx/weapons/attack/common/greatsword_attack_v01.png",
+			"projectile_texture": "",
+			"orbit": {
+				"len": 118.0,
+				"scale": 0.85,
+				"visual_span": 118.0,
+				"grip_point": [
+					0.5,
+					0.84
+				],
+				"tip_point": [
+					0.5,
+					0.04
+				]
+			},
+			"identity": {},
+			"combo": {
+				"cone": 0.32,
+				"cooldown": 0.94,
+				"bleed_damage_mul": 0.05,
+				"bleed_duration": 1.2,
+				"bleed_tick_interval": 0.4,
+				"bleed_sfx": "bleed_tick",
+				"bleed_vfx_mode": "ground_burst",
+				"bleed_vfx_life": 0.15,
+				"bleed_vfx_strength": 0.62,
+				"bleed_vfx_color_core": "#ff2e29",
+				"bleed_vfx_color_edge": "#6b0508",
+				"equipment_pose": "focused_vertical_slash",
+				"hit_power": 1.2,
+				"impact": 108.0,
+				"knockback": 520.0,
+				"life": 0.44,
+				"range": 150.0,
+				"reach": 72.0,
+				"recoil": 68.0,
+				"strength": 1.5,
+				"stun": 0.2,
+				"target_cap": 0.0,
+				"vfx_mode": "slash",
+				"windup": -82.0,
+				"damage": 15.19753152,
+				"hit_stop": 0.08,
+				"vfx_scale": 1.55,
+				"vfx_speed": 0.8,
+				"particle_count": 0.0,
+				"ring_layers": 0.0,
+				"weapon_rotation_deg": -34.0,
+				"weapon_arc_scale": 0.52,
+				"weapon_scale": 1.58,
+				"vfx_row": 7.0,
+				"hit_shape": "LINE",
+				"phase_frames": {
+					"impact": [
+						2.0,
+						3.0
+					],
+					"prep": [
+						0.0,
+						1.0
+					],
+					"recovery": [
+						4.0,
+						5.0
+					]
+				},
+				"weapon_offset": [
+					10.0,
+					-14.0
+				],
+				"impact_offset": [
+					66.0,
+					4.0
+				],
+				"trajectory": {
+					"space": "path_normalized",
+					"kind": "polyline",
+					"samples": [
+						{
+							"id": "p00",
+							"t": 0.0,
+							"position": [
+								0.065,
+								-0.617
+							],
+							"rotation_deg": -84.0
+						},
+						{
+							"id": "p01",
+							"t": 0.32,
+							"position": [
+								-0.21,
+								-0.519
+							],
+							"rotation_deg": -112.0
+						},
+						{
+							"id": "p02",
+							"t": 0.4,
+							"position": [
+								0.086,
+								-0.816
+							],
+							"rotation_deg": -84.0
+						},
+						{
+							"id": "p03",
+							"t": 0.5,
+							"position": [
+								0.895,
+								-0.399
+							],
+							"rotation_deg": -24.0
+						},
+						{
+							"id": "p04",
+							"t": 0.56,
+							"position": [
+								0.995,
+								0.105
+							],
+							"rotation_deg": 6.0
+						},
+						{
+							"id": "p05",
+							"t": 0.62,
+							"position": [
+								0.985,
+								0.174
+							],
+							"rotation_deg": 10.0
+						},
+						{
+							"id": "p06",
+							"t": 0.72,
+							"position": [
+								0.898,
+								-0.063
+							],
+							"rotation_deg": -4.0
+						},
+						{
+							"id": "p07",
+							"t": 0.86,
+							"position": [
+								0.482,
+								-0.535
+							],
+							"rotation_deg": -48.0
+						},
+						{
+							"id": "p08",
+							"t": 1.0,
+							"position": [
+								0.065,
+								-0.617
+							],
+							"rotation_deg": -84.0
+						}
+					],
+					"hit": {
+						"kind": "swept_circle",
+						"radius": 18.0
+					}
+				},
+				"shake": 1.2,
+				"color_core": [
+					0.959999978542328,
+					1.0,
+					1.0,
+					1.0
+				],
+				"color_edge": [
+					0.419999986886978,
+					0.579999983310699,
+					0.720000028610229,
+					1.0
+				],
+				"crit_chance_pct": 7.0,
+				"axis": "vertical",
+				"pierce": 0,
+				"block": 0.0,
+				"lifesteal_pct": 0.0,
+				"orbit_path_caps": {
+					"horizontal_arc_deg": 300.0,
+					"horizontal_depth": 330.0,
+					"range_upgrade_cap_pct": 30.0,
+					"vertical_depth": 330.0
+				},
+				"orbit_archetype": "slash_throw"
+			}
+		},
+		{
+			"weapon_id": "spear",
+			"axis": "horizontal",
+			"category": "melee",
+			"damage_family": "melee",
+			"label_key": "item.weapon.spear.name",
+			"motion_role": "melee_thrust",
+			"base_axis": "vertical",
+			"weapon_texture": "./project/assets/ui/backpack/items/common_v2/spear_1x3.png",
+			"attack_texture": "./project/assets/combat/vfx/weapons/attack/common/spear_attack_v01.png",
+			"projectile_texture": "",
+			"orbit": {
+				"len": 132.0,
+				"scale": 0.91,
+				"visual_span": 132.0,
+				"grip_point": [
+					0.5,
+					0.82
+				],
+				"tip_point": [
+					0.5,
+					0.02
+				]
+			},
+			"identity": {},
+			"combo": {
+				"cone": 0.48,
+				"cooldown": 1.12,
+				"equipment_pose": "wide_pierce_sweep",
+				"hit_power": 0.65,
+				"impact": 14.0,
+				"knockback": 230.0,
+				"life": 0.3,
+				"pierce": 3,
+				"range": 90.2,
+				"reach": 86.0,
+				"recoil": 26.0,
+				"strength": 0.9,
+				"stun": 0.08,
+				"target_cap": 0.0,
+				"vfx_mode": "thrust",
+				"windup": -16.0,
+				"damage": 4.89495936,
+				"hit_stop": 0.05,
+				"vfx_scale": 1.45,
+				"vfx_speed": 0.9,
+				"particle_count": 0.0,
+				"ring_layers": 0.0,
+				"weapon_rotation_deg": 0.0,
+				"weapon_arc_scale": 0.18,
+				"weapon_scale": 1.5,
+				"vfx_row": 8.0,
+				"hit_shape": "LINE",
+				"phase_frames": {
+					"impact": [
+						2.0,
+						3.0
+					],
+					"prep": [
+						0.0,
+						1.0
+					],
+					"recovery": [
+						4.0,
+						5.0
+					]
+				},
+				"weapon_offset": [
+					28.0,
+					0.0
+				],
+				"impact_offset": [
+					92.0,
+					0.0
+				],
+				"trajectory": {
+					"space": "path_normalized",
+					"kind": "polyline",
+					"samples": [
+						{
+							"id": "p00",
+							"position": [
+								0.3,
+								-0.1
+							],
+							"rotation_deg": -58.0,
+							"t": 0.0
+						},
+						{
+							"id": "p01",
+							"position": [
+								0.22,
+								-0.12
+							],
+							"rotation_deg": -50.0,
+							"t": 0.12
+						},
+						{
+							"id": "p02",
+							"position": [
+								0.58,
+								-0.16
+							],
+							"rotation_deg": -74.0,
+							"t": 0.24
+						},
+						{
+							"id": "p03",
+							"position": [
+								0.88,
+								-0.1
+							],
+							"rotation_deg": -95.0,
+							"t": 0.34
+						},
+						{
+							"id": "p04",
+							"position": [
+								1.0,
+								0.02
+							],
+							"rotation_deg": -112.0,
+							"t": 0.44
+						},
+						{
+							"id": "p05",
+							"position": [
+								0.94,
+								0.1
+							],
+							"rotation_deg": -122.0,
+							"t": 0.56
+						},
+						{
+							"id": "p06",
+							"position": [
+								0.62,
+								0.06
+							],
+							"rotation_deg": -96.0,
+							"t": 0.72
+						},
+						{
+							"id": "p07",
+							"position": [
+								0.4,
+								-0.02
+							],
+							"rotation_deg": -70.0,
+							"t": 0.86
+						},
+						{
+							"id": "p08",
+							"position": [
+								0.3,
+								-0.1
+							],
+							"rotation_deg": -58.0,
+							"t": 1.0
+						}
+					],
+					"hit": {
+						"kind": "swept_circle",
+						"radius": 12.0
+					}
+				},
+				"shake": 0.65,
+				"color_core": [
+					0.25,
+					0.949999988079071,
+					0.899999976158142,
+					1.0
+				],
+				"color_edge": [
+					0.0799999982118607,
+					0.579999983310699,
+					0.720000028610229,
+					1.0
+				],
+				"axis": "horizontal",
+				"crit_chance_pct": 0.0,
+				"block": 0.0,
+				"lifesteal_pct": 0.0,
+				"orbit_path_caps": {
+					"horizontal_depth": 330.0,
+					"range_upgrade_cap_pct": 30.0,
+					"vertical_depth": 480.0
+				},
+				"orbit_archetype": "thrust_line"
+			}
+		},
+		{
+			"weapon_id": "spear",
+			"axis": "vertical",
+			"category": "melee",
+			"damage_family": "melee",
+			"label_key": "item.weapon.spear.name",
+			"motion_role": "melee_thrust",
+			"base_axis": "vertical",
+			"weapon_texture": "./project/assets/ui/backpack/items/common_v2/spear_1x3.png",
+			"attack_texture": "./project/assets/combat/vfx/weapons/attack/common/spear_attack_v01.png",
+			"projectile_texture": "",
+			"orbit": {
+				"len": 132.0,
+				"scale": 0.91,
+				"visual_span": 132.0,
+				"grip_point": [
+					0.5,
+					0.82
+				],
+				"tip_point": [
+					0.5,
+					0.02
+				]
+			},
+			"identity": {},
+			"combo": {
+				"cone": 0.84,
+				"cooldown": 1.2096,
+				"equipment_pose": "long_piercing_thrust",
+				"hit_power": 0.65,
+				"impact": 10.0,
+				"knockback": 230.0,
+				"life": 0.28,
+				"pierce": 2,
+				"range": 114.4,
+				"reach": 110.0,
+				"recoil": 26.0,
+				"strength": 0.9,
+				"stun": 0.08,
+				"target_cap": 0.0,
+				"vfx_mode": "thrust",
+				"windup": -10.0,
+				"damage": 8.63058624,
+				"hit_stop": 0.05,
+				"vfx_scale": 1.55,
+				"vfx_speed": 0.85,
+				"particle_count": 0.0,
+				"ring_layers": 0.0,
+				"weapon_rotation_deg": 0.0,
+				"weapon_arc_scale": 0.08,
+				"weapon_scale": 1.62,
+				"vfx_row": 9.0,
+				"hit_shape": "LINE",
+				"phase_frames": {
+					"impact": [
+						2.0,
+						3.0
+					],
+					"prep": [
+						0.0,
+						1.0
+					],
+					"recovery": [
+						4.0,
+						5.0
+					]
+				},
+				"weapon_offset": [
+					38.0,
+					0.0
+				],
+				"impact_offset": [
+					142.0,
+					0.0
+				],
+				"trajectory": {
+					"space": "path_normalized",
+					"kind": "polyline",
+					"samples": [
+						{
+							"id": "p00",
+							"t": 0.0,
+							"position": [
+								0.631,
+								-0.426
+							],
+							"rotation_deg": -34.0
+						},
+						{
+							"id": "p01",
+							"t": 0.26,
+							"position": [
+								0.379,
+								-0.485
+							],
+							"rotation_deg": -52.0
+						},
+						{
+							"id": "p02",
+							"t": 0.34,
+							"position": [
+								0.601,
+								-0.405
+							],
+							"rotation_deg": -34.0
+						},
+						{
+							"id": "p03",
+							"t": 0.42,
+							"position": [
+								0.892,
+								-0.157
+							],
+							"rotation_deg": -10.0
+						},
+						{
+							"id": "p04",
+							"t": 0.48,
+							"position": [
+								1.0,
+								0.0
+							],
+							"rotation_deg": 0.0
+						},
+						{
+							"id": "p05",
+							"t": 0.56,
+							"position": [
+								0.978,
+								0.034
+							],
+							"rotation_deg": 2.0
+						},
+						{
+							"id": "p06",
+							"t": 0.7,
+							"position": [
+								0.851,
+								-0.181
+							],
+							"rotation_deg": -12.0
+						},
+						{
+							"id": "p07",
+							"t": 0.86,
+							"position": [
+								0.7,
+								-0.341
+							],
+							"rotation_deg": -26.0
+						},
+						{
+							"id": "p08",
+							"t": 1.0,
+							"position": [
+								0.631,
+								-0.426
+							],
+							"rotation_deg": -34.0
+						}
+					],
+					"hit": {
+						"kind": "swept_circle",
+						"radius": 10.0
+					}
+				},
+				"shake": 0.65,
+				"color_core": [
+					0.25,
+					0.949999988079071,
+					0.899999976158142,
+					1.0
+				],
+				"color_edge": [
+					0.0799999982118607,
+					0.579999983310699,
+					0.720000028610229,
+					1.0
+				],
+				"axis": "vertical",
+				"crit_chance_pct": 0.0,
+				"block": 0.0,
+				"lifesteal_pct": 0.0,
+				"orbit_path_caps": {
+					"horizontal_depth": 330.0,
+					"range_upgrade_cap_pct": 30.0,
+					"vertical_depth": 480.0
+				},
+				"orbit_archetype": "thrust_line"
+			}
+		},
+		{
+			"weapon_id": "halberd",
+			"axis": "horizontal",
+			"category": "melee",
+			"damage_family": "melee",
+			"label_key": "item.weapon.halberd.name",
+			"motion_role": "melee_slash",
+			"base_axis": "vertical",
+			"weapon_texture": "./project/assets/ui/backpack/items/common_v2/halberd_2x3_l.png",
+			"attack_texture": "./project/assets/combat/vfx/weapons/attack/common/halberd_attack_v01.png",
+			"projectile_texture": "",
+			"orbit": {
+				"len": 126.0,
+				"scale": 0.91,
+				"visual_span": 126.0,
+				"grip_point": [
+					0.42,
+					0.82
+				],
+				"tip_point": [
+					0.5,
+					0.05
+				]
+			},
+			"identity": {},
+			"combo": {
+				"cone": 0.06,
+				"cooldown": 1.07,
+				"equipment_pose": "wide_horizontal_slash",
+				"hit_power": 1.0,
+				"impact": 42.0,
+				"knockback": 460.0,
+				"life": 0.42,
+				"pierce": 2,
+				"range": 139.12,
+				"reach": 84.0,
+				"recoil": 52.0,
+				"strength": 1.55,
+				"stun": 0.16,
+				"target_cap": 0.0,
+				"vfx_mode": "slash",
+				"windup": -130.0,
+				"damage": 11.24309184,
+				"hit_stop": 0.06,
+				"vfx_scale": 1.85,
+				"vfx_speed": 0.9,
+				"particle_count": 0.0,
+				"ring_layers": 0.0,
+				"weapon_rotation_deg": -6.0,
+				"weapon_arc_scale": 0.82,
+				"weapon_scale": 1.82,
+				"vfx_row": 10.0,
+				"hit_shape": "ARC",
+				"phase_frames": {
+					"impact": [
+						2.0,
+						3.0
+					],
+					"prep": [
+						0.0,
+						1.0
+					],
+					"recovery": [
+						4.0,
+						5.0
+					]
+				},
+				"weapon_offset": [
+					4.0,
+					0.0
+				],
+				"impact_offset": [
+					72.0,
+					0.0
+				],
+				"trajectory": {
+					"space": "path_normalized",
+					"kind": "polyline",
+					"samples": [
+						{
+							"id": "p00",
+							"position": [
+								0.05,
+								-0.48
+							],
+							"rotation_deg": -86.0,
+							"t": 0.0
+						},
+						{
+							"id": "p01",
+							"position": [
+								0.2,
+								-0.62
+							],
+							"rotation_deg": -76.0,
+							"t": 0.12
+						},
+						{
+							"id": "p02",
+							"position": [
+								0.65,
+								-0.52
+							],
+							"rotation_deg": -46.0,
+							"t": 0.24
+						},
+						{
+							"id": "p03",
+							"position": [
+								0.98,
+								-0.12
+							],
+							"rotation_deg": -16.0,
+							"t": 0.36
+						},
+						{
+							"id": "p04",
+							"position": [
+								0.88,
+								0.28
+							],
+							"rotation_deg": 18.0,
+							"t": 0.48
+						},
+						{
+							"id": "p05",
+							"position": [
+								0.5,
+								0.48
+							],
+							"rotation_deg": 42.0,
+							"t": 0.6
+						},
+						{
+							"id": "p06",
+							"position": [
+								0.22,
+								0.35
+							],
+							"rotation_deg": 56.0,
+							"t": 0.72
+						},
+						{
+							"id": "p07",
+							"position": [
+								0.42,
+								0.12
+							],
+							"rotation_deg": 20.0,
+							"t": 0.84
+						},
+						{
+							"id": "p08",
+							"position": [
+								0.28,
+								-0.12
+							],
+							"rotation_deg": -10.0,
+							"t": 0.92
+						},
+						{
+							"id": "p09",
+							"position": [
+								0.08,
+								-0.32
+							],
+							"rotation_deg": -64.0,
+							"t": 1.0
+						}
+					],
+					"hit": {
+						"kind": "swept_circle",
+						"radius": 16.0
+					}
+				},
+				"shake": 1.0,
+				"color_core": [
+					0.100000001490116,
+					0.280000001192093,
+					0.949999988079071,
+					1.0
+				],
+				"color_edge": [
+					0.0399999991059303,
+					0.119999997317791,
+					0.620000004768372,
+					1.0
+				],
+				"axis": "horizontal",
+				"crit_chance_pct": 0.0,
+				"block": 0.0,
+				"lifesteal_pct": 0.0,
+				"orbit_path_caps": {
+					"horizontal_arc_deg": 300.0,
+					"horizontal_depth": 330.0,
+					"range_upgrade_cap_pct": 30.0,
+					"vertical_depth": 330.0
+				},
+				"orbit_archetype": "slash_throw"
+			}
+		},
+		{
+			"weapon_id": "halberd",
+			"axis": "vertical",
+			"category": "melee",
+			"damage_family": "melee",
+			"label_key": "item.weapon.halberd.name",
+			"motion_role": "melee_slash",
+			"base_axis": "vertical",
+			"weapon_texture": "./project/assets/ui/backpack/items/common_v2/halberd_2x3_l.png",
+			"attack_texture": "./project/assets/combat/vfx/weapons/attack/common/halberd_attack_v01.png",
+			"projectile_texture": "",
+			"orbit": {
+				"len": 126.0,
+				"scale": 0.91,
+				"visual_span": 126.0,
+				"grip_point": [
+					0.42,
+					0.82
+				],
+				"tip_point": [
+					0.5,
+					0.05
+				]
+			},
+			"identity": {},
+			"combo": {
+				"cone": 0.32,
+				"cooldown": 1.07,
+				"equipment_pose": "focused_vertical_slash",
+				"hit_power": 0.95,
+				"impact": 82.0,
+				"knockback": 460.0,
+				"life": 0.4,
+				"pierce": 2,
+				"range": 148.0,
+				"reach": 84.0,
+				"recoil": 52.0,
+				"strength": 1.55,
+				"stun": 0.16,
+				"target_cap": 0.0,
+				"vfx_mode": "slash",
+				"windup": -58.0,
+				"damage": 14.11366848,
+				"hit_stop": 0.06,
+				"vfx_scale": 1.75,
+				"vfx_speed": 0.9,
+				"particle_count": 0.0,
+				"ring_layers": 0.0,
+				"weapon_rotation_deg": -28.0,
+				"weapon_arc_scale": 0.48,
+				"weapon_scale": 1.78,
+				"vfx_row": 11.0,
+				"hit_shape": "LINE",
+				"phase_frames": {
+					"impact": [
+						2.0,
+						3.0
+					],
+					"prep": [
+						0.0,
+						1.0
+					],
+					"recovery": [
+						4.0,
+						5.0
+					]
+				},
+				"weapon_offset": [
+					18.0,
+					-10.0
+				],
+				"impact_offset": [
+					94.0,
+					6.0
+				],
+				"trajectory": {
+					"space": "path_normalized",
+					"kind": "polyline",
+					"samples": [
+						{
+							"id": "p00",
+							"t": 0.0,
+							"position": [
+								0.339,
+								-0.543
+							],
+							"rotation_deg": -58.0
+						},
+						{
+							"id": "p01",
+							"t": 0.26,
+							"position": [
+								0.179,
+								-0.552
+							],
+							"rotation_deg": -72.0
+						},
+						{
+							"id": "p02",
+							"t": 0.34,
+							"position": [
+								0.43,
+								-0.745
+							],
+							"rotation_deg": -60.0
+						},
+						{
+							"id": "p03",
+							"t": 0.42,
+							"position": [
+								0.616,
+								-0.788
+							],
+							"rotation_deg": -52.0
+						},
+						{
+							"id": "p04",
+							"t": 0.48,
+							"position": [
+								0.866,
+								-0.5
+							],
+							"rotation_deg": -30.0
+						},
+						{
+							"id": "p05",
+							"t": 0.54,
+							"position": [
+								0.985,
+								0.174
+							],
+							"rotation_deg": 10.0
+						},
+						{
+							"id": "p06",
+							"t": 0.6,
+							"position": [
+								0.812,
+								0.548
+							],
+							"rotation_deg": 34.0
+						},
+						{
+							"id": "p07",
+							"t": 0.74,
+							"position": [
+								0.858,
+								0.06
+							],
+							"rotation_deg": 4.0
+						},
+						{
+							"id": "p08",
+							"t": 0.88,
+							"position": [
+								0.552,
+								-0.431
+							],
+							"rotation_deg": -38.0
+						},
+						{
+							"id": "p09",
+							"t": 1.0,
+							"position": [
+								0.339,
+								-0.543
+							],
+							"rotation_deg": -58.0
+						}
+					],
+					"hit": {
+						"kind": "swept_circle",
+						"radius": 16.0
+					}
+				},
+				"shake": 0.95,
+				"color_core": [
+					0.100000001490116,
+					0.280000001192093,
+					0.949999988079071,
+					1.0
+				],
+				"color_edge": [
+					0.0399999991059303,
+					0.119999997317791,
+					0.620000004768372,
+					1.0
+				],
+				"crit_chance_pct": 7.0,
+				"axis": "vertical",
+				"block": 0.0,
+				"lifesteal_pct": 0.0,
+				"orbit_path_caps": {
+					"horizontal_arc_deg": 300.0,
+					"horizontal_depth": 330.0,
+					"range_upgrade_cap_pct": 30.0,
+					"vertical_depth": 330.0
+				},
+				"orbit_archetype": "slash_throw"
+			}
+		},
+		{
+			"weapon_id": "lance",
+			"axis": "horizontal",
+			"category": "melee",
+			"damage_family": "melee",
+			"label_key": "item.weapon.lance.name",
+			"motion_role": "melee_thrust",
+			"base_axis": "vertical",
+			"weapon_texture": "./project/assets/ui/backpack/items/common_v2/lance_1x3.png",
+			"attack_texture": "./project/assets/combat/vfx/weapons/attack/common/lance_attack_v01.png",
+			"projectile_texture": "",
+			"orbit": {
+				"len": 144.0,
+				"scale": 0.91,
+				"visual_span": 144.0,
+				"grip_point": [
+					0.5,
+					0.84
+				],
+				"tip_point": [
+					0.5,
+					0.02
+				]
+			},
+			"identity": {},
+			"combo": {
+				"cone": 0.48,
+				"cooldown": 1.69,
+				"equipment_pose": "wide_pierce_sweep",
+				"hit_power": 1.2,
+				"impact": 8.0,
+				"knockback": 520.0,
+				"life": 0.42,
+				"pierce": 4,
+				"range": 104.96,
+				"reach": 118.0,
+				"recoil": 62.0,
+				"strength": 1.55,
+				"stun": 0.18,
+				"target_cap": 0.0,
+				"vfx_mode": "thrust",
+				"windup": -8.0,
+				"damage": 9.936,
+				"hit_stop": 0.07,
+				"vfx_scale": 1.55,
+				"vfx_speed": 0.68,
+				"particle_count": 0.0,
+				"ring_layers": 0.0,
+				"weapon_rotation_deg": 0.0,
+				"weapon_arc_scale": 0.12,
+				"weapon_scale": 1.58,
+				"vfx_row": 12.0,
+				"hit_shape": "CHARGE_LINE",
+				"phase_frames": {
+					"impact": [
+						2.0,
+						3.0
+					],
+					"prep": [
+						0.0,
+						1.0
+					],
+					"recovery": [
+						4.0,
+						5.0
+					]
+				},
+				"weapon_offset": [
+					36.0,
+					0.0
+				],
+				"impact_offset": [
+					104.0,
+					0.0
+				],
+				"trajectory": {
+					"space": "path_normalized",
+					"kind": "polyline",
+					"samples": [
+						{
+							"id": "p00",
+							"position": [
+								0.18,
+								-0.42
+							],
+							"rotation_deg": -68.0,
+							"t": 0.0
+						},
+						{
+							"id": "p01",
+							"position": [
+								0.05,
+								-0.45
+							],
+							"rotation_deg": -72.0,
+							"t": 0.14
+						},
+						{
+							"id": "p02",
+							"position": [
+								0.48,
+								-0.34
+							],
+							"rotation_deg": -48.0,
+							"t": 0.26
+						},
+						{
+							"id": "p03",
+							"position": [
+								0.88,
+								-0.18
+							],
+							"rotation_deg": -24.0,
+							"t": 0.38
+						},
+						{
+							"id": "p04",
+							"position": [
+								1.0,
+								-0.02
+							],
+							"rotation_deg": -5.0,
+							"t": 0.5
+						},
+						{
+							"id": "p05",
+							"position": [
+								0.98,
+								0.08
+							],
+							"rotation_deg": 4.0,
+							"t": 0.58
+						},
+						{
+							"id": "p06",
+							"position": [
+								0.58,
+								-0.08
+							],
+							"rotation_deg": -18.0,
+							"t": 0.72
+						},
+						{
+							"id": "p07",
+							"position": [
+								0.38,
+								-0.18
+							],
+							"rotation_deg": -42.0,
+							"t": 0.86
+						},
+						{
+							"id": "p08",
+							"position": [
+								0.3,
+								-0.25
+							],
+							"rotation_deg": -58.0,
+							"t": 1.0
+						}
+					],
+					"hit": {
+						"kind": "swept_circle",
+						"radius": 14.0
+					}
+				},
+				"shake": 1.2,
+				"color_core": [
+					0.699999988079071,
+					0.899999976158142,
+					1.0,
+					1.0
+				],
+				"color_edge": [
+					0.360000014305115,
+					0.680000007152557,
+					1.0,
+					1.0
+				],
+				"axis": "horizontal",
+				"crit_chance_pct": 0.0,
+				"block": 0.0,
+				"lifesteal_pct": 0.0,
+				"orbit_path_caps": {
+					"horizontal_depth": 330.0,
+					"range_upgrade_cap_pct": 30.0,
+					"vertical_depth": 480.0
+				},
+				"orbit_archetype": "thrust_line"
+			}
+		},
+		{
+			"weapon_id": "lance",
+			"axis": "vertical",
+			"category": "melee",
+			"damage_family": "melee",
+			"label_key": "item.weapon.lance.name",
+			"motion_role": "melee_thrust",
+			"base_axis": "vertical",
+			"weapon_texture": "./project/assets/ui/backpack/items/common_v2/lance_1x3.png",
+			"attack_texture": "./project/assets/combat/vfx/weapons/attack/common/lance_attack_v01.png",
+			"projectile_texture": "",
+			"orbit": {
+				"len": 144.0,
+				"scale": 0.91,
+				"visual_span": 144.0,
+				"grip_point": [
+					0.5,
+					0.84
+				],
+				"tip_point": [
+					0.5,
+					0.02
+				]
+			},
+			"identity": {},
+			"combo": {
+				"cone": 0.84,
+				"cooldown": 1.8252,
+				"equipment_pose": "long_piercing_thrust",
+				"hit_power": 1.25,
+				"impact": 6.0,
+				"knockback": 520.0,
+				"life": 0.5,
+				"pierce": 3,
+				"range": 133.12,
+				"reach": 136.0,
+				"recoil": 62.0,
+				"strength": 1.55,
+				"stun": 0.18,
+				"target_cap": 0.0,
+				"vfx_mode": "thrust",
+				"windup": -6.0,
+				"damage": 12.8064,
+				"hit_stop": 0.07,
+				"vfx_scale": 1.7,
+				"vfx_speed": 0.6,
+				"particle_count": 0.0,
+				"ring_layers": 0.0,
+				"weapon_rotation_deg": 0.0,
+				"weapon_arc_scale": 0.06,
+				"weapon_scale": 1.72,
+				"vfx_row": 13.0,
+				"hit_shape": "CHARGE_LINE",
+				"phase_frames": {
+					"impact": [
+						2.0,
+						3.0
+					],
+					"prep": [
+						0.0,
+						1.0
+					],
+					"recovery": [
+						4.0,
+						5.0
+					]
+				},
+				"weapon_offset": [
+					58.0,
+					0.0
+				],
+				"impact_offset": [
+					170.0,
+					0.0
+				],
+				"trajectory": {
+					"hit": {
+						"kind": "swept_circle",
+						"radius": 14.0
+					},
+					"kind": "polyline",
+					"samples": [
+						{
+							"id": "p00",
+							"position": [
+								0.394,
+								-0.069
+							],
+							"rotation_deg": -10.0,
+							"t": 0.0
+						},
+						{
+							"id": "p01",
+							"position": [
+								0.155,
+								-0.039
+							],
+							"rotation_deg": -14.0,
+							"t": 0.34
+						},
+						{
+							"id": "p02",
+							"position": [
+								0.698,
+								-0.049
+							],
+							"rotation_deg": -4.0,
+							"t": 0.42
+						},
+						{
+							"id": "p03",
+							"position": [
+								1.0,
+								0.0
+							],
+							"rotation_deg": 0.0,
+							"t": 0.48
+						},
+						{
+							"id": "p04",
+							"position": [
+								1.0,
+								0.0
+							],
+							"rotation_deg": 0.0,
+							"t": 0.56
+						},
+						{
+							"id": "p05",
+							"position": [
+								1.0,
+								0.0
+							],
+							"rotation_deg": 0.0,
+							"t": 0.62
+						},
+						{
+							"id": "p06",
+							"position": [
+								0.599,
+								-0.042
+							],
+							"rotation_deg": -4.0,
+							"t": 0.8
+						},
+						{
+							"id": "p07",
+							"position": [
+								0.394,
+								-0.069
+							],
+							"rotation_deg": -10.0,
+							"t": 1.0
+						}
+					],
+					"space": "path_normalized"
+				},
+				"shake": 1.25,
+				"color_core": [
+					0.699999988079071,
+					0.899999976158142,
+					1.0,
+					1.0
+				],
+				"color_edge": [
+					0.360000014305115,
+					0.680000007152557,
+					1.0,
+					1.0
+				],
+				"axis": "vertical",
+				"crit_chance_pct": 0.0,
+				"block": 0.0,
+				"lifesteal_pct": 0.0,
+				"orbit_path_caps": {
+					"horizontal_depth": 330.0,
+					"range_upgrade_cap_pct": 30.0,
+					"vertical_depth": 480.0
+				},
+				"orbit_archetype": "thrust_line"
+			}
+		},
+		{
+			"weapon_id": "hammer",
+			"axis": "horizontal",
+			"category": "melee",
+			"damage_family": "melee",
+			"label_key": "item.weapon.hammer.name",
+			"motion_role": "melee_blunt",
+			"base_axis": "vertical",
+			"weapon_texture": "./project/assets/ui/backpack/items/common_v2/hammer_t_3x2.png",
+			"attack_texture": "./project/assets/combat/vfx/weapons/attack/common/hammer_attack_v01.png",
+			"projectile_texture": "",
+			"orbit": {
+				"len": 92.0,
+				"scale": 0.92,
+				"visual_span": 92.0,
+				"grip_point": [
+					0.62,
+					0.76
+				],
+				"tip_point": [
+					0.5,
+					0.1
+				]
+			},
+			"identity": {},
+			"combo": {
+				"cone": 0.03,
+				"cooldown": 1.17,
+				"equipment_pose": "wide_shock_slam",
+				"hit_power": 1.6,
+				"impact": 38.0,
+				"knockback": 864.0,
+				"life": 0.36,
+				"range": 116.64,
+				"reach": 62.0,
+				"recoil": 62.0,
+				"slow_pct": 18.0,
+				"slow_seconds": 0.7,
+				"strength": 1.85,
+				"stun": 0.33,
+				"target_cap": 0.0,
+				"vfx_mode": "slam",
+				"windup": -100.0,
+				"damage": 11.960736,
+				"hit_stop": 0.07,
+				"vfx_scale": 1.85,
+				"vfx_speed": 0.85,
+				"particle_count": 16.0,
+				"ring_layers": 1.0,
+				"weapon_rotation_deg": -8.0,
+				"weapon_arc_scale": 0.78,
+				"weapon_scale": 1.88,
+				"vfx_row": 14.0,
+				"hit_shape": "ARC",
+				"phase_frames": {
+					"impact": [
+						2.0,
+						3.0
+					],
+					"prep": [
+						0.0,
+						1.0
+					],
+					"recovery": [
+						4.0,
+						5.0
+					]
+				},
+				"weapon_offset": [
+					-10.0,
+					4.0
+				],
+				"impact_offset": [
+					52.0,
+					8.0
+				],
+				"trajectory": {
+					"space": "path_normalized",
+					"kind": "polyline",
+					"samples": [
+						{
+							"id": "p00",
+							"position": [
+								0.15,
+								-0.7
+							],
+							"rotation_deg": -78.0,
+							"t": 0.0
+						},
+						{
+							"id": "p01",
+							"position": [
+								0.45,
+								-0.75
+							],
+							"rotation_deg": -62.0,
+							"t": 0.14
+						},
+						{
+							"id": "p02",
+							"position": [
+								0.8,
+								-0.5
+							],
+							"rotation_deg": -38.0,
+							"t": 0.26
+						},
+						{
+							"id": "p03",
+							"position": [
+								1.0,
+								-0.05
+							],
+							"rotation_deg": -4.0,
+							"t": 0.38
+						},
+						{
+							"id": "p04",
+							"position": [
+								0.85,
+								0.35
+							],
+							"rotation_deg": 24.0,
+							"t": 0.5
+						},
+						{
+							"id": "p05",
+							"position": [
+								0.45,
+								0.65
+							],
+							"rotation_deg": 52.0,
+							"t": 0.62
+						},
+						{
+							"id": "p06",
+							"position": [
+								0.05,
+								0.55
+							],
+							"rotation_deg": 82.0,
+							"t": 0.74
+						},
+						{
+							"id": "p07",
+							"position": [
+								-0.1,
+								0.25
+							],
+							"rotation_deg": 112.0,
+							"t": 0.86
+						},
+						{
+							"id": "p08",
+							"position": [
+								0.1,
+								-0.15
+							],
+							"rotation_deg": -56.0,
+							"t": 1.0
+						}
+					],
+					"hit": {
+						"kind": "swept_circle",
+						"radius": 20.0
+					}
+				},
+				"shake": 1.6,
+				"color_core": [
+					1.0,
+					0.360000014305115,
+					0.0599999986588955,
+					1.0
+				],
+				"color_edge": [
+					0.720000028610229,
+					0.159999996423721,
+					0.0199999995529652,
+					1.0
+				],
+				"axis": "horizontal",
+				"crit_chance_pct": 0.0,
+				"pierce": 0,
+				"block": 0.0,
+				"lifesteal_pct": 0.0,
+				"orbit_path_caps": {
+					"horizontal_radius": 290.0,
+					"range_upgrade_cap_pct": 30.0,
+					"vertical_radius": 260.0
+				},
+				"orbit_archetype": "blunt_slam"
+			}
+		},
+		{
+			"weapon_id": "hammer",
+			"axis": "vertical",
+			"category": "melee",
+			"damage_family": "melee",
+			"label_key": "item.weapon.hammer.name",
+			"motion_role": "melee_blunt",
+			"base_axis": "vertical",
+			"weapon_texture": "./project/assets/ui/backpack/items/common_v2/hammer_t_3x2.png",
+			"attack_texture": "./project/assets/combat/vfx/weapons/attack/common/hammer_attack_v01.png",
+			"projectile_texture": "",
+			"orbit": {
+				"len": 92.0,
+				"scale": 0.92,
+				"visual_span": 92.0,
+				"grip_point": [
+					0.62,
+					0.76
+				],
+				"tip_point": [
+					0.5,
+					0.1
+				]
+			},
+			"identity": {},
+			"combo": {
+				"cone": 0.06,
+				"cooldown": 1.2636,
+				"equipment_pose": "focused_heavy_slam",
+				"hit_power": 1.65,
+				"impact": 96.0,
+				"knockback": 777.6,
+				"life": 0.32,
+				"range": 105.84,
+				"reach": 62.0,
+				"recoil": 62.0,
+				"slow_pct": 18.0,
+				"slow_seconds": 0.7,
+				"strength": 1.85,
+				"stun": 0.4,
+				"target_cap": 0.0,
+				"vfx_mode": "slam",
+				"windup": -78.0,
+				"damage": 14.59209792,
+				"hit_stop": 0.07,
+				"vfx_scale": 1.75,
+				"vfx_speed": 0.85,
+				"particle_count": 16.0,
+				"ring_layers": 1.0,
+				"weapon_rotation_deg": -36.0,
+				"weapon_arc_scale": 0.54,
+				"weapon_scale": 1.92,
+				"vfx_row": 15.0,
+				"hit_shape": "POINT_IMPACT",
+				"phase_frames": {
+					"impact": [
+						2.0,
+						3.0
+					],
+					"prep": [
+						0.0,
+						1.0
+					],
+					"recovery": [
+						4.0,
+						5.0
+					]
+				},
+				"weapon_offset": [
+					0.0,
+					-16.0
+				],
+				"impact_offset": [
+					58.0,
+					18.0
+				],
+				"trajectory": {
+					"space": "path_normalized",
+					"kind": "polyline",
+					"samples": [
+						{
+							"id": "p00",
+							"t": 0.0,
+							"position": [
+								0.417,
+								-0.432
+							],
+							"rotation_deg": -46.0
+						},
+						{
+							"id": "p01",
+							"t": 0.3,
+							"position": [
+								-0.106,
+								-0.427
+							],
+							"rotation_deg": -104.0
+						},
+						{
+							"id": "p02",
+							"t": 0.38,
+							"position": [
+								-0.106,
+								-0.427
+							],
+							"rotation_deg": -104.0
+						},
+						{
+							"id": "p03",
+							"t": 0.48,
+							"position": [
+								0.677,
+								-0.246
+							],
+							"rotation_deg": -20.0
+						},
+						{
+							"id": "p04",
+							"t": 0.54,
+							"position": [
+								0.99,
+								0.139
+							],
+							"rotation_deg": 8.0
+						},
+						{
+							"id": "p05",
+							"t": 0.6,
+							"position": [
+								0.932,
+								0.303
+							],
+							"rotation_deg": 18.0
+						},
+						{
+							"id": "p06",
+							"t": 0.72,
+							"position": [
+								0.8,
+								-0.028
+							],
+							"rotation_deg": -2.0
+						},
+						{
+							"id": "p07",
+							"t": 0.88,
+							"position": [
+								0.56,
+								-0.35
+							],
+							"rotation_deg": -32.0
+						},
+						{
+							"id": "p08",
+							"t": 1.0,
+							"position": [
+								0.417,
+								-0.432
+							],
+							"rotation_deg": -46.0
+						}
+					],
+					"hit": {
+						"kind": "swept_circle",
+						"radius": 20.0
+					}
+				},
+				"shake": 1.65,
+				"color_core": [
+					1.0,
+					0.360000014305115,
+					0.0599999986588955,
+					1.0
+				],
+				"color_edge": [
+					0.720000028610229,
+					0.159999996423721,
+					0.0199999995529652,
+					1.0
+				],
+				"axis": "vertical",
+				"crit_chance_pct": 0.0,
+				"pierce": 0,
+				"block": 0.0,
+				"lifesteal_pct": 0.0,
+				"orbit_path_caps": {
+					"horizontal_radius": 290.0,
+					"range_upgrade_cap_pct": 30.0,
+					"vertical_radius": 260.0
+				},
+				"orbit_archetype": "blunt_slam"
+			}
+		},
+		{
+			"weapon_id": "great_hammer",
+			"axis": "horizontal",
+			"category": "melee",
+			"damage_family": "melee",
+			"label_key": "item.weapon.great_hammer.name",
+			"motion_role": "melee_blunt",
+			"base_axis": "vertical",
+			"weapon_texture": "./project/assets/ui/backpack/items/common_v2/great_hammer_t_3x2.png",
+			"attack_texture": "./project/assets/combat/vfx/weapons/attack/common/great_hammer_attack_v01.png",
+			"projectile_texture": "",
+			"orbit": {
+				"len": 116.0,
+				"scale": 1.12,
+				"visual_span": 116.0,
+				"grip_point": [
+					0.62,
+					0.78
+				],
+				"tip_point": [
+					0.5,
+					0.08
+				]
+			},
+			"identity": {},
+			"combo": {
+				"cone": 0.03,
+				"cooldown": 1.51,
+				"equipment_pose": "wide_shock_slam",
+				"hit_power": 2.0,
+				"impact": 48.0,
+				"knockback": 1128.0,
+				"life": 0.58,
+				"range": 133.92,
+				"reach": 76.0,
+				"recoil": 86.0,
+				"slow_pct": 24.0,
+				"slow_seconds": 0.9,
+				"strength": 2.15,
+				"stun": 0.45,
+				"target_cap": 0.0,
+				"vfx_mode": "slam",
+				"windup": -125.0,
+				"damage": 18.399264,
+				"hit_stop": 0.1,
+				"vfx_scale": 2.25,
+				"vfx_speed": 0.7,
+				"particle_count": 32.0,
+				"ring_layers": 2.0,
+				"weapon_rotation_deg": -10.0,
+				"weapon_arc_scale": 0.88,
+				"weapon_scale": 2.08,
+				"vfx_row": 16.0,
+				"hit_shape": "ARC",
+				"phase_frames": {
+					"impact": [
+						2.0,
+						3.0
+					],
+					"prep": [
+						0.0,
+						1.0
+					],
+					"recovery": [
+						4.0,
+						5.0
+					]
+				},
+				"weapon_offset": [
+					-16.0,
+					6.0
+				],
+				"impact_offset": [
+					68.0,
+					12.0
+				],
+				"trajectory": {
+					"space": "path_normalized",
+					"kind": "polyline",
+					"samples": [
+						{
+							"id": "p00",
+							"position": [
+								-0.55,
+								0.15
+							],
+							"rotation_deg": 166.0,
+							"t": 0.0
+						},
+						{
+							"id": "p01",
+							"position": [
+								-0.45,
+								-0.35
+							],
+							"rotation_deg": -142.0,
+							"t": 0.12
+						},
+						{
+							"id": "p02",
+							"position": [
+								-0.15,
+								-0.75
+							],
+							"rotation_deg": -102.0,
+							"t": 0.2
+						},
+						{
+							"id": "p03",
+							"position": [
+								0.3,
+								-0.9
+							],
+							"rotation_deg": -72.0,
+							"t": 0.272
+						},
+						{
+							"id": "p04",
+							"position": [
+								0.75,
+								-0.65
+							],
+							"rotation_deg": -42.0,
+							"t": 0.344
+						},
+						{
+							"id": "p05",
+							"position": [
+								1.0,
+								-0.2
+							],
+							"rotation_deg": -12.0,
+							"t": 0.417
+						},
+						{
+							"id": "p06",
+							"position": [
+								0.92,
+								0.35
+							],
+							"rotation_deg": 24.0,
+							"t": 0.489
+						},
+						{
+							"id": "p07",
+							"position": [
+								0.6,
+								0.75
+							],
+							"rotation_deg": 52.0,
+							"t": 0.561
+						},
+						{
+							"id": "p08",
+							"position": [
+								0.2,
+								0.9
+							],
+							"rotation_deg": 78.0,
+							"t": 0.633
+						},
+						{
+							"id": "p09",
+							"position": [
+								0.45,
+								0.45
+							],
+							"rotation_deg": 44.0,
+							"t": 0.706
+						},
+						{
+							"id": "p10",
+							"position": [
+								0.55,
+								0.05
+							],
+							"rotation_deg": 6.0,
+							"t": 0.778
+						},
+						{
+							"id": "p11",
+							"position": [
+								0.4,
+								-0.3
+							],
+							"rotation_deg": -36.0,
+							"t": 0.85
+						},
+						{
+							"id": "p12",
+							"position": [
+								0.15,
+								-0.5
+							],
+							"rotation_deg": -74.0,
+							"t": 1.0
+						}
+					],
+					"hit": {
+						"kind": "swept_circle",
+						"radius": 28.0
+					}
+				},
+				"shake": 2.0,
+				"color_core": [
+					1.0,
+					0.159999996423721,
+					0.0399999991059303,
+					1.0
+				],
+				"color_edge": [
+					0.600000023841858,
+					0.0399999991059303,
+					0.00999999977648258,
+					1.0
+				],
+				"axis": "horizontal",
+				"crit_chance_pct": 0.0,
+				"pierce": 0,
+				"block": 0.0,
+				"lifesteal_pct": 0.0,
+				"orbit_path_caps": {
+					"horizontal_radius": 290.0,
+					"range_upgrade_cap_pct": 30.0,
+					"vertical_radius": 260.0
+				},
+				"orbit_archetype": "blunt_slam"
+			}
+		},
+		{
+			"weapon_id": "great_hammer",
+			"axis": "vertical",
+			"category": "melee",
+			"damage_family": "melee",
+			"label_key": "item.weapon.great_hammer.name",
+			"motion_role": "melee_blunt",
+			"base_axis": "vertical",
+			"weapon_texture": "./project/assets/ui/backpack/items/common_v2/great_hammer_t_3x2.png",
+			"attack_texture": "./project/assets/combat/vfx/weapons/attack/common/great_hammer_attack_v01.png",
+			"projectile_texture": "",
+			"orbit": {
+				"len": 116.0,
+				"scale": 1.12,
+				"visual_span": 116.0,
+				"grip_point": [
+					0.62,
+					0.78
+				],
+				"tip_point": [
+					0.5,
+					0.08
+				]
+			},
+			"identity": {},
+			"combo": {
+				"cone": 0.08,
+				"cooldown": 1.6308,
+				"equipment_pose": "focused_heavy_slam",
+				"hit_power": 2.1,
+				"impact": 90.0,
+				"knockback": 1015.2,
+				"life": 0.68,
+				"range": 121.52,
+				"reach": 76.0,
+				"recoil": 86.0,
+				"slow_pct": 24.0,
+				"slow_seconds": 0.9,
+				"strength": 2.15,
+				"stun": 0.52,
+				"target_cap": 0.0,
+				"vfx_mode": "slam",
+				"windup": 0.0,
+				"damage": 22.44710208,
+				"hit_stop": 0.1,
+				"vfx_scale": 2.0,
+				"vfx_speed": 0.7,
+				"particle_count": 32.0,
+				"ring_layers": 2.0,
+				"weapon_rotation_deg": -38.0,
+				"weapon_arc_scale": 0.58,
+				"weapon_scale": 2.15,
+				"vfx_row": 17.0,
+				"hit_shape": "POINT_IMPACT",
+				"phase_frames": {
+					"impact": [
+						2.0,
+						3.0
+					],
+					"prep": [
+						0.0,
+						1.0
+					],
+					"recovery": [
+						4.0,
+						5.0
+					]
+				},
+				"weapon_offset": [
+					0.0,
+					-20.0
+				],
+				"impact_offset": [
+					74.0,
+					24.0
+				],
+				"trajectory": {
+					"hit": {
+						"kind": "swept_circle",
+						"radius": 34.0
+					},
+					"kind": "polyline",
+					"samples": [
+						{
+							"id": "p00",
+							"position": [
+								0.198,
+								-0.545
+							],
+							"rotation_deg": -70.0,
+							"t": 0.0
+						},
+						{
+							"id": "p01",
+							"position": [
+								-0.361,
+								-0.374
+							],
+							"rotation_deg": -134.0,
+							"t": 0.36
+						},
+						{
+							"id": "p02",
+							"position": [
+								-0.361,
+								-0.374
+							],
+							"rotation_deg": -134.0,
+							"t": 0.44
+						},
+						{
+							"id": "p03",
+							"position": [
+								0.913,
+								0.297
+							],
+							"rotation_deg": 18.0,
+							"t": 0.56
+						},
+						{
+							"id": "p04",
+							"position": [
+								0.829,
+								0.559
+							],
+							"rotation_deg": 34.0,
+							"t": 0.62
+						},
+						{
+							"id": "p05",
+							"position": [
+								0.809,
+								0.588
+							],
+							"rotation_deg": 36.0,
+							"t": 0.72
+						},
+						{
+							"id": "p06",
+							"position": [
+								0.82,
+								-0.029
+							],
+							"rotation_deg": -2.0,
+							"t": 0.84
+						},
+						{
+							"id": "p07",
+							"position": [
+								0.458,
+								-0.475
+							],
+							"rotation_deg": -46.0,
+							"t": 0.94
+						},
+						{
+							"id": "p08",
+							"position": [
+								0.198,
+								-0.545
+							],
+							"rotation_deg": -70.0,
+							"t": 1.0
+						}
+					],
+					"space": "path_normalized"
+				},
+				"shake": 2.1,
+				"color_core": [
+					1.0,
+					0.159999996423721,
+					0.0399999991059303,
+					1.0
+				],
+				"color_edge": [
+					0.600000023841858,
+					0.0399999991059303,
+					0.00999999977648258,
+					1.0
+				],
+				"axis": "vertical",
+				"crit_chance_pct": 0.0,
+				"pierce": 0,
+				"block": 0.0,
+				"lifesteal_pct": 0.0,
+				"orbit_path_caps": {
+					"horizontal_radius": 290.0,
+					"range_upgrade_cap_pct": 30.0,
+					"vertical_radius": 260.0
+				},
+				"orbit_archetype": "blunt_slam"
+			}
+		},
+		{
+			"weapon_id": "shortbow",
+			"axis": "horizontal",
+			"category": "ranged",
+			"damage_family": "ranged",
+			"label_key": "item.weapon.shortbow.name",
+			"motion_role": "ranged_fire",
+			"base_axis": "vertical",
+			"weapon_texture": "./project/assets/ui/backpack/items/common_v2/shortbow_1x2.png",
+			"attack_texture": "./project/assets/combat/vfx/weapons/projectiles/ranged_v01/arrow_projectile.png",
+			"projectile_texture": "./project/assets/combat/vfx/weapons/projectiles/ranged_v01/arrow_projectile.png",
+			"orbit": {
+				"len": 92.0,
+				"scale": 0.86,
+				"grip_point": [
+					0.5,
+					0.58
+				],
+				"tip_point": [
+					0.5,
+					0.08
+				]
+			},
+			"identity": {
+				"chassis": "bow",
+				"delivery": "direct_projectile",
+				"fantasy": "작고 빠른 기동 사격",
+				"forbidden_traits": [
+					"high_single_hit",
+					"high_pierce"
+				],
+				"hit_behaviors": [
+					"stop"
+				],
+				"horizontal_role": "짧은 두 갈래 빠른 사격, 사거리·개별 피해 감소",
+				"reference_family": "fast_ranged",
+				"same_target_policy": {
+					"mode": "shared_hit"
+				},
+				"strengths": [
+					"rapid_fire",
+					"mobility"
+				],
+				"verbs": [
+					"draw",
+					"fire"
+				],
+				"vertical_role": "한 발의 빠른 정밀 사격, 더 안정적인 사거리",
+				"weaknesses": [
+					"low_single_hit",
+					"low_pierce"
+				]
+			},
+			"combo": {
+				"cone": 0.9,
+				"cooldown": 1.14,
+				"equipment_pose": "volley",
+				"hit_power": 0.25,
+				"impact": 8.0,
+				"knockback": 120.0,
+				"life": 0.18,
+				"pierce": 1,
+				"projectile_count": 3.0,
+				"range": 147.2,
+				"reach": 104.0,
+				"recoil": 18.0,
+				"spread": 16.0,
+				"strength": 0.82,
+				"stun": 0.03,
+				"target_cap": 3.0,
+				"vfx_mode": "thrust",
+				"windup": -10.0,
+				"damage": 4.968,
+				"hit_stop": 0.0,
+				"vfx_scale": 0.8,
+				"vfx_speed": 1.2,
+				"particle_count": 0.0,
+				"ring_layers": 0.0,
+				"weapon_rotation_deg": 0.0,
+				"weapon_arc_scale": 0.18,
+				"weapon_scale": 1.0,
+				"vfx_row": 18.0,
+				"hit_shape": "ARC",
+				"phase_frames": {
+					"impact": [
+						2.0,
+						3.0
+					],
+					"prep": [
+						0.0,
+						1.0
+					],
+					"recovery": [
+						4.0,
+						5.0
+					]
+				},
+				"weapon_offset": [
+					4.0,
+					0.0
+				],
+				"impact_offset": [
+					54.0,
+					0.0
+				],
+				"shake": 0.25,
+				"color_core": [
+					0.899999976158142,
+					1.0,
+					0.899999976158142,
+					1.0
+				],
+				"color_edge": [
+					0.419999986886978,
+					0.720000028610229,
+					0.360000014305115,
+					1.0
+				],
+				"axis": "horizontal",
+				"crit_chance_pct": 0.0,
+				"block": 0.0,
+				"lifesteal_pct": 0.0,
+				"orbit_path_caps": {
+					"horizontal_range": 520.0,
+					"range_upgrade_cap_pct": 30.0,
+					"vertical_range": 640.0
+				},
+				"orbit_archetype": "bow_crossbow"
+			}
+		},
+		{
+			"weapon_id": "shortbow",
+			"axis": "vertical",
+			"category": "ranged",
+			"damage_family": "ranged",
+			"label_key": "item.weapon.shortbow.name",
+			"motion_role": "ranged_fire",
+			"base_axis": "vertical",
+			"weapon_texture": "./project/assets/ui/backpack/items/common_v2/shortbow_1x2.png",
+			"attack_texture": "./project/assets/combat/vfx/weapons/projectiles/ranged_v01/arrow_projectile.png",
+			"projectile_texture": "./project/assets/combat/vfx/weapons/projectiles/ranged_v01/arrow_projectile.png",
+			"orbit": {
+				"len": 92.0,
+				"scale": 0.86,
+				"grip_point": [
+					0.5,
+					0.58
+				],
+				"tip_point": [
+					0.5,
+					0.08
+				]
+			},
+			"identity": {
+				"chassis": "bow",
+				"delivery": "direct_projectile",
+				"fantasy": "작고 빠른 기동 사격",
+				"forbidden_traits": [
+					"high_single_hit",
+					"high_pierce"
+				],
+				"hit_behaviors": [
+					"stop"
+				],
+				"horizontal_role": "짧은 두 갈래 빠른 사격, 사거리·개별 피해 감소",
+				"reference_family": "fast_ranged",
+				"same_target_policy": {
+					"mode": "shared_hit"
+				},
+				"strengths": [
+					"rapid_fire",
+					"mobility"
+				],
+				"verbs": [
+					"draw",
+					"fire"
+				],
+				"vertical_role": "한 발의 빠른 정밀 사격, 더 안정적인 사거리",
+				"weaknesses": [
+					"low_single_hit",
+					"low_pierce"
+				]
+			},
+			"combo": {
+				"cone": 0.9,
+				"cooldown": 1.14,
+				"equipment_pose": "aimed_shot",
+				"hit_power": 0.2,
+				"impact": 6.0,
+				"knockback": 120.0,
+				"life": 0.16,
+				"pierce": 1,
+				"projectile_count": 1.0,
+				"range": 179.2,
+				"reach": 104.0,
+				"recoil": 18.0,
+				"spread": 0.0,
+				"strength": 0.82,
+				"stun": 0.03,
+				"target_cap": 3.0,
+				"vfx_mode": "thrust",
+				"windup": -6.0,
+				"damage": 6.1824,
+				"hit_stop": 0.0,
+				"vfx_scale": 0.75,
+				"vfx_speed": 1.25,
+				"particle_count": 0.0,
+				"ring_layers": 0.0,
+				"weapon_rotation_deg": 0.0,
+				"weapon_arc_scale": 0.08,
+				"weapon_scale": 1.05,
+				"vfx_row": 19.0,
+				"hit_shape": "LINE",
+				"phase_frames": {
+					"impact": [
+						2.0,
+						3.0
+					],
+					"prep": [
+						0.0,
+						1.0
+					],
+					"recovery": [
+						4.0,
+						5.0
+					]
+				},
+				"weapon_offset": [
+					12.0,
+					0.0
+				],
+				"impact_offset": [
+					74.0,
+					0.0
+				],
+				"shake": 0.2,
+				"color_core": [
+					0.899999976158142,
+					1.0,
+					0.899999976158142,
+					1.0
+				],
+				"color_edge": [
+					0.419999986886978,
+					0.720000028610229,
+					0.360000014305115,
+					1.0
+				],
+				"crit_chance_pct": 5.0,
+				"axis": "vertical",
+				"block": 0.0,
+				"lifesteal_pct": 0.0,
+				"orbit_path_caps": {
+					"horizontal_range": 520.0,
+					"range_upgrade_cap_pct": 30.0,
+					"vertical_range": 640.0
+				},
+				"orbit_archetype": "bow_crossbow"
+			}
+		},
+		{
+			"weapon_id": "crossbow",
+			"axis": "horizontal",
+			"category": "ranged",
+			"damage_family": "ranged",
+			"label_key": "item.weapon.crossbow.name",
+			"motion_role": "ranged_fire",
+			"base_axis": "vertical",
+			"weapon_texture": "./project/assets/combat/vfx/weapons/runtime/crossbow_right_3x2_v01.png",
+			"attack_texture": "./project/assets/combat/vfx/weapons/projectiles/ranged_v01/bolt_projectile.png",
+			"projectile_texture": "./project/assets/combat/vfx/weapons/projectiles/ranged_v01/bolt_projectile.png",
+			"orbit": {
+				"len": 104.0,
+				"scale": 0.51,
+				"grip_point": [
+					0.64,
+					0.58
+				],
+				"tip_point": [
+					0.96,
+					0.48
+				]
+			},
+			"identity": {
+				"axis_same_target_policy": {
+					"horizontal": {
+						"mode": "capped_multi",
+						"cap": 2.0
+					},
+					"vertical": {
+						"mode": "shared_hit"
+					}
+				},
+				"chassis": "crossbow",
+				"delivery": "direct_projectile",
+				"fantasy": "느린 재장전과 강한 볼트",
+				"forbidden_traits": [
+					"rapid_fire",
+					"uncapped_same_target"
+				],
+				"hit_behaviors": [
+					"limited_pierce"
+				],
+				"horizontal_role": "짧은 산탄 볼트, 제한된 동일 대상 중복",
+				"reference_family": "heavy_ranged",
+				"same_target_policy": {
+					"mode": "shared_hit"
+				},
+				"strengths": [
+					"strong_bolt",
+					"limited_pierce"
+				],
+				"verbs": [
+					"reload",
+					"fire"
+				],
+				"vertical_role": "긴 사거리의 단일 관통 볼트",
+				"weaknesses": [
+					"slow_reload",
+					"close_spread"
+				]
+			},
+			"combo": {
+				"cone": 0.92,
+				"cooldown": 1.59,
+				"equipment_pose": "bolt_spread",
+				"hit_power": 0.45,
+				"impact": 7.0,
+				"knockback": 360.0,
+				"life": 0.2,
+				"pierce": 1,
+				"projectile_count": 4.0,
+				"projectile_lifetime": 0.4,
+				"projectile_radius": 20.0,
+				"range": 99.0,
+				"reach": 136.0,
+				"recoil": 34.0,
+				"spread": 40.0,
+				"strength": 1.35,
+				"stun": 0.12,
+				"target_cap": 4.0,
+				"vfx_mode": "thrust",
+				"windup": 0.799999999999955,
+				"damage": 14.5728,
+				"hit_stop": 0.0,
+				"vfx_scale": 0.95,
+				"vfx_speed": 1.0,
+				"particle_count": 0.0,
+				"ring_layers": 0.0,
+				"weapon_rotation_deg": 0.0,
+				"weapon_arc_scale": 0.16,
+				"weapon_scale": 1.08,
+				"vfx_row": 20.0,
+				"hit_shape": "ARC",
+				"phase_frames": {
+					"impact": [
+						2.0,
+						3.0
+					],
+					"prep": [
+						0.0,
+						1.0
+					],
+					"recovery": [
+						4.0,
+						5.0
+					]
+				},
+				"weapon_offset": [
+					2.0,
+					0.0
+				],
+				"impact_offset": [
+					48.0,
+					0.0
+				],
+				"trajectory": {
+					"hit": {
+						"kind": "swept_circle",
+						"radius": 22.0
+					},
+					"kind": "polyline",
+					"samples": [
+						{
+							"id": "p00",
+							"position": [
+								0.0,
+								0.0
+							],
+							"t": 0.0
+						},
+						{
+							"id": "p01",
+							"position": [
+								0.22,
+								-0.1
+							],
+							"t": 0.111
+						},
+						{
+							"id": "p02",
+							"position": [
+								0.720000028610229,
+								-0.230399996042252
+							],
+							"t": 0.222222222222222
+						},
+						{
+							"id": "p03",
+							"position": [
+								0.0,
+								0.0
+							],
+							"t": 0.333333333333333
+						},
+						{
+							"id": "p04",
+							"position": [
+								0.22,
+								0.0
+							],
+							"t": 0.444
+						},
+						{
+							"id": "p05",
+							"position": [
+								0.720000028610229,
+								0.0
+							],
+							"t": 0.555555555555556
+						},
+						{
+							"id": "p06",
+							"position": [
+								0.0,
+								0.0
+							],
+							"t": 0.666666666666667
+						},
+						{
+							"id": "p07",
+							"position": [
+								0.215999990701675,
+								0.103679992258549
+							],
+							"t": 0.777777777777778
+						},
+						{
+							"id": "p08",
+							"position": [
+								0.720000028610229,
+								0.230399996042252
+							],
+							"t": 0.888888888888889
+						},
+						{
+							"id": "p09",
+							"position": [
+								0.0,
+								0.0
+							],
+							"t": 1.0
+						}
+					],
+					"space": "path_normalized"
+				},
+				"shake": 0.45,
+				"color_core": [
+					1.0,
+					0.879999995231628,
+					0.550000011920929,
+					1.0
+				],
+				"color_edge": [
+					0.899999976158142,
+					0.519999980926514,
+					0.180000007152557,
+					1.0
+				],
+				"axis": "horizontal",
+				"crit_chance_pct": 0.0,
+				"block": 0.0,
+				"lifesteal_pct": 0.0,
+				"orbit_path_caps": {
+					"horizontal_range": 520.0,
+					"range_upgrade_cap_pct": 30.0,
+					"vertical_range": 640.0
+				},
+				"orbit_archetype": "bow_crossbow"
+			}
+		},
+		{
+			"weapon_id": "crossbow",
+			"axis": "vertical",
+			"category": "ranged",
+			"damage_family": "ranged",
+			"label_key": "item.weapon.crossbow.name",
+			"motion_role": "ranged_fire",
+			"base_axis": "vertical",
+			"weapon_texture": "./project/assets/combat/vfx/weapons/runtime/crossbow_right_3x2_v01.png",
+			"attack_texture": "./project/assets/combat/vfx/weapons/projectiles/ranged_v01/bolt_projectile.png",
+			"projectile_texture": "./project/assets/combat/vfx/weapons/projectiles/ranged_v01/bolt_projectile.png",
+			"orbit": {
+				"len": 104.0,
+				"scale": 0.51,
+				"grip_point": [
+					0.64,
+					0.58
+				],
+				"tip_point": [
+					0.96,
+					0.48
+				]
+			},
+			"identity": {
+				"axis_same_target_policy": {
+					"horizontal": {
+						"mode": "capped_multi",
+						"cap": 2.0
+					},
+					"vertical": {
+						"mode": "shared_hit"
+					}
+				},
+				"chassis": "crossbow",
+				"delivery": "direct_projectile",
+				"fantasy": "느린 재장전과 강한 볼트",
+				"forbidden_traits": [
+					"rapid_fire",
+					"uncapped_same_target"
+				],
+				"hit_behaviors": [
+					"limited_pierce"
+				],
+				"horizontal_role": "짧은 산탄 볼트, 제한된 동일 대상 중복",
+				"reference_family": "heavy_ranged",
+				"same_target_policy": {
+					"mode": "shared_hit"
+				},
+				"strengths": [
+					"strong_bolt",
+					"limited_pierce"
+				],
+				"verbs": [
+					"reload",
+					"fire"
+				],
+				"vertical_role": "긴 사거리의 단일 관통 볼트",
+				"weaknesses": [
+					"slow_reload",
+					"close_spread"
+				]
+			},
+			"combo": {
+				"cone": 0.92,
+				"cooldown": 1.59,
+				"equipment_pose": "piercing_bolt",
+				"hit_power": 0.4,
+				"impact": 5.0,
+				"knockback": 403.2,
+				"life": 0.18,
+				"pierce": 3,
+				"projectile_count": 1.0,
+				"projectile_lifetime": 0.547105263157895,
+				"projectile_radius": 18.0,
+				"range": 201.6,
+				"reach": 136.0,
+				"recoil": 34.0,
+				"spread": 0.0,
+				"strength": 1.35,
+				"stun": 0.12,
+				"target_cap": 4.0,
+				"vfx_mode": "thrust",
+				"windup": -5.0,
+				"damage": 19.044,
+				"hit_stop": 0.0,
+				"vfx_scale": 1.0,
+				"vfx_speed": 1.05,
+				"particle_count": 0.0,
+				"ring_layers": 0.0,
+				"weapon_rotation_deg": 0.0,
+				"weapon_arc_scale": 0.08,
+				"weapon_scale": 1.16,
+				"vfx_row": 21.0,
+				"hit_shape": "LINE",
+				"phase_frames": {
+					"impact": [
+						2.0,
+						3.0
+					],
+					"prep": [
+						0.0,
+						1.0
+					],
+					"recovery": [
+						4.0,
+						5.0
+					]
+				},
+				"weapon_offset": [
+					14.0,
+					0.0
+				],
+				"impact_offset": [
+					88.0,
+					0.0
+				],
+				"shake": 0.4,
+				"color_core": [
+					1.0,
+					0.879999995231628,
+					0.550000011920929,
+					1.0
+				],
+				"color_edge": [
+					0.899999976158142,
+					0.519999980926514,
+					0.180000007152557,
+					1.0
+				],
+				"axis": "vertical",
+				"crit_chance_pct": 0.0,
+				"block": 0.0,
+				"lifesteal_pct": 0.0,
+				"orbit_path_caps": {
+					"horizontal_range": 520.0,
+					"range_upgrade_cap_pct": 30.0,
+					"vertical_range": 640.0
+				},
+				"orbit_archetype": "bow_crossbow"
+			}
+		},
+		{
+			"weapon_id": "throwing_dagger",
+			"axis": "horizontal",
+			"category": "ranged",
+			"damage_family": "ranged",
+			"label_key": "item.weapon.throwing_dagger.name",
+			"motion_role": "throw",
+			"base_axis": "vertical",
+			"weapon_texture": "./project/assets/ui/backpack/items/common_v2/throwing_dagger_1x2.png",
+			"attack_texture": "./project/assets/combat/vfx/weapons/projectiles/ranged_v01/throwing_dagger_projectile.png",
+			"projectile_texture": "./project/assets/combat/vfx/weapons/projectiles/ranged_v01/throwing_dagger_projectile.png",
+			"orbit": {
+				"len": 72.0,
+				"scale": 0.57,
+				"grip_point": [
+					0.5,
+					0.78
+				],
+				"tip_point": [
+					0.5,
+					0.08
+				]
+			},
+			"identity": {
+				"chassis": "light_throw",
+				"delivery": "direct_projectile",
+				"fantasy": "쉽고 빠르게 던지는 경량 무기. 낮은 관통과 짧은 회수 부담",
+				"forbidden_traits": [
+					"high_pierce",
+					"long_range",
+					"uncapped_same_target"
+				],
+				"hit_behaviors": [
+					"stop"
+				],
+				"horizontal_role": "짧은 3방향 투척. 여러 소형 적 분산용",
+				"reference_family": "fast_ranged",
+				"same_target_policy": {
+					"mode": "shared_hit"
+				},
+				"strengths": [
+					"fast_recovery",
+					"spread"
+				],
+				"verbs": [
+					"throw",
+					"recover"
+				],
+				"vertical_role": "빠른 단일 정밀 투척. 약간 긴 사거리와 높은 명중 신뢰도",
+				"weaknesses": [
+					"low_pierce",
+					"short_range"
+				]
+			},
+			"combo": {
+				"cone": 0.72,
+				"cooldown": 0.96,
+				"crit_chance_pct": 3.0,
+				"equipment_pose": "fan_throw",
+				"hit_power": 0.2,
+				"impact": 10.0,
+				"knockback": 90.0,
+				"life": 0.16,
+				"pierce": 1,
+				"projectile_count": 3.0,
+				"range": 123.5,
+				"reach": 78.0,
+				"recoil": 12.0,
+				"spread": 18.0,
+				"strength": 0.58,
+				"stun": 0.02,
+				"target_cap": 2.0,
+				"vfx_mode": "thrust",
+				"windup": -12.0,
+				"damage": 8.12544,
+				"hit_stop": 0.0,
+				"vfx_scale": 0.72,
+				"vfx_speed": 1.3,
+				"particle_count": 0.0,
+				"ring_layers": 0.0,
+				"weapon_rotation_deg": 0.0,
+				"weapon_arc_scale": 0.28,
+				"weapon_scale": 0.9,
+				"vfx_row": 22.0,
+				"hit_shape": "ARC",
+				"phase_frames": {
+					"impact": [
+						2.0,
+						3.0
+					],
+					"prep": [
+						0.0,
+						1.0
+					],
+					"recovery": [
+						4.0,
+						5.0
+					]
+				},
+				"weapon_offset": [
+					2.0,
+					0.0
+				],
+				"impact_offset": [
+					42.0,
+					0.0
+				],
+				"shake": 0.2,
+				"color_core": [
+					0.949999988079071,
+					0.949999988079071,
+					1.0,
+					1.0
+				],
+				"color_edge": [
+					0.550000011920929,
+					0.620000004768372,
+					0.800000011920929,
+					1.0
+				],
+				"axis": "horizontal",
+				"block": 0.0,
+				"lifesteal_pct": 0.0,
+				"orbit_path_caps": {
+					"horizontal_range": 440.0,
+					"range_upgrade_cap_pct": 30.0,
+					"vertical_range": 530.0
+				},
+				"orbit_archetype": "throwing_return"
+			}
+		},
+		{
+			"weapon_id": "throwing_dagger",
+			"axis": "vertical",
+			"category": "ranged",
+			"damage_family": "ranged",
+			"label_key": "item.weapon.throwing_dagger.name",
+			"motion_role": "throw",
+			"base_axis": "vertical",
+			"weapon_texture": "./project/assets/ui/backpack/items/common_v2/throwing_dagger_1x2.png",
+			"attack_texture": "./project/assets/combat/vfx/weapons/projectiles/ranged_v01/throwing_dagger_projectile.png",
+			"projectile_texture": "./project/assets/combat/vfx/weapons/projectiles/ranged_v01/throwing_dagger_projectile.png",
+			"orbit": {
+				"len": 72.0,
+				"scale": 0.57,
+				"grip_point": [
+					0.5,
+					0.78
+				],
+				"tip_point": [
+					0.5,
+					0.08
+				]
+			},
+			"identity": {
+				"chassis": "light_throw",
+				"delivery": "direct_projectile",
+				"fantasy": "쉽고 빠르게 던지는 경량 무기. 낮은 관통과 짧은 회수 부담",
+				"forbidden_traits": [
+					"high_pierce",
+					"long_range",
+					"uncapped_same_target"
+				],
+				"hit_behaviors": [
+					"stop"
+				],
+				"horizontal_role": "짧은 3방향 투척. 여러 소형 적 분산용",
+				"reference_family": "fast_ranged",
+				"same_target_policy": {
+					"mode": "shared_hit"
+				},
+				"strengths": [
+					"fast_recovery",
+					"spread"
+				],
+				"verbs": [
+					"throw",
+					"recover"
+				],
+				"vertical_role": "빠른 단일 정밀 투척. 약간 긴 사거리와 높은 명중 신뢰도",
+				"weaknesses": [
+					"low_pierce",
+					"short_range"
+				]
+			},
+			"combo": {
+				"cone": 0.72,
+				"cooldown": 0.96,
+				"crit_chance_pct": 7.0,
+				"equipment_pose": "focused_throw",
+				"hit_power": 0.18,
+				"impact": 8.0,
+				"knockback": 90.0,
+				"life": 0.14,
+				"pierce": 1,
+				"projectile_count": 1.0,
+				"range": 140.4,
+				"reach": 78.0,
+				"recoil": 12.0,
+				"spread": 0.0,
+				"strength": 0.58,
+				"stun": 0.02,
+				"target_cap": 2.0,
+				"vfx_mode": "thrust",
+				"windup": -8.0,
+				"damage": 10.06848,
+				"hit_stop": 0.0,
+				"vfx_scale": 0.7,
+				"vfx_speed": 1.35,
+				"particle_count": 0.0,
+				"ring_layers": 0.0,
+				"weapon_rotation_deg": 0.0,
+				"weapon_arc_scale": 0.08,
+				"weapon_scale": 0.95,
+				"vfx_row": 23.0,
+				"hit_shape": "LINE",
+				"phase_frames": {
+					"impact": [
+						2.0,
+						3.0
+					],
+					"prep": [
+						0.0,
+						1.0
+					],
+					"recovery": [
+						4.0,
+						5.0
+					]
+				},
+				"weapon_offset": [
+					10.0,
+					0.0
+				],
+				"impact_offset": [
+					60.0,
+					0.0
+				],
+				"shake": 0.18,
+				"color_core": [
+					0.949999988079071,
+					0.949999988079071,
+					1.0,
+					1.0
+				],
+				"color_edge": [
+					0.550000011920929,
+					0.620000004768372,
+					0.800000011920929,
+					1.0
+				],
+				"axis": "vertical",
+				"block": 0.0,
+				"lifesteal_pct": 0.0,
+				"orbit_path_caps": {
+					"horizontal_range": 440.0,
+					"range_upgrade_cap_pct": 30.0,
+					"vertical_range": 530.0
+				},
+				"orbit_archetype": "throwing_return"
+			}
+		},
+		{
+			"weapon_id": "short_wand",
+			"axis": "horizontal",
+			"category": "magic",
+			"damage_family": "magic",
+			"label_key": "item.weapon.short_wand.name",
+			"motion_role": "cast",
+			"base_axis": "vertical",
+			"weapon_texture": "./project/assets/ui/backpack/items/common_v2/short_wand_1x2.png",
+			"attack_texture": "./project/assets/combat/vfx/weapons/projectiles/ranged_v01/magic_orb_normal_projectile.png",
+			"projectile_texture": "./project/assets/combat/vfx/weapons/projectiles/ranged_v01/magic_orb_normal_projectile.png",
+			"orbit": {
+				"len": 84.0,
+				"scale": 0.63,
+				"grip_point": [
+					0.5,
+					0.78
+				],
+				"tip_point": [
+					0.5,
+					0.08
+				]
+			},
+			"identity": {
+				"chassis": "arcane_focus",
+				"delivery": "direct_projectile",
+				"fantasy": "가볍고 빠른 유도 마법",
+				"forbidden_traits": [
+					"high_pierce",
+					"large_splash"
+				],
+				"hit_behaviors": [
+					"stop"
+				],
+				"horizontal_role": "서로 다른 표적을 찾는 약한 쌍 유도탄",
+				"reference_family": "fast_magic",
+				"same_target_policy": {
+					"mode": "shared_hit"
+				},
+				"strengths": [
+					"fast_cast",
+					"guided_targeting"
+				],
+				"verbs": [
+					"cast",
+					"guide"
+				],
+				"vertical_role": "한 표적을 안정적으로 추적하는 단일 유도탄",
+				"weaknesses": [
+					"low_pierce",
+					"small_splash"
+				]
+			},
+			"combo": {
+				"cone": 0.82,
+				"cooldown": 1.17,
+				"equipment_pose": "area_cast",
+				"guide_turn_rate": 0.0,
+				"hit_power": 0.28,
+				"impact": 6.0,
+				"impact_behavior": "area_burst",
+				"impact_damage_mul": 1.0,
+				"impact_radius": 24.0,
+				"knockback": 160.0,
+				"life": 0.22,
+				"projectile_count": 2.0,
+				"range": 150.0,
+				"reach": 96.0,
+				"recoil": 18.0,
+				"splash_radius": 42.0,
+				"spread": 0.0,
+				"strength": 0.92,
+				"stun": 0.06,
+				"target_cap": 3.0,
+				"vfx_mode": "projectile_orb",
+				"windup": -6.0,
+				"damage": 8.328576,
+				"hit_stop": 0.0,
+				"vfx_scale": 0.95,
+				"vfx_speed": 0.82,
+				"particle_count": 0.0,
+				"ring_layers": 0.0,
+				"weapon_rotation_deg": 0.0,
+				"weapon_arc_scale": 0.18,
+				"weapon_scale": 1.0,
+				"vfx_row": 24.0,
+				"hit_shape": "ARC",
+				"phase_frames": {
+					"impact": [
+						2.0,
+						3.0
+					],
+					"prep": [
+						0.0,
+						1.0
+					],
+					"recovery": [
+						4.0,
+						5.0
+					]
+				},
+				"weapon_offset": [
+					0.0,
+					-2.0
+				],
+				"impact_offset": [
+					42.0,
+					0.0
+				],
+				"shake": 0.28,
+				"color_core": [
+					0.5,
+					0.850000023841858,
+					1.0,
+					1.0
+				],
+				"color_edge": [
+					0.180000007152557,
+					0.360000014305115,
+					1.0,
+					1.0
+				],
+				"axis": "horizontal",
+				"crit_chance_pct": 0.0,
+				"pierce": 0,
+				"block": 0.0,
+				"lifesteal_pct": 0.0,
+				"orbit_path_caps": {
+					"horizontal_radius": 96.0,
+					"range_upgrade_cap_pct": 30.0,
+					"vertical_range": 560.0
+				},
+				"orbit_archetype": "magic_cast"
+			}
+		},
+		{
+			"weapon_id": "short_wand",
+			"axis": "vertical",
+			"category": "magic",
+			"damage_family": "magic",
+			"label_key": "item.weapon.short_wand.name",
+			"motion_role": "cast",
+			"base_axis": "vertical",
+			"weapon_texture": "./project/assets/ui/backpack/items/common_v2/short_wand_1x2.png",
+			"attack_texture": "./project/assets/combat/vfx/weapons/projectiles/ranged_v01/magic_orb_normal_projectile.png",
+			"projectile_texture": "./project/assets/combat/vfx/weapons/projectiles/ranged_v01/magic_orb_normal_projectile.png",
+			"orbit": {
+				"len": 84.0,
+				"scale": 0.63,
+				"grip_point": [
+					0.5,
+					0.78
+				],
+				"tip_point": [
+					0.5,
+					0.08
+				]
+			},
+			"identity": {
+				"chassis": "arcane_focus",
+				"delivery": "direct_projectile",
+				"fantasy": "가볍고 빠른 유도 마법",
+				"forbidden_traits": [
+					"high_pierce",
+					"large_splash"
+				],
+				"hit_behaviors": [
+					"stop"
+				],
+				"horizontal_role": "서로 다른 표적을 찾는 약한 쌍 유도탄",
+				"reference_family": "fast_magic",
+				"same_target_policy": {
+					"mode": "shared_hit"
+				},
+				"strengths": [
+					"fast_cast",
+					"guided_targeting"
+				],
+				"verbs": [
+					"cast",
+					"guide"
+				],
+				"vertical_role": "한 표적을 안정적으로 추적하는 단일 유도탄",
+				"weaknesses": [
+					"low_pierce",
+					"small_splash"
+				]
+			},
+			"combo": {
+				"cone": 0.82,
+				"cooldown": 1.17,
+				"equipment_pose": "focused_cast",
+				"guide_turn_rate": 45.0,
+				"hit_power": 0.25,
+				"impact": 4.0,
+				"impact_behavior": "area_burst",
+				"impact_damage_mul": 1.0,
+				"impact_radius": 24.0,
+				"knockback": 160.0,
+				"life": 0.2,
+				"projectile_count": 1.0,
+				"range": 150.0,
+				"reach": 96.0,
+				"recoil": 18.0,
+				"splash_radius": 24.0,
+				"spread": 0.0,
+				"strength": 0.92,
+				"stun": 0.06,
+				"target_cap": 3.0,
+				"vfx_mode": "projectile_orb",
+				"windup": -4.0,
+				"damage": 10.501248,
+				"hit_stop": 0.0,
+				"vfx_scale": 1.05,
+				"vfx_speed": 0.9,
+				"particle_count": 0.0,
+				"ring_layers": 0.0,
+				"weapon_rotation_deg": 0.0,
+				"weapon_arc_scale": 0.08,
+				"weapon_scale": 1.05,
+				"vfx_row": 25.0,
+				"hit_shape": "LINE",
+				"phase_frames": {
+					"impact": [
+						2.0,
+						3.0
+					],
+					"prep": [
+						0.0,
+						1.0
+					],
+					"recovery": [
+						4.0,
+						5.0
+					]
+				},
+				"weapon_offset": [
+					10.0,
+					-2.0
+				],
+				"impact_offset": [
+					70.0,
+					0.0
+				],
+				"shake": 0.25,
+				"color_core": [
+					0.5,
+					0.850000023841858,
+					1.0,
+					1.0
+				],
+				"color_edge": [
+					0.180000007152557,
+					0.360000014305115,
+					1.0,
+					1.0
+				],
+				"crit_chance_pct": 4.0,
+				"axis": "vertical",
+				"pierce": 0,
+				"block": 0.0,
+				"lifesteal_pct": 0.0,
+				"orbit_path_caps": {
+					"horizontal_radius": 96.0,
+					"range_upgrade_cap_pct": 30.0,
+					"vertical_range": 560.0
+				},
+				"orbit_archetype": "magic_cast"
+			}
+		},
+		{
+			"weapon_id": "round_shield",
+			"axis": "horizontal",
+			"category": "shield",
+			"damage_family": "melee",
+			"label_key": "item.weapon.round_shield.name",
+			"motion_role": "shield_guard",
+			"base_axis": "vertical",
+			"weapon_texture": "./project/assets/combat/vfx/weapons/attack/shields/round_shield_attack_v02.png",
+			"attack_texture": "./project/assets/combat/vfx/weapons/attack/shields/round_shield_attack_v02.png",
+			"projectile_texture": "",
+			"orbit": {
+				"len": 68.0,
+				"scale": 1.09,
+				"visual_span": 44.0,
+				"grip_point": [
+					0.5,
+					0.68
+				],
+				"flight_center": [
+					0.5,
+					0.496
+				],
+				"tip_point": [
+					0.5,
+					0.18
+				],
+				"block_radius": 22.0
+			},
+			"identity": {},
+			"combo": {
+				"bounce_pause": 0.025,
+				"catch_duration": 0.08,
+				"cone": 0.72,
+				"cooldown": 1.01,
+				"curve_height": 16.0,
+				"equipment_pose": "shield_guard_arc",
+				"flight_speed": 860.0,
+				"hit_power": 0.495,
+				"impact": 24.0,
+				"knockback": 660.8,
+				"life": 0.26,
+				"range": 66.24,
+				"reach": 58.0,
+				"recoil": 18.0,
+				"return_speed_mul": 1.5,
+				"shield_flight_path": "round_arc",
+				"spin_speed": 18.0,
+				"strength": 0.86,
+				"stun": 0.14,
+				"target_cap": 1.0,
+				"vfx_mode": "slash",
+				"windup": -24.0,
+				"damage": 4.292352,
+				"hit_stop": 0.03,
+				"vfx_scale": 0.85,
+				"vfx_speed": 0.95,
+				"particle_count": 0.0,
+				"ring_layers": 0.0,
+				"weapon_rotation_deg": 90.0,
+				"weapon_arc_scale": 0.34,
+				"weapon_scale": 1.0,
+				"vfx_row": 26.0,
+				"hit_shape": "ARC",
+				"phase_frames": {
+					"impact": [
+						2.0,
+						3.0
+					],
+					"prep": [
+						0.0,
+						1.0
+					],
+					"recovery": [
+						4.0,
+						5.0
+					]
+				},
+				"weapon_offset": [
+					0.0,
+					0.0
+				],
+				"impact_offset": [
+					30.0,
+					0.0
+				],
+				"trajectory": {
+					"hit": {
+						"kind": "swept_circle",
+						"radius": 26.0
+					},
+					"kind": "polyline",
+					"samples": [
+						{
+							"id": "p00",
+							"position": [
+								0.1,
+								-0.52
+							],
+							"rotation_deg": 0.0,
+							"t": 0.0
+						},
+						{
+							"id": "p01",
+							"position": [
+								0.38,
+								-0.38
+							],
+							"rotation_deg": 0.0,
+							"t": 0.14
+						},
+						{
+							"id": "p02",
+							"position": [
+								0.52,
+								-0.06
+							],
+							"rotation_deg": 0.0,
+							"t": 0.28
+						},
+						{
+							"id": "p03",
+							"position": [
+								0.38,
+								0.34
+							],
+							"rotation_deg": 0.0,
+							"t": 0.42
+						},
+						{
+							"id": "p04",
+							"position": [
+								0.08,
+								0.52
+							],
+							"rotation_deg": 0.0,
+							"t": 0.56
+						},
+						{
+							"id": "p05",
+							"position": [
+								-0.1,
+								0.3
+							],
+							"rotation_deg": 0.0,
+							"t": 0.7
+						},
+						{
+							"id": "p06",
+							"position": [
+								-0.12,
+								-0.12
+							],
+							"rotation_deg": 0.0,
+							"t": 0.82
+						},
+						{
+							"id": "p07",
+							"position": [
+								0.1,
+								-0.52
+							],
+							"rotation_deg": 0.0,
+							"t": 1.0
+						}
+					],
+					"space": "path_normalized"
+				},
+				"shake": 0.55,
+				"color_core": [
+					1.0,
+					0.819999992847443,
+					0.180000007152557,
+					1.0
+				],
+				"color_edge": [
+					0.800000011920929,
+					0.449999988079071,
+					0.0799999982118607,
+					1.0
+				],
+				"axis": "horizontal",
+				"crit_chance_pct": 0.0,
+				"pierce": 0,
+				"block": 0.0,
+				"lifesteal_pct": 0.0,
+				"orbit_path_caps": {},
+				"orbit_archetype": "shield_guard_sweep"
+			}
+		},
+		{
+			"weapon_id": "round_shield",
+			"axis": "vertical",
+			"category": "shield",
+			"damage_family": "melee",
+			"label_key": "item.weapon.round_shield.name",
+			"motion_role": "shield_guard",
+			"base_axis": "vertical",
+			"weapon_texture": "./project/assets/combat/vfx/weapons/attack/shields/round_shield_attack_v02.png",
+			"attack_texture": "./project/assets/combat/vfx/weapons/attack/shields/round_shield_attack_v02.png",
+			"projectile_texture": "",
+			"orbit": {
+				"len": 68.0,
+				"scale": 1.09,
+				"visual_span": 44.0,
+				"grip_point": [
+					0.5,
+					0.68
+				],
+				"flight_center": [
+					0.5,
+					0.496
+				],
+				"tip_point": [
+					0.5,
+					0.18
+				],
+				"block_radius": 22.0
+			},
+			"identity": {},
+			"combo": {
+				"bounce_pause": 0.025,
+				"catch_duration": 0.08,
+				"cone": 0.46,
+				"cooldown": 1.0908,
+				"curve_height": 16.0,
+				"equipment_pose": "shield_boomerang_throw",
+				"flight_speed": 860.0,
+				"hit_power": 0.728,
+				"impact": 8.0,
+				"knockback": 716.8,
+				"life": 0.3,
+				"range": 106.72,
+				"reach": 76.0,
+				"recoil": 18.0,
+				"return_speed_mul": 1.5,
+				"shield_flight_path": "round_arc",
+				"spin_speed": 18.0,
+				"strength": 0.86,
+				"stun": 0.14,
+				"target_cap": 3.0,
+				"vfx_mode": "slash",
+				"windup": -8.0,
+				"damage": 6.55776,
+				"hit_stop": 0.04,
+				"vfx_scale": 0.9,
+				"vfx_speed": 1.05,
+				"particle_count": 0.0,
+				"ring_layers": 0.0,
+				"weapon_rotation_deg": 0.0,
+				"weapon_arc_scale": 0.16,
+				"weapon_scale": 1.05,
+				"vfx_row": 27.0,
+				"hit_shape": "CHARGE_LINE",
+				"phase_frames": {
+					"impact": [
+						2.0,
+						3.0
+					],
+					"prep": [
+						0.0,
+						1.0
+					],
+					"recovery": [
+						4.0,
+						5.0
+					]
+				},
+				"weapon_offset": [
+					10.0,
+					0.0
+				],
+				"impact_offset": [
+					64.0,
+					0.0
+				],
+				"shake": 0.65,
+				"color_core": [
+					1.0,
+					0.819999992847443,
+					0.180000007152557,
+					1.0
+				],
+				"color_edge": [
+					0.800000011920929,
+					0.449999988079071,
+					0.0799999982118607,
+					1.0
+				],
+				"axis": "vertical",
+				"crit_chance_pct": 0.0,
+				"pierce": 0,
+				"block": 0.0,
+				"lifesteal_pct": 0.0,
+				"orbit_path_caps": {},
+				"orbit_archetype": "shield_ricochet"
+			}
+		},
+		{
+			"weapon_id": "kite_shield",
+			"axis": "horizontal",
+			"category": "shield",
+			"damage_family": "melee",
+			"label_key": "item.weapon.kite_shield.name",
+			"motion_role": "shield_guard",
+			"base_axis": "vertical",
+			"weapon_texture": "./project/assets/combat/vfx/weapons/attack/shields/kite_shield_attack_v02.png",
+			"attack_texture": "./project/assets/combat/vfx/weapons/attack/shields/kite_shield_attack_v02.png",
+			"projectile_texture": "",
+			"orbit": {
+				"len": 72.0,
+				"scale": 0.82,
+				"visual_span": 80.0,
+				"grip_point": [
+					0.5,
+					0.7
+				],
+				"flight_center": [
+					0.499,
+					0.482
+				],
+				"tip_point": [
+					0.5,
+					0.16
+				],
+				"block_radius": 30.0
+			},
+			"identity": {},
+			"combo": {
+				"bounce_pause": 0.05,
+				"catch_duration": 0.13,
+				"cone": 0.72,
+				"cooldown": 1.2,
+				"curve_height": 28.0,
+				"equipment_pose": "shield_guard_arc",
+				"flight_speed": 650.0,
+				"hit_power": 0.585,
+				"impact": 24.0,
+				"knockback": 778.8,
+				"life": 0.28,
+				"range": 69.12,
+				"reach": 62.0,
+				"recoil": 22.0,
+				"return_speed_mul": 1.2,
+				"shield_flight_path": "kite_weave",
+				"spin_speed": 14.0,
+				"strength": 0.96,
+				"stun": 0.18,
+				"target_cap": 1.0,
+				"vfx_mode": "slash",
+				"windup": -24.0,
+				"damage": 4.928256,
+				"hit_stop": 0.04,
+				"vfx_scale": 0.95,
+				"vfx_speed": 0.9,
+				"particle_count": 0.0,
+				"ring_layers": 0.0,
+				"weapon_rotation_deg": 90.0,
+				"weapon_arc_scale": 0.36,
+				"weapon_scale": 1.12,
+				"vfx_row": 28.0,
+				"hit_shape": "ARC",
+				"phase_frames": {
+					"impact": [
+						2.0,
+						3.0
+					],
+					"prep": [
+						0.0,
+						1.0
+					],
+					"recovery": [
+						4.0,
+						5.0
+					]
+				},
+				"weapon_offset": [
+					0.0,
+					0.0
+				],
+				"impact_offset": [
+					34.0,
+					0.0
+				],
+				"trajectory": {
+					"hit": {
+						"kind": "swept_circle",
+						"radius": 30.0
+					},
+					"kind": "polyline",
+					"samples": [
+						{
+							"id": "p00",
+							"position": [
+								0.12,
+								-0.12
+							],
+							"rotation_deg": 0.0,
+							"t": 0.0
+						},
+						{
+							"id": "p01",
+							"position": [
+								0.05,
+								-0.18
+							],
+							"rotation_deg": 0.0,
+							"t": 0.14
+						},
+						{
+							"id": "p02",
+							"position": [
+								0.52,
+								-0.08
+							],
+							"rotation_deg": 0.0,
+							"t": 0.3
+						},
+						{
+							"id": "p03",
+							"position": [
+								0.82,
+								0.02
+							],
+							"rotation_deg": 0.0,
+							"t": 0.42
+						},
+						{
+							"id": "p04",
+							"position": [
+								0.78,
+								0.12
+							],
+							"rotation_deg": 0.0,
+							"t": 0.54
+						},
+						{
+							"id": "p05",
+							"position": [
+								0.42,
+								0.14
+							],
+							"rotation_deg": 0.0,
+							"t": 0.72
+						},
+						{
+							"id": "p06",
+							"position": [
+								0.18,
+								0.02
+							],
+							"rotation_deg": 0.0,
+							"t": 0.88
+						},
+						{
+							"id": "p07",
+							"position": [
+								0.12,
+								-0.12
+							],
+							"rotation_deg": 0.0,
+							"t": 1.0
+						}
+					],
+					"space": "path_normalized"
+				},
+				"shake": 0.65,
+				"color_core": [
+					1.0,
+					0.819999992847443,
+					0.180000007152557,
+					1.0
+				],
+				"color_edge": [
+					0.800000011920929,
+					0.449999988079071,
+					0.0799999982118607,
+					1.0
+				],
+				"axis": "horizontal",
+				"crit_chance_pct": 0.0,
+				"pierce": 0,
+				"block": 0.0,
+				"lifesteal_pct": 0.0,
+				"orbit_path_caps": {},
+				"orbit_archetype": "shield_guard_sweep"
+			}
+		},
+		{
+			"weapon_id": "kite_shield",
+			"axis": "vertical",
+			"category": "shield",
+			"damage_family": "melee",
+			"label_key": "item.weapon.kite_shield.name",
+			"motion_role": "shield_guard",
+			"base_axis": "vertical",
+			"weapon_texture": "./project/assets/combat/vfx/weapons/attack/shields/kite_shield_attack_v02.png",
+			"attack_texture": "./project/assets/combat/vfx/weapons/attack/shields/kite_shield_attack_v02.png",
+			"projectile_texture": "",
+			"orbit": {
+				"len": 72.0,
+				"scale": 0.82,
+				"visual_span": 80.0,
+				"grip_point": [
+					0.5,
+					0.7
+				],
+				"flight_center": [
+					0.499,
+					0.482
+				],
+				"tip_point": [
+					0.5,
+					0.16
+				],
+				"block_radius": 30.0
+			},
+			"identity": {},
+			"combo": {
+				"bounce_pause": 0.05,
+				"catch_duration": 0.13,
+				"cone": 0.5,
+				"cooldown": 1.296,
+				"curve_height": 28.0,
+				"equipment_pose": "shield_boomerang_throw",
+				"flight_speed": 650.0,
+				"hit_power": 0.8736,
+				"impact": 8.0,
+				"knockback": 844.8,
+				"life": 0.32,
+				"range": 111.36,
+				"reach": 80.0,
+				"recoil": 22.0,
+				"return_speed_mul": 1.2,
+				"shield_flight_path": "kite_weave",
+				"spin_speed": 14.0,
+				"strength": 0.96,
+				"stun": 0.18,
+				"target_cap": 2.0,
+				"vfx_mode": "slash",
+				"windup": -8.0,
+				"damage": 7.52928,
+				"hit_stop": 0.04,
+				"vfx_scale": 1.0,
+				"vfx_speed": 1.0,
+				"particle_count": 0.0,
+				"ring_layers": 0.0,
+				"weapon_rotation_deg": 0.0,
+				"weapon_arc_scale": 0.16,
+				"weapon_scale": 1.18,
+				"vfx_row": 29.0,
+				"hit_shape": "CHARGE_LINE",
+				"phase_frames": {
+					"impact": [
+						2.0,
+						3.0
+					],
+					"prep": [
+						0.0,
+						1.0
+					],
+					"recovery": [
+						4.0,
+						5.0
+					]
+				},
+				"weapon_offset": [
+					12.0,
+					0.0
+				],
+				"impact_offset": [
+					72.0,
+					0.0
+				],
+				"shake": 0.78,
+				"color_core": [
+					1.0,
+					0.819999992847443,
+					0.180000007152557,
+					1.0
+				],
+				"color_edge": [
+					0.800000011920929,
+					0.449999988079071,
+					0.0799999982118607,
+					1.0
+				],
+				"axis": "vertical",
+				"crit_chance_pct": 0.0,
+				"pierce": 0,
+				"block": 0.0,
+				"lifesteal_pct": 0.0,
+				"orbit_path_caps": {},
+				"orbit_archetype": "shield_ricochet"
+			}
+		},
+		{
+			"weapon_id": "tower_shield",
+			"axis": "horizontal",
+			"category": "shield",
+			"damage_family": "melee",
+			"label_key": "item.weapon.tower_shield.name",
+			"motion_role": "shield_guard",
+			"base_axis": "vertical",
+			"weapon_texture": "./project/assets/combat/vfx/weapons/attack/shields/tower_shield_attack_v02.png",
+			"attack_texture": "./project/assets/combat/vfx/weapons/attack/shields/tower_shield_attack_v02.png",
+			"projectile_texture": "",
+			"orbit": {
+				"len": 78.0,
+				"scale": 0.95,
+				"visual_span": 96.0,
+				"grip_point": [
+					0.5,
+					0.72
+				],
+				"flight_center": [
+					0.498,
+					0.498
+				],
+				"tip_point": [
+					0.5,
+					0.14
+				],
+				"block_radius": 42.0
+			},
+			"identity": {},
+			"combo": {
+				"bounce_pause": 1.0,
+				"catch_duration": 0.2,
+				"cone": 0.72,
+				"cooldown": 1.46,
+				"curve_height": 40.0,
+				"equipment_pose": "shield_guard_arc",
+				"flight_speed": 470.0,
+				"hit_power": 0.72,
+				"impact": 24.0,
+				"impact_damage_mul": 0.5,
+				"impact_radius": 56.0,
+				"impact_vfx_mode": "slam",
+				"knockback": 967.6,
+				"life": 0.32,
+				"range": 74.88,
+				"reach": 68.0,
+				"recoil": 28.0,
+				"return_speed_mul": 0.5,
+				"shield_flight_path": "tower_battering",
+				"spin_speed": 10.0,
+				"strength": 1.08,
+				"stun": 0.24,
+				"target_cap": 1.0,
+				"vfx_mode": "slash",
+				"windup": -24.0,
+				"damage": 5.484672,
+				"hit_stop": 0.04,
+				"vfx_scale": 1.05,
+				"vfx_speed": 0.85,
+				"particle_count": 0.0,
+				"ring_layers": 0.0,
+				"weapon_rotation_deg": 90.0,
+				"weapon_arc_scale": 0.38,
+				"weapon_scale": 1.28,
+				"vfx_row": 30.0,
+				"hit_shape": "ARC",
+				"phase_frames": {
+					"impact": [
+						2.0,
+						3.0
+					],
+					"prep": [
+						0.0,
+						1.0
+					],
+					"recovery": [
+						4.0,
+						5.0
+					]
+				},
+				"weapon_offset": [
+					0.0,
+					0.0
+				],
+				"impact_offset": [
+					38.0,
+					0.0
+				],
+				"trajectory": {
+					"hit": {
+						"kind": "swept_circle",
+						"radius": 36.0
+					},
+					"kind": "polyline",
+					"samples": [
+						{
+							"id": "p00",
+							"position": [
+								0.1,
+								-0.72
+							],
+							"rotation_deg": 0.0,
+							"t": 0.0
+						},
+						{
+							"id": "p01",
+							"position": [
+								0.14,
+								-0.4
+							],
+							"rotation_deg": 0.0,
+							"t": 0.16
+						},
+						{
+							"id": "p02",
+							"position": [
+								0.16,
+								0.0
+							],
+							"rotation_deg": 0.0,
+							"t": 0.32
+						},
+						{
+							"id": "p03",
+							"position": [
+								0.14,
+								0.4
+							],
+							"rotation_deg": 0.0,
+							"t": 0.48
+						},
+						{
+							"id": "p04",
+							"position": [
+								0.1,
+								0.72
+							],
+							"rotation_deg": 0.0,
+							"t": 0.62
+						},
+						{
+							"id": "p05",
+							"position": [
+								0.12,
+								0.28
+							],
+							"rotation_deg": 0.0,
+							"t": 0.76
+						},
+						{
+							"id": "p06",
+							"position": [
+								0.12,
+								-0.3
+							],
+							"rotation_deg": 0.0,
+							"t": 0.9
+						},
+						{
+							"id": "p07",
+							"position": [
+								0.1,
+								-0.72
+							],
+							"rotation_deg": 0.0,
+							"t": 1.0
+						}
+					],
+					"space": "path_normalized"
+				},
+				"shake": 0.8,
+				"color_core": [
+					1.0,
+					0.819999992847443,
+					0.180000007152557,
+					1.0
+				],
+				"color_edge": [
+					0.800000011920929,
+					0.449999988079071,
+					0.0799999982118607,
+					1.0
+				],
+				"axis": "horizontal",
+				"crit_chance_pct": 0.0,
+				"pierce": 0,
+				"block": 0.0,
+				"lifesteal_pct": 0.0,
+				"orbit_path_caps": {},
+				"orbit_archetype": "shield_guard_sweep"
+			}
+		},
+		{
+			"weapon_id": "tower_shield",
+			"axis": "vertical",
+			"category": "shield",
+			"damage_family": "melee",
+			"label_key": "item.weapon.tower_shield.name",
+			"motion_role": "shield_guard",
+			"base_axis": "vertical",
+			"weapon_texture": "./project/assets/combat/vfx/weapons/attack/shields/tower_shield_attack_v02.png",
+			"attack_texture": "./project/assets/combat/vfx/weapons/attack/shields/tower_shield_attack_v02.png",
+			"projectile_texture": "",
+			"orbit": {
+				"len": 78.0,
+				"scale": 0.95,
+				"visual_span": 96.0,
+				"grip_point": [
+					0.5,
+					0.72
+				],
+				"flight_center": [
+					0.498,
+					0.498
+				],
+				"tip_point": [
+					0.5,
+					0.14
+				],
+				"block_radius": 42.0
+			},
+			"identity": {},
+			"combo": {
+				"bounce_pause": 1.0,
+				"catch_duration": 0.2,
+				"cone": 0.56,
+				"cooldown": 1.5768,
+				"curve_height": 40.0,
+				"equipment_pose": "shield_boomerang_throw",
+				"flight_speed": 470.0,
+				"hit_power": 1.064,
+				"impact": 8.0,
+				"impact_damage_mul": 0.5,
+				"impact_radius": 56.0,
+				"impact_vfx_mode": "slam",
+				"knockback": 1049.6,
+				"life": 0.36,
+				"range": 120.64,
+				"reach": 86.0,
+				"recoil": 28.0,
+				"return_speed_mul": 0.5,
+				"shield_flight_path": "tower_battering",
+				"spin_speed": 10.0,
+				"strength": 1.08,
+				"stun": 0.24,
+				"target_cap": 1.0,
+				"vfx_mode": "slash",
+				"windup": -8.0,
+				"damage": 8.37936,
+				"hit_stop": 0.05,
+				"vfx_scale": 1.1,
+				"vfx_speed": 0.95,
+				"particle_count": 0.0,
+				"ring_layers": 0.0,
+				"weapon_rotation_deg": 0.0,
+				"weapon_arc_scale": 0.16,
+				"weapon_scale": 1.32,
+				"vfx_row": 31.0,
+				"hit_shape": "CHARGE_LINE",
+				"phase_frames": {
+					"impact": [
+						2.0,
+						3.0
+					],
+					"prep": [
+						0.0,
+						1.0
+					],
+					"recovery": [
+						4.0,
+						5.0
+					]
+				},
+				"weapon_offset": [
+					14.0,
+					0.0
+				],
+				"impact_offset": [
+					82.0,
+					0.0
+				],
+				"shake": 0.95,
+				"color_core": [
+					1.0,
+					0.819999992847443,
+					0.180000007152557,
+					1.0
+				],
+				"color_edge": [
+					0.800000011920929,
+					0.449999988079071,
+					0.0799999982118607,
+					1.0
+				],
+				"axis": "vertical",
+				"crit_chance_pct": 0.0,
+				"pierce": 0,
+				"block": 0.0,
+				"lifesteal_pct": 0.0,
+				"orbit_path_caps": {},
+				"orbit_archetype": "shield_ricochet"
+			}
+		},
+		{
+			"weapon_id": "staff",
+			"axis": "horizontal",
+			"category": "magic",
+			"damage_family": "magic",
+			"label_key": "item.weapon.staff.name",
+			"motion_role": "cast",
+			"base_axis": "vertical",
+			"weapon_texture": "./project/assets/ui/backpack/items/class_special_weapons/staff_1x3.png",
+			"attack_texture": "./project/assets/combat/vfx/weapons/projectiles/magic/staff_rune_bolt_1x4_v01.png",
+			"projectile_texture": "./project/assets/combat/vfx/weapons/projectiles/magic/staff_rune_bolt_1x4_v01.png",
+			"orbit": {
+				"len": 110.0,
+				"scale": 0.86,
+				"grip_point": [
+					0.5,
+					0.88
+				],
+				"tip_point": [
+					0.5,
+					0.05
+				]
+			},
+			"identity": {
+				"chassis": "arcane_focus",
+				"delivery": "ground_area",
+				"fantasy": "느리지만 큰 마력 방출",
+				"forbidden_traits": [
+					"rapid_fire",
+					"return_hit"
+				],
+				"hit_behaviors": [
+					"splash"
+				],
+				"horizontal_role": "넓은 원형 폭발을 한 번 생성",
+				"reference_family": "area_magic",
+				"same_target_policy": {
+					"mode": "shared_hit"
+				},
+				"strengths": [
+					"large_burst",
+					"area_damage"
+				],
+				"verbs": [
+					"channel",
+					"release"
+				],
+				"vertical_role": "좁은 전방선에 지연 폭발을 순차 생성",
+				"weaknesses": [
+					"slow_cast",
+					"no_return_hit"
+				]
+			},
+			"combo": {
+				"cone": 0.84,
+				"cooldown": 1.35,
+				"equipment_pose": "area_cast",
+				"guide_turn_rate": 15.0,
+				"hit_power": 0.28,
+				"impact": 6.0,
+				"knockback": 180.0,
+				"life": 0.22,
+				"projectile_count": 2.0,
+				"range": 190.0,
+				"reach": 118.0,
+				"recoil": 24.0,
+				"splash_radius": 54.0,
+				"spread": 0.0,
+				"strength": 1.08,
+				"stun": 0.08,
+				"target_cap": 4.0,
+				"vfx_mode": "projectile_orb",
+				"windup": -6.0,
+				"damage": 11.17248,
+				"hit_stop": 0.0,
+				"vfx_scale": 0.95,
+				"vfx_speed": 0.82,
+				"particle_count": 0.0,
+				"ring_layers": 0.0,
+				"weapon_rotation_deg": 0.0,
+				"weapon_arc_scale": 0.18,
+				"weapon_scale": 1.0,
+				"vfx_row": 24.0,
+				"hit_shape": "ARC",
+				"phase_frames": {
+					"impact": [
+						2.0,
+						3.0
+					],
+					"prep": [
+						0.0,
+						1.0
+					],
+					"recovery": [
+						4.0,
+						5.0
+					]
+				},
+				"weapon_offset": [
+					0.0,
+					-2.0
+				],
+				"impact_offset": [
+					42.0,
+					0.0
+				],
+				"shake": 0.28,
+				"color_core": [
+					0.5,
+					0.850000023841858,
+					1.0,
+					1.0
+				],
+				"color_edge": [
+					0.180000007152557,
+					0.360000014305115,
+					1.0,
+					1.0
+				],
+				"axis": "horizontal",
+				"crit_chance_pct": 0.0,
+				"pierce": 0,
+				"block": 0.0,
+				"lifesteal_pct": 0.0,
+				"orbit_path_caps": {
+					"horizontal_radius": 96.0,
+					"range_upgrade_cap_pct": 30.0,
+					"vertical_range": 560.0
+				},
+				"orbit_archetype": "magic_cast"
+			}
+		},
+		{
+			"weapon_id": "staff",
+			"axis": "vertical",
+			"category": "magic",
+			"damage_family": "magic",
+			"label_key": "item.weapon.staff.name",
+			"motion_role": "cast",
+			"base_axis": "vertical",
+			"weapon_texture": "./project/assets/ui/backpack/items/class_special_weapons/staff_1x3.png",
+			"attack_texture": "./project/assets/combat/vfx/weapons/projectiles/magic/staff_rune_bolt_1x4_v01.png",
+			"projectile_texture": "./project/assets/combat/vfx/weapons/projectiles/magic/staff_rune_bolt_1x4_v01.png",
+			"orbit": {
+				"len": 110.0,
+				"scale": 0.86,
+				"grip_point": [
+					0.5,
+					0.88
+				],
+				"tip_point": [
+					0.5,
+					0.05
+				]
+			},
+			"identity": {
+				"chassis": "arcane_focus",
+				"delivery": "ground_area",
+				"fantasy": "느리지만 큰 마력 방출",
+				"forbidden_traits": [
+					"rapid_fire",
+					"return_hit"
+				],
+				"hit_behaviors": [
+					"splash"
+				],
+				"horizontal_role": "넓은 원형 폭발을 한 번 생성",
+				"reference_family": "area_magic",
+				"same_target_policy": {
+					"mode": "shared_hit"
+				},
+				"strengths": [
+					"large_burst",
+					"area_damage"
+				],
+				"verbs": [
+					"channel",
+					"release"
+				],
+				"vertical_role": "좁은 전방선에 지연 폭발을 순차 생성",
+				"weaknesses": [
+					"slow_cast",
+					"no_return_hit"
+				]
+			},
+			"combo": {
+				"cone": 0.84,
+				"cooldown": 1.35,
+				"equipment_pose": "focused_cast",
+				"guide_turn_rate": 60.0,
+				"hit_power": 0.25,
+				"impact": 4.0,
+				"knockback": 180.0,
+				"life": 0.2,
+				"projectile_count": 1.0,
+				"range": 190.0,
+				"reach": 118.0,
+				"recoil": 24.0,
+				"splash_radius": 36.0,
+				"spread": 0.0,
+				"strength": 1.08,
+				"stun": 0.08,
+				"target_cap": 4.0,
+				"vfx_mode": "projectile_orb",
+				"windup": -4.0,
+				"damage": 14.08704,
+				"hit_stop": 0.0,
+				"vfx_scale": 1.05,
+				"vfx_speed": 0.9,
+				"particle_count": 0.0,
+				"ring_layers": 0.0,
+				"weapon_rotation_deg": 0.0,
+				"weapon_arc_scale": 0.08,
+				"weapon_scale": 1.05,
+				"vfx_row": 25.0,
+				"hit_shape": "LINE",
+				"phase_frames": {
+					"impact": [
+						2.0,
+						3.0
+					],
+					"prep": [
+						0.0,
+						1.0
+					],
+					"recovery": [
+						4.0,
+						5.0
+					]
+				},
+				"weapon_offset": [
+					10.0,
+					-2.0
+				],
+				"impact_offset": [
+					70.0,
+					0.0
+				],
+				"shake": 0.25,
+				"color_core": [
+					0.5,
+					0.850000023841858,
+					1.0,
+					1.0
+				],
+				"color_edge": [
+					0.180000007152557,
+					0.360000014305115,
+					1.0,
+					1.0
+				],
+				"crit_chance_pct": 4.0,
+				"axis": "vertical",
+				"pierce": 0,
+				"block": 0.0,
+				"lifesteal_pct": 0.0,
+				"orbit_path_caps": {
+					"horizontal_radius": 96.0,
+					"range_upgrade_cap_pct": 30.0,
+					"vertical_range": 560.0
+				},
+				"orbit_archetype": "magic_cast"
+			}
+		},
+		{
+			"weapon_id": "orb_focus",
+			"axis": "horizontal",
+			"category": "magic",
+			"damage_family": "magic",
+			"label_key": "item.weapon.orb_focus.name",
+			"motion_role": "cast",
+			"base_axis": "vertical",
+			"weapon_texture": "./project/assets/ui/backpack/items/class_special_weapons/orb_focus_2x2.png",
+			"attack_texture": "./project/assets/combat/vfx/weapons/projectiles/magic/orb_focus_pulse_1x4_v01.png",
+			"projectile_texture": "./project/assets/combat/vfx/weapons/projectiles/magic/orb_focus_pulse_1x4_v01.png",
+			"orbit": {
+				"len": 80.0,
+				"scale": 0.54,
+				"grip_point": [
+					0.5,
+					0.72
+				],
+				"tip_point": [
+					0.5,
+					0.12
+				]
+			},
+			"identity": {
+				"chassis": "arcane_focus",
+				"delivery": "orbit",
+				"fantasy": "사용자를 돌며 연쇄를 만드는 초점체",
+				"forbidden_traits": [
+					"large_splash",
+					"unbounded_rehit"
+				],
+				"hit_behaviors": [
+					"chain",
+					"return_hit"
+				],
+				"horizontal_role": "두 오브가 짧게 공전하며 주변 표적 연쇄",
+				"reference_family": "chain_magic",
+				"same_target_policy": {
+					"mode": "capped_multi",
+					"cap": 2.0
+				},
+				"strengths": [
+					"orbit_pressure",
+					"chain_targets"
+				],
+				"verbs": [
+					"orbit",
+					"chain"
+				],
+				"vertical_role": "한 오브가 전방 표적을 오래 추적한 뒤 복귀",
+				"weaknesses": [
+					"bounded_rehit",
+					"small_splash"
+				]
+			},
+			"combo": {
+				"cone": 0.84,
+				"cooldown": 1.05,
+				"equipment_pose": "area_cast",
+				"guide_turn_rate": 25.0,
+				"hit_power": 0.28,
+				"impact": 6.0,
+				"knockback": 170.0,
+				"life": 0.22,
+				"projectile_count": 2.0,
+				"range": 165.0,
+				"reach": 104.0,
+				"recoil": 18.0,
+				"splash_radius": 66.0,
+				"spread": 0.0,
+				"strength": 0.98,
+				"stun": 0.08,
+				"target_cap": 5.0,
+				"vfx_mode": "projectile_orb",
+				"windup": -6.0,
+				"damage": 8.531712,
+				"hit_stop": 0.0,
+				"vfx_scale": 0.95,
+				"vfx_speed": 0.82,
+				"particle_count": 0.0,
+				"ring_layers": 0.0,
+				"weapon_rotation_deg": 0.0,
+				"weapon_arc_scale": 0.18,
+				"weapon_scale": 1.0,
+				"vfx_row": 24.0,
+				"hit_shape": "ARC",
+				"phase_frames": {
+					"impact": [
+						2.0,
+						3.0
+					],
+					"prep": [
+						0.0,
+						1.0
+					],
+					"recovery": [
+						4.0,
+						5.0
+					]
+				},
+				"weapon_offset": [
+					0.0,
+					-2.0
+				],
+				"impact_offset": [
+					42.0,
+					0.0
+				],
+				"shake": 0.28,
+				"color_core": [
+					0.5,
+					0.850000023841858,
+					1.0,
+					1.0
+				],
+				"color_edge": [
+					0.180000007152557,
+					0.360000014305115,
+					1.0,
+					1.0
+				],
+				"axis": "horizontal",
+				"crit_chance_pct": 0.0,
+				"pierce": 0,
+				"block": 0.0,
+				"lifesteal_pct": 0.0,
+				"orbit_path_caps": {
+					"horizontal_radius": 96.0,
+					"range_upgrade_cap_pct": 30.0,
+					"vertical_range": 560.0
+				},
+				"orbit_archetype": "magic_cast"
+			}
+		},
+		{
+			"weapon_id": "orb_focus",
+			"axis": "vertical",
+			"category": "magic",
+			"damage_family": "magic",
+			"label_key": "item.weapon.orb_focus.name",
+			"motion_role": "cast",
+			"base_axis": "vertical",
+			"weapon_texture": "./project/assets/ui/backpack/items/class_special_weapons/orb_focus_2x2.png",
+			"attack_texture": "./project/assets/combat/vfx/weapons/projectiles/magic/orb_focus_pulse_1x4_v01.png",
+			"projectile_texture": "./project/assets/combat/vfx/weapons/projectiles/magic/orb_focus_pulse_1x4_v01.png",
+			"orbit": {
+				"len": 80.0,
+				"scale": 0.54,
+				"grip_point": [
+					0.5,
+					0.72
+				],
+				"tip_point": [
+					0.5,
+					0.12
+				]
+			},
+			"identity": {
+				"chassis": "arcane_focus",
+				"delivery": "orbit",
+				"fantasy": "사용자를 돌며 연쇄를 만드는 초점체",
+				"forbidden_traits": [
+					"large_splash",
+					"unbounded_rehit"
+				],
+				"hit_behaviors": [
+					"chain",
+					"return_hit"
+				],
+				"horizontal_role": "두 오브가 짧게 공전하며 주변 표적 연쇄",
+				"reference_family": "chain_magic",
+				"same_target_policy": {
+					"mode": "capped_multi",
+					"cap": 2.0
+				},
+				"strengths": [
+					"orbit_pressure",
+					"chain_targets"
+				],
+				"verbs": [
+					"orbit",
+					"chain"
+				],
+				"vertical_role": "한 오브가 전방 표적을 오래 추적한 뒤 복귀",
+				"weaknesses": [
+					"bounded_rehit",
+					"small_splash"
+				]
+			},
+			"combo": {
+				"cone": 0.84,
+				"cooldown": 1.05,
+				"equipment_pose": "focused_cast",
+				"guide_turn_rate": 70.0,
+				"hit_power": 0.25,
+				"impact": 4.0,
+				"knockback": 170.0,
+				"life": 0.2,
+				"projectile_count": 1.0,
+				"range": 165.0,
+				"reach": 104.0,
+				"recoil": 18.0,
+				"splash_radius": 48.0,
+				"spread": 0.0,
+				"strength": 0.98,
+				"stun": 0.08,
+				"target_cap": 5.0,
+				"vfx_mode": "projectile_orb",
+				"windup": -4.0,
+				"damage": 10.757376,
+				"hit_stop": 0.0,
+				"vfx_scale": 1.05,
+				"vfx_speed": 0.9,
+				"particle_count": 0.0,
+				"ring_layers": 0.0,
+				"weapon_rotation_deg": 0.0,
+				"weapon_arc_scale": 0.08,
+				"weapon_scale": 1.05,
+				"vfx_row": 25.0,
+				"hit_shape": "LINE",
+				"phase_frames": {
+					"impact": [
+						2.0,
+						3.0
+					],
+					"prep": [
+						0.0,
+						1.0
+					],
+					"recovery": [
+						4.0,
+						5.0
+					]
+				},
+				"weapon_offset": [
+					10.0,
+					-2.0
+				],
+				"impact_offset": [
+					70.0,
+					0.0
+				],
+				"shake": 0.25,
+				"color_core": [
+					0.5,
+					0.850000023841858,
+					1.0,
+					1.0
+				],
+				"color_edge": [
+					0.180000007152557,
+					0.360000014305115,
+					1.0,
+					1.0
+				],
+				"crit_chance_pct": 4.0,
+				"axis": "vertical",
+				"pierce": 0,
+				"block": 0.0,
+				"lifesteal_pct": 0.0,
+				"orbit_path_caps": {
+					"horizontal_radius": 96.0,
+					"range_upgrade_cap_pct": 30.0,
+					"vertical_range": 560.0
+				},
+				"orbit_archetype": "magic_cast"
+			}
+		},
+		{
+			"weapon_id": "spellbook",
+			"axis": "horizontal",
+			"category": "magic",
+			"damage_family": "magic",
+			"label_key": "item.weapon.spellbook.name",
+			"motion_role": "cast",
+			"base_axis": "vertical",
+			"weapon_texture": "./project/assets/ui/backpack/items/class_special_weapons/spellbook_2x2.png",
+			"attack_texture": "./project/assets/combat/vfx/runtime/player_meteor_6x2_v01.png",
+			"projectile_texture": "./project/assets/combat/vfx/runtime/player_meteor_6x2_v01.png",
+			"orbit": {
+				"len": 78.0,
+				"scale": 0.54,
+				"grip_point": [
+					0.5,
+					0.72
+				],
+				"tip_point": [
+					0.5,
+					0.12
+				]
+			},
+			"identity": {
+				"chassis": "arcane_focus",
+				"delivery": "delayed_rune",
+				"fantasy": "미리 기록한 지연 룬",
+				"forbidden_traits": [
+					"instant_burst",
+					"return_hit"
+				],
+				"hit_behaviors": [
+					"splash"
+				],
+				"horizontal_role": "좌우 두 위치에 약한 지연 룬",
+				"reference_family": "delayed_magic",
+				"same_target_policy": {
+					"mode": "shared_hit"
+				},
+				"strengths": [
+					"prepared_area",
+					"delayed_burst"
+				],
+				"verbs": [
+					"inscribe",
+					"trigger"
+				],
+				"vertical_role": "전방 한 위치에 강한 다단계 봉인 룬",
+				"weaknesses": [
+					"delayed_activation",
+					"fixed_zone"
+				]
+			},
+			"combo": {
+				"cone": 0.78,
+				"cooldown": 1.15,
+				"equipment_pose": "area_cast",
+				"fall_height": 190.0,
+				"hit_power": 0.28,
+				"impact": 6.0,
+				"impact_atlas_rows": 2.0,
+				"impact_behavior": "area_burst",
+				"impact_damage_mul": 1.0,
+				"impact_frames": 6.0,
+				"impact_radius": 39.0,
+				"impact_row": 1.0,
+				"impact_spread": 96.0,
+				"impact_texture": "res://assets/combat/vfx/runtime/player_meteor_6x2_v01.png",
+				"impact_vfx_life": 0.34,
+				"impact_vfx_mode": "meteor_impact",
+				"knockback": 220.0,
+				"life": 0.22,
+				"projectile_count": 3.0,
+				"projectile_motion": "vertical_drop",
+				"projectile_radius": 14.0,
+				"projectile_speed": 620.0,
+				"range": 175.0,
+				"reach": 108.0,
+				"recoil": 8.0,
+				"spread": 0.0,
+				"strength": 1.0,
+				"stun": 0.1,
+				"target_cap": 6.0,
+				"vfx_mode": "projectile_orb",
+				"windup": -6.0,
+				"damage": 8.054784,
+				"hit_stop": 0.0,
+				"vfx_scale": 0.95,
+				"vfx_speed": 0.82,
+				"particle_count": 0.0,
+				"ring_layers": 0.0,
+				"weapon_rotation_deg": 0.0,
+				"weapon_arc_scale": 0.18,
+				"weapon_scale": 1.0,
+				"vfx_row": 24.0,
+				"hit_shape": "ARC",
+				"phase_frames": {
+					"impact": [
+						2.0,
+						3.0
+					],
+					"prep": [
+						0.0,
+						1.0
+					],
+					"recovery": [
+						4.0,
+						5.0
+					]
+				},
+				"weapon_offset": [
+					0.0,
+					-2.0
+				],
+				"impact_offset": [
+					42.0,
+					0.0
+				],
+				"shake": 0.28,
+				"color_core": [
+					0.5,
+					0.850000023841858,
+					1.0,
+					1.0
+				],
+				"color_edge": [
+					0.180000007152557,
+					0.360000014305115,
+					1.0,
+					1.0
+				],
+				"axis": "horizontal",
+				"crit_chance_pct": 0.0,
+				"pierce": 0,
+				"block": 0.0,
+				"lifesteal_pct": 0.0,
+				"orbit_path_caps": {
+					"horizontal_radius": 96.0,
+					"range_upgrade_cap_pct": 30.0,
+					"vertical_range": 560.0
+				},
+				"orbit_archetype": "magic_cast"
+			}
+		},
+		{
+			"weapon_id": "spellbook",
+			"axis": "vertical",
+			"category": "magic",
+			"damage_family": "magic",
+			"label_key": "item.weapon.spellbook.name",
+			"motion_role": "cast",
+			"base_axis": "vertical",
+			"weapon_texture": "./project/assets/ui/backpack/items/class_special_weapons/spellbook_2x2.png",
+			"attack_texture": "./project/assets/combat/vfx/runtime/player_meteor_6x2_v01.png",
+			"projectile_texture": "./project/assets/combat/vfx/runtime/player_meteor_6x2_v01.png",
+			"orbit": {
+				"len": 78.0,
+				"scale": 0.54,
+				"grip_point": [
+					0.5,
+					0.72
+				],
+				"tip_point": [
+					0.5,
+					0.12
+				]
+			},
+			"identity": {
+				"chassis": "arcane_focus",
+				"delivery": "delayed_rune",
+				"fantasy": "미리 기록한 지연 룬",
+				"forbidden_traits": [
+					"instant_burst",
+					"return_hit"
+				],
+				"hit_behaviors": [
+					"splash"
+				],
+				"horizontal_role": "좌우 두 위치에 약한 지연 룬",
+				"reference_family": "delayed_magic",
+				"same_target_policy": {
+					"mode": "shared_hit"
+				},
+				"strengths": [
+					"prepared_area",
+					"delayed_burst"
+				],
+				"verbs": [
+					"inscribe",
+					"trigger"
+				],
+				"vertical_role": "전방 한 위치에 강한 다단계 봉인 룬",
+				"weaknesses": [
+					"delayed_activation",
+					"fixed_zone"
+				]
+			},
+			"combo": {
+				"cone": 0.78,
+				"cooldown": 1.15,
+				"equipment_pose": "focused_cast",
+				"fall_height": 190.0,
+				"hit_power": 0.25,
+				"impact": 4.0,
+				"impact_atlas_rows": 2.0,
+				"impact_behavior": "area_burst",
+				"impact_damage_mul": 1.0,
+				"impact_frames": 6.0,
+				"impact_radius": 60.0,
+				"impact_row": 1.0,
+				"impact_spread": 0.0,
+				"impact_texture": "res://assets/combat/vfx/runtime/player_meteor_6x2_v01.png",
+				"impact_vfx_life": 0.34,
+				"impact_vfx_mode": "meteor_impact",
+				"knockback": 220.0,
+				"life": 0.2,
+				"projectile_count": 1.0,
+				"projectile_motion": "vertical_drop",
+				"projectile_radius": 14.0,
+				"projectile_speed": 620.0,
+				"range": 175.0,
+				"reach": 108.0,
+				"recoil": 8.0,
+				"spread": 0.0,
+				"strength": 1.0,
+				"stun": 0.1,
+				"target_cap": 6.0,
+				"vfx_mode": "projectile_orb",
+				"windup": -4.0,
+				"damage": 12.71808,
+				"hit_stop": 0.0,
+				"vfx_scale": 1.05,
+				"vfx_speed": 0.9,
+				"particle_count": 0.0,
+				"ring_layers": 0.0,
+				"weapon_rotation_deg": 0.0,
+				"weapon_arc_scale": 0.08,
+				"weapon_scale": 1.05,
+				"vfx_row": 25.0,
+				"hit_shape": "LINE",
+				"phase_frames": {
+					"impact": [
+						2.0,
+						3.0
+					],
+					"prep": [
+						0.0,
+						1.0
+					],
+					"recovery": [
+						4.0,
+						5.0
+					]
+				},
+				"weapon_offset": [
+					10.0,
+					-2.0
+				],
+				"impact_offset": [
+					70.0,
+					0.0
+				],
+				"shake": 0.25,
+				"color_core": [
+					0.5,
+					0.850000023841858,
+					1.0,
+					1.0
+				],
+				"color_edge": [
+					0.180000007152557,
+					0.360000014305115,
+					1.0,
+					1.0
+				],
+				"crit_chance_pct": 4.0,
+				"axis": "vertical",
+				"pierce": 0,
+				"block": 0.0,
+				"lifesteal_pct": 0.0,
+				"orbit_path_caps": {
+					"horizontal_radius": 96.0,
+					"range_upgrade_cap_pct": 30.0,
+					"vertical_range": 560.0
+				},
+				"orbit_archetype": "magic_cast"
+			}
+		},
+		{
+			"weapon_id": "relic_censer",
+			"axis": "horizontal",
+			"category": "ranged",
+			"damage_family": "magic",
+			"label_key": "item.weapon.relic_censer.name",
+			"motion_role": "throw",
+			"base_axis": "vertical",
+			"weapon_texture": "./project/assets/ui/backpack/items/class_special_weapons/relic_censer_1x2.png",
+			"attack_texture": "./project/assets/combat/vfx/runtime/player_holy_water_6x3_v01.png",
+			"projectile_texture": "./project/assets/combat/vfx/runtime/player_holy_water_6x3_v01.png",
+			"orbit": {
+				"len": 78.0,
+				"scale": 0.45,
+				"grip_point": [
+					0.5,
+					0.82
+				],
+				"tip_point": [
+					0.5,
+					0.1
+				]
+			},
+			"identity": {
+				"chassis": "vessel_zone",
+				"delivery": "ground_area",
+				"fantasy": "향 연기로 성역을 만드는 느린 의식 도구",
+				"forbidden_traits": [
+					"rapid_burst",
+					"high_pierce"
+				],
+				"hit_behaviors": [
+					"slow"
+				],
+				"horizontal_role": "주변을 스치는 넓고 짧은 향 연기 파동",
+				"reference_family": "support_zone",
+				"same_target_policy": {
+					"mode": "shared_hit"
+				},
+				"strengths": [
+					"wide_zone",
+					"slow_support"
+				],
+				"verbs": [
+					"swing",
+					"consecrate"
+				],
+				"vertical_role": "전방에 좁고 오래 남는 성역 흔적",
+				"weaknesses": [
+					"slow_ritual",
+					"low_pierce"
+				]
+			},
+			"combo": {
+				"area_atlas_rows": 3.0,
+				"area_duration": 2.56,
+				"area_fps": 8.0,
+				"area_frames": 6.0,
+				"area_radius": 47.6,
+				"area_row": 2.0,
+				"area_source_cap": 2.0,
+				"area_texture": "res://assets/combat/vfx/runtime/player_holy_water_6x3_v01.png",
+				"area_tick_damage_mul": 0.3,
+				"area_tick_interval": 0.5,
+				"cone": 0.76,
+				"cooldown": 1.25,
+				"equipment_pose": "fan_throw",
+				"hit_power": 0.28,
+				"impact": 6.0,
+				"impact_atlas_rows": 3.0,
+				"impact_behavior": "ground_pool",
+				"impact_damage_mul": 0.35,
+				"impact_frames": 6.0,
+				"impact_radius": 28.0,
+				"impact_row": 1.0,
+				"impact_texture": "res://assets/combat/vfx/runtime/player_holy_water_6x3_v01.png",
+				"impact_vfx_life": 0.3,
+				"impact_vfx_mode": "holy_water_shatter",
+				"knockback": 120.0,
+				"life": 0.22,
+				"lifesteal_pct": 1.0,
+				"projectile_count": 2.0,
+				"projectile_motion": "targeted_throw",
+				"projectile_radius": 12.0,
+				"projectile_speed": 440.0,
+				"range": 145.0,
+				"reach": 92.0,
+				"recoil": 10.0,
+				"spread": 20.0,
+				"strength": 0.88,
+				"stun": 0.08,
+				"target_cap": 8.0,
+				"vfx_mode": "projectile_orb",
+				"windup": -6.0,
+				"damage": 6.09408,
+				"hit_stop": 0.0,
+				"vfx_scale": 0.95,
+				"vfx_speed": 0.82,
+				"particle_count": 0.0,
+				"ring_layers": 0.0,
+				"weapon_rotation_deg": 0.0,
+				"weapon_arc_scale": 0.18,
+				"weapon_scale": 1.0,
+				"vfx_row": 24.0,
+				"hit_shape": "ARC",
+				"phase_frames": {
+					"impact": [
+						2.0,
+						3.0
+					],
+					"prep": [
+						0.0,
+						1.0
+					],
+					"recovery": [
+						4.0,
+						5.0
+					]
+				},
+				"weapon_offset": [
+					0.0,
+					-2.0
+				],
+				"impact_offset": [
+					42.0,
+					0.0
+				],
+				"shake": 0.28,
+				"color_core": [
+					0.5,
+					0.850000023841858,
+					1.0,
+					1.0
+				],
+				"color_edge": [
+					0.180000007152557,
+					0.360000014305115,
+					1.0,
+					1.0
+				],
+				"axis": "horizontal",
+				"crit_chance_pct": 0.0,
+				"pierce": 0,
+				"block": 0.0,
+				"orbit_path_caps": {
+					"horizontal_radius": 96.0,
+					"range_upgrade_cap_pct": 30.0,
+					"vertical_range": 560.0
+				},
+				"orbit_archetype": "magic_cast"
+			}
+		},
+		{
+			"weapon_id": "relic_censer",
+			"axis": "vertical",
+			"category": "ranged",
+			"damage_family": "magic",
+			"label_key": "item.weapon.relic_censer.name",
+			"motion_role": "throw",
+			"base_axis": "vertical",
+			"weapon_texture": "./project/assets/ui/backpack/items/class_special_weapons/relic_censer_1x2.png",
+			"attack_texture": "./project/assets/combat/vfx/runtime/player_holy_water_6x3_v01.png",
+			"projectile_texture": "./project/assets/combat/vfx/runtime/player_holy_water_6x3_v01.png",
+			"orbit": {
+				"len": 78.0,
+				"scale": 0.45,
+				"grip_point": [
+					0.5,
+					0.82
+				],
+				"tip_point": [
+					0.5,
+					0.1
+				]
+			},
+			"identity": {
+				"chassis": "vessel_zone",
+				"delivery": "ground_area",
+				"fantasy": "향 연기로 성역을 만드는 느린 의식 도구",
+				"forbidden_traits": [
+					"rapid_burst",
+					"high_pierce"
+				],
+				"hit_behaviors": [
+					"slow"
+				],
+				"horizontal_role": "주변을 스치는 넓고 짧은 향 연기 파동",
+				"reference_family": "support_zone",
+				"same_target_policy": {
+					"mode": "shared_hit"
+				},
+				"strengths": [
+					"wide_zone",
+					"slow_support"
+				],
+				"verbs": [
+					"swing",
+					"consecrate"
+				],
+				"vertical_role": "전방에 좁고 오래 남는 성역 흔적",
+				"weaknesses": [
+					"slow_ritual",
+					"low_pierce"
+				]
+			},
+			"combo": {
+				"area_atlas_rows": 3.0,
+				"area_duration": 3.2,
+				"area_fps": 8.0,
+				"area_frames": 6.0,
+				"area_radius": 34.0,
+				"area_row": 2.0,
+				"area_source_cap": 2.0,
+				"area_texture": "res://assets/combat/vfx/runtime/player_holy_water_6x3_v01.png",
+				"area_tick_damage_mul": 0.3,
+				"area_tick_interval": 0.5,
+				"cone": 0.76,
+				"cooldown": 1.25,
+				"equipment_pose": "focused_throw",
+				"hit_power": 0.25,
+				"impact": 4.0,
+				"impact_atlas_rows": 3.0,
+				"impact_behavior": "ground_pool",
+				"impact_damage_mul": 0.35,
+				"impact_frames": 6.0,
+				"impact_radius": 28.0,
+				"impact_row": 1.0,
+				"impact_texture": "res://assets/combat/vfx/runtime/player_holy_water_6x3_v01.png",
+				"impact_vfx_life": 0.3,
+				"impact_vfx_mode": "holy_water_shatter",
+				"knockback": 120.0,
+				"life": 0.2,
+				"lifesteal_pct": 1.0,
+				"projectile_count": 1.0,
+				"projectile_motion": "targeted_throw",
+				"projectile_radius": 12.0,
+				"projectile_speed": 440.0,
+				"range": 145.0,
+				"reach": 92.0,
+				"recoil": 10.0,
+				"spread": 0.0,
+				"strength": 0.88,
+				"stun": 0.08,
+				"target_cap": 8.0,
+				"vfx_mode": "projectile_orb",
+				"windup": -4.0,
+				"damage": 7.68384,
+				"hit_stop": 0.0,
+				"vfx_scale": 1.05,
+				"vfx_speed": 0.9,
+				"particle_count": 0.0,
+				"ring_layers": 0.0,
+				"weapon_rotation_deg": 0.0,
+				"weapon_arc_scale": 0.08,
+				"weapon_scale": 1.05,
+				"vfx_row": 25.0,
+				"hit_shape": "LINE",
+				"phase_frames": {
+					"impact": [
+						2.0,
+						3.0
+					],
+					"prep": [
+						0.0,
+						1.0
+					],
+					"recovery": [
+						4.0,
+						5.0
+					]
+				},
+				"weapon_offset": [
+					10.0,
+					-2.0
+				],
+				"impact_offset": [
+					70.0,
+					0.0
+				],
+				"shake": 0.25,
+				"color_core": [
+					0.5,
+					0.850000023841858,
+					1.0,
+					1.0
+				],
+				"color_edge": [
+					0.180000007152557,
+					0.360000014305115,
+					1.0,
+					1.0
+				],
+				"crit_chance_pct": 4.0,
+				"axis": "vertical",
+				"pierce": 0,
+				"block": 0.0,
+				"orbit_path_caps": {
+					"horizontal_radius": 96.0,
+					"range_upgrade_cap_pct": 30.0,
+					"vertical_range": 560.0
+				},
+				"orbit_archetype": "magic_cast"
+			}
+		},
+		{
+			"weapon_id": "coil_launcher",
+			"axis": "horizontal",
+			"category": "ranged",
+			"damage_family": "engineering",
+			"label_key": "item.weapon.coil_launcher.name",
+			"motion_role": "ranged_fire",
+			"base_axis": "vertical",
+			"weapon_texture": "./project/assets/ui/backpack/items/class_special_weapons/coil_launcher_2x3_l.png",
+			"attack_texture": "./project/assets/combat/vfx/weapons/projectiles/engineering/coil_launcher_slug_1x4_v02.png",
+			"projectile_texture": "./project/assets/combat/vfx/weapons/projectiles/engineering/coil_launcher_slug_1x4_v02.png",
+			"orbit": {
+				"len": 112.0,
+				"scale": 0.68,
+				"grip_point": [
+					0.5,
+					0.84
+				],
+				"tip_point": [
+					0.5,
+					0.06
+				]
+			},
+			"identity": {
+				"chassis": "crossbow",
+				"delivery": "direct_projectile",
+				"fantasy": "충전 전하를 방출하는 전자 발사기",
+				"forbidden_traits": [
+					"rapid_fire",
+					"large_splash"
+				],
+				"hit_behaviors": [
+					"limited_pierce",
+					"chain"
+				],
+				"horizontal_role": "중거리 충전 충격과 제한 방전",
+				"reference_family": "heavy_ranged",
+				"same_target_policy": {
+					"mode": "capped_multi",
+					"cap": 2.0
+				},
+				"strengths": [
+					"charged_impact",
+					"limited_chain"
+				],
+				"verbs": [
+					"charge",
+					"discharge"
+				],
+				"vertical_role": "긴 충전 뒤 좁은 레일 관통",
+				"weaknesses": [
+					"slow_charge",
+					"small_splash"
+				]
+			},
+			"combo": {
+				"cone": 0.94,
+				"cooldown": 1.7,
+				"equipment_pose": "bolt_spread",
+				"hit_power": 0.8,
+				"impact": 22.0,
+				"knockback": 420.0,
+				"life": 0.28,
+				"pierce": 2,
+				"projectile_count": 4.0,
+				"range": 121.0,
+				"reach": 152.0,
+				"recoil": 42.0,
+				"spread": 40.0,
+				"strength": 1.48,
+				"stun": 0.14,
+				"target_cap": 5.0,
+				"vfx_mode": "thrust",
+				"windup": -12.0,
+				"damage": 15.932928,
+				"hit_stop": 0.0,
+				"vfx_scale": 1.05,
+				"vfx_speed": 1.2,
+				"particle_count": 0.0,
+				"ring_layers": 0.0,
+				"weapon_rotation_deg": 0.0,
+				"weapon_arc_scale": 0.0,
+				"weapon_scale": 1.0,
+				"vfx_row": 20.0,
+				"hit_shape": "LINE",
+				"phase_frames": {
+					"impact": [
+						2.0,
+						3.0
+					],
+					"prep": [
+						0.0,
+						1.0
+					],
+					"recovery": [
+						4.0,
+						5.0
+					]
+				},
+				"weapon_offset": [
+					10.0,
+					0.0
+				],
+				"impact_offset": [
+					96.0,
+					0.0
+				],
+				"shake": 0.8,
+				"color_core": [
+					0.819999992847443,
+					0.980000019073486,
+					1.0,
+					1.0
+				],
+				"color_edge": [
+					0.119999997317791,
+					0.579999983310699,
+					1.0,
+					1.0
+				],
+				"projectile_radius": 2.0,
+				"axis": "horizontal",
+				"crit_chance_pct": 0.0,
+				"block": 0.0,
+				"lifesteal_pct": 0.0,
+				"orbit_path_caps": {
+					"horizontal_range": 520.0,
+					"range_upgrade_cap_pct": 30.0,
+					"vertical_range": 640.0
+				},
+				"orbit_archetype": "bow_crossbow"
+			}
+		},
+		{
+			"weapon_id": "coil_launcher",
+			"axis": "vertical",
+			"category": "ranged",
+			"damage_family": "engineering",
+			"label_key": "item.weapon.coil_launcher.name",
+			"motion_role": "ranged_fire",
+			"base_axis": "vertical",
+			"weapon_texture": "./project/assets/ui/backpack/items/class_special_weapons/coil_launcher_2x3_l.png",
+			"attack_texture": "./project/assets/combat/vfx/weapons/projectiles/engineering/coil_launcher_slug_1x4_v02.png",
+			"projectile_texture": "./project/assets/combat/vfx/weapons/projectiles/engineering/coil_launcher_slug_1x4_v02.png",
+			"orbit": {
+				"len": 112.0,
+				"scale": 0.68,
+				"grip_point": [
+					0.5,
+					0.84
+				],
+				"tip_point": [
+					0.5,
+					0.06
+				]
+			},
+			"identity": {
+				"chassis": "crossbow",
+				"delivery": "direct_projectile",
+				"fantasy": "충전 전하를 방출하는 전자 발사기",
+				"forbidden_traits": [
+					"rapid_fire",
+					"large_splash"
+				],
+				"hit_behaviors": [
+					"limited_pierce",
+					"chain"
+				],
+				"horizontal_role": "중거리 충전 충격과 제한 방전",
+				"reference_family": "heavy_ranged",
+				"same_target_policy": {
+					"mode": "capped_multi",
+					"cap": 2.0
+				},
+				"strengths": [
+					"charged_impact",
+					"limited_chain"
+				],
+				"verbs": [
+					"charge",
+					"discharge"
+				],
+				"vertical_role": "긴 충전 뒤 좁은 레일 관통",
+				"weaknesses": [
+					"slow_charge",
+					"small_splash"
+				]
+			},
+			"combo": {
+				"cone": 0.94,
+				"cooldown": 1.7,
+				"equipment_pose": "piercing_bolt",
+				"hit_power": 0.9,
+				"impact": 22.0,
+				"knockback": 470.4,
+				"life": 0.28,
+				"pierce": 4,
+				"projectile_count": 1.0,
+				"range": 246.4,
+				"reach": 152.0,
+				"recoil": 42.0,
+				"spread": 0.0,
+				"strength": 1.48,
+				"stun": 0.14,
+				"target_cap": 5.0,
+				"vfx_mode": "thrust",
+				"windup": -16.0,
+				"damage": 20.82144,
+				"hit_stop": 0.0,
+				"vfx_scale": 1.12,
+				"vfx_speed": 1.25,
+				"particle_count": 0.0,
+				"ring_layers": 0.0,
+				"weapon_rotation_deg": 0.0,
+				"weapon_arc_scale": 0.0,
+				"weapon_scale": 1.0,
+				"vfx_row": 21.0,
+				"hit_shape": "LINE",
+				"phase_frames": {
+					"impact": [
+						2.0,
+						3.0
+					],
+					"prep": [
+						0.0,
+						1.0
+					],
+					"recovery": [
+						4.0,
+						5.0
+					]
+				},
+				"weapon_offset": [
+					14.0,
+					0.0
+				],
+				"impact_offset": [
+					112.0,
+					0.0
+				],
+				"shake": 0.9,
+				"color_core": [
+					0.920000016689301,
+					1.0,
+					1.0,
+					1.0
+				],
+				"color_edge": [
+					0.200000002980232,
+					0.419999986886978,
+					1.0,
+					1.0
+				],
+				"axis": "vertical",
+				"crit_chance_pct": 0.0,
+				"block": 0.0,
+				"lifesteal_pct": 0.0,
+				"orbit_path_caps": {
+					"horizontal_range": 520.0,
+					"range_upgrade_cap_pct": 30.0,
+					"vertical_range": 640.0
+				},
+				"orbit_archetype": "bow_crossbow"
+			}
+		},
+		{
+			"weapon_id": "turret_pack",
+			"axis": "horizontal",
+			"category": "deployable",
+			"damage_family": "engineering",
+			"label_key": "item.weapon.turret_pack.name",
+			"motion_role": "deploy",
+			"base_axis": "vertical",
+			"weapon_texture": "./project/assets/ui/backpack/items/class_special_weapons/turret_pack_2x2.png",
+			"attack_texture": "./project/assets/combat/vfx/weapons/projectiles/engineering/turret_pack_mini_bolt_1x4_v01.png",
+			"projectile_texture": "./project/assets/combat/vfx/weapons/projectiles/engineering/turret_pack_mini_bolt_1x4_v01.png",
+			"orbit": {
+				"len": 80.0,
+				"scale": 0.68,
+				"grip_point": [
+					0.5,
+					0.72
+				],
+				"tip_point": [
+					0.5,
+					0.12
+				]
+			},
+			"identity": {
+				"chassis": "deployable",
+				"delivery": "deployable",
+				"fantasy": "휴대 장치에서 미니 포탑을 설치",
+				"forbidden_traits": [
+					"instant_burst",
+					"large_splash"
+				],
+				"hit_behaviors": [
+					"stop"
+				],
+				"horizontal_role": "짧게 유지되는 측면 미니 포탑 2기",
+				"reference_family": "deployable_control",
+				"same_target_policy": {
+					"mode": "shared_hit"
+				},
+				"strengths": [
+					"multiple_deployables",
+					"side_coverage"
+				],
+				"verbs": [
+					"deploy",
+					"sustain"
+				],
+				"vertical_role": "오래 유지되는 전방 집중 포탑 1기",
+				"weaknesses": [
+					"setup_time",
+					"small_splash"
+				]
+			},
+			"combo": {
+				"cone": 0.8,
+				"cooldown": 0.78,
+				"equipment_pose": "bolt_spread",
+				"hit_power": 0.62,
+				"impact": 10.0,
+				"knockback": 100.0,
+				"life": 0.16,
+				"pierce": 0,
+				"projectile_count": 5.0,
+				"range": 90.75,
+				"reach": 102.0,
+				"recoil": 10.0,
+				"spread": 48.0,
+				"strength": 0.68,
+				"stun": 0.04,
+				"target_cap": 4.0,
+				"vfx_mode": "thrust",
+				"windup": -12.0,
+				"damage": 5.051904,
+				"projectile_radius": 2.0,
+				"axis": "horizontal",
+				"crit_chance_pct": 0.0,
+				"block": 0.0,
+				"lifesteal_pct": 0.0,
+				"orbit_path_caps": {
+					"horizontal_range": 520.0,
+					"range_upgrade_cap_pct": 30.0,
+					"vertical_range": 640.0
+				},
+				"orbit_archetype": "bow_crossbow"
+			}
+		},
+		{
+			"weapon_id": "turret_pack",
+			"axis": "vertical",
+			"category": "deployable",
+			"damage_family": "engineering",
+			"label_key": "item.weapon.turret_pack.name",
+			"motion_role": "deploy",
+			"base_axis": "vertical",
+			"weapon_texture": "./project/assets/ui/backpack/items/class_special_weapons/turret_pack_2x2.png",
+			"attack_texture": "./project/assets/combat/vfx/weapons/projectiles/engineering/turret_pack_mini_bolt_1x4_v01.png",
+			"projectile_texture": "./project/assets/combat/vfx/weapons/projectiles/engineering/turret_pack_mini_bolt_1x4_v01.png",
+			"orbit": {
+				"len": 80.0,
+				"scale": 0.68,
+				"grip_point": [
+					0.5,
+					0.72
+				],
+				"tip_point": [
+					0.5,
+					0.12
+				]
+			},
+			"identity": {
+				"chassis": "deployable",
+				"delivery": "deployable",
+				"fantasy": "휴대 장치에서 미니 포탑을 설치",
+				"forbidden_traits": [
+					"instant_burst",
+					"large_splash"
+				],
+				"hit_behaviors": [
+					"stop"
+				],
+				"horizontal_role": "짧게 유지되는 측면 미니 포탑 2기",
+				"reference_family": "deployable_control",
+				"same_target_policy": {
+					"mode": "shared_hit"
+				},
+				"strengths": [
+					"multiple_deployables",
+					"side_coverage"
+				],
+				"verbs": [
+					"deploy",
+					"sustain"
+				],
+				"vertical_role": "오래 유지되는 전방 집중 포탑 1기",
+				"weaknesses": [
+					"setup_time",
+					"small_splash"
+				]
+			},
+			"combo": {
+				"cone": 0.8,
+				"cooldown": 0.78,
+				"equipment_pose": "piercing_bolt",
+				"hit_power": 0.62,
+				"impact": 10.0,
+				"knockback": 112.0,
+				"life": 0.16,
+				"pierce": 2,
+				"projectile_count": 2.0,
+				"range": 184.8,
+				"reach": 102.0,
+				"recoil": 10.0,
+				"spread": 8.0,
+				"strength": 0.68,
+				"stun": 0.04,
+				"target_cap": 4.0,
+				"vfx_mode": "thrust",
+				"windup": -12.0,
+				"damage": 6.60192,
+				"axis": "vertical",
+				"crit_chance_pct": 0.0,
+				"block": 0.0,
+				"lifesteal_pct": 0.0,
+				"orbit_path_caps": {
+					"horizontal_range": 520.0,
+					"range_upgrade_cap_pct": 30.0,
+					"vertical_range": 640.0
+				},
+				"orbit_archetype": "bow_crossbow"
+			}
+		},
+		{
+			"weapon_id": "bolt_sentry",
+			"axis": "horizontal",
+			"category": "deployable",
+			"damage_family": "engineering",
+			"label_key": "item.weapon.bolt_sentry.name",
+			"motion_role": "deploy",
+			"base_axis": "vertical",
+			"weapon_texture": "./project/assets/ui/backpack/items/class_special_weapons/bolt_sentry_2x2_v03.png",
+			"attack_texture": "./project/assets/ui/backpack/items/class_special_weapons/bolt_sentry_2x2_v03.png",
+			"projectile_texture": "./project/assets/combat/vfx/weapons/projectiles/turrets/bolt_sentry_projectile_1x4.png",
+			"orbit": {
+				"len": 82.0,
+				"scale": 0.69,
+				"grip_point": [
+					0.5,
+					0.72
+				],
+				"tip_point": [
+					0.5,
+					0.1
+				]
+			},
+			"identity": {
+				"chassis": "deployable",
+				"delivery": "deployable",
+				"fantasy": "기본적인 자동 볼트 포탑",
+				"forbidden_traits": [
+					"large_splash",
+					"return_hit"
+				],
+				"hit_behaviors": [
+					"limited_pierce"
+				],
+				"horizontal_role": "낮은 피해의 부채꼴 사격과 동일 대상 감쇠",
+				"reference_family": "deployable_control",
+				"same_target_policy": {
+					"mode": "diminishing",
+					"multipliers": [
+						1.0,
+						0.45,
+						0.2
+					]
+				},
+				"strengths": [
+					"steady_fire",
+					"limited_pierce"
+				],
+				"verbs": [
+					"deploy",
+					"fire"
+				],
+				"vertical_role": "느린 집중 관통 볼트",
+				"weaknesses": [
+					"low_burst",
+					"fixed_position"
+				]
+			},
+			"combo": {
+				"cone": 0.9,
+				"cooldown": 0.55,
+				"deployable_mode": "bolt_fan",
+				"equipment_pose": "bolt_spread",
+				"hit_power": 0.72,
+				"impact": 10.0,
+				"knockback": 160.0,
+				"life": 0.18,
+				"pierce": 2,
+				"projectile_count": 5.0,
+				"range": 158.4,
+				"reach": 102.0,
+				"recoil": 12.0,
+				"spread": 28.0,
+				"strength": 0.78,
+				"stun": 0.06,
+				"target_cap": 5.0,
+				"vfx_mode": "thrust",
+				"windup": -12.0,
+				"damage": 7.215744,
+				"axis": "horizontal",
+				"crit_chance_pct": 0.0,
+				"block": 0.0,
+				"lifesteal_pct": 0.0,
+				"orbit_path_caps": {
+					"horizontal_range": 520.0,
+					"range_upgrade_cap_pct": 30.0,
+					"vertical_range": 640.0
+				},
+				"orbit_archetype": "bow_crossbow"
+			}
+		},
+		{
+			"weapon_id": "bolt_sentry",
+			"axis": "vertical",
+			"category": "deployable",
+			"damage_family": "engineering",
+			"label_key": "item.weapon.bolt_sentry.name",
+			"motion_role": "deploy",
+			"base_axis": "vertical",
+			"weapon_texture": "./project/assets/ui/backpack/items/class_special_weapons/bolt_sentry_2x2_v03.png",
+			"attack_texture": "./project/assets/ui/backpack/items/class_special_weapons/bolt_sentry_2x2_v03.png",
+			"projectile_texture": "./project/assets/combat/vfx/weapons/projectiles/turrets/bolt_sentry_projectile_1x4.png",
+			"orbit": {
+				"len": 82.0,
+				"scale": 0.69,
+				"grip_point": [
+					0.5,
+					0.72
+				],
+				"tip_point": [
+					0.5,
+					0.1
+				]
+			},
+			"identity": {
+				"chassis": "deployable",
+				"delivery": "deployable",
+				"fantasy": "기본적인 자동 볼트 포탑",
+				"forbidden_traits": [
+					"large_splash",
+					"return_hit"
+				],
+				"hit_behaviors": [
+					"limited_pierce"
+				],
+				"horizontal_role": "낮은 피해의 부채꼴 사격과 동일 대상 감쇠",
+				"reference_family": "deployable_control",
+				"same_target_policy": {
+					"mode": "diminishing",
+					"multipliers": [
+						1.0,
+						0.45,
+						0.2
+					]
+				},
+				"strengths": [
+					"steady_fire",
+					"limited_pierce"
+				],
+				"verbs": [
+					"deploy",
+					"fire"
+				],
+				"vertical_role": "느린 집중 관통 볼트",
+				"weaknesses": [
+					"low_burst",
+					"fixed_position"
+				]
+			},
+			"combo": {
+				"cone": 0.9,
+				"cooldown": 0.55,
+				"deployable_mode": "piercing_bolt",
+				"equipment_pose": "piercing_bolt",
+				"hit_power": 0.72,
+				"impact": 10.0,
+				"knockback": 160.0,
+				"life": 0.18,
+				"pierce": 3,
+				"projectile_count": 1.0,
+				"range": 237.6,
+				"reach": 102.0,
+				"recoil": 12.0,
+				"spread": 0.0,
+				"strength": 0.78,
+				"stun": 0.06,
+				"target_cap": 5.0,
+				"vfx_mode": "thrust",
+				"windup": -12.0,
+				"damage": 9.397248,
+				"axis": "vertical",
+				"crit_chance_pct": 0.0,
+				"block": 0.0,
+				"lifesteal_pct": 0.0,
+				"orbit_path_caps": {
+					"horizontal_range": 520.0,
+					"range_upgrade_cap_pct": 30.0,
+					"vertical_range": 640.0
+				},
+				"orbit_archetype": "bow_crossbow"
+			}
+		},
+		{
+			"weapon_id": "bombard_turret",
+			"axis": "horizontal",
+			"category": "deployable",
+			"damage_family": "engineering",
+			"label_key": "item.weapon.bombard_turret.name",
+			"motion_role": "deploy",
+			"base_axis": "vertical",
+			"weapon_texture": "./project/assets/ui/backpack/items/class_special_weapons/bombard_turret_2x2_v02.png",
+			"attack_texture": "./project/assets/ui/backpack/items/class_special_weapons/bombard_turret_2x2_v02.png",
+			"projectile_texture": "./project/assets/combat/vfx/weapons/projectiles/turrets/bombard_turret_projectile_1x4.png",
+			"orbit": {
+				"len": 88.0,
+				"scale": 0.69,
+				"grip_point": [
+					0.5,
+					0.74
+				],
+				"tip_point": [
+					0.5,
+					0.1
+				]
+			},
+			"identity": {
+				"chassis": "deployable",
+				"delivery": "deployable",
+				"fantasy": "느린 포탄과 착탄 지점 제어",
+				"forbidden_traits": [
+					"rapid_fire",
+					"high_pierce"
+				],
+				"hit_behaviors": [
+					"splash",
+					"knockback"
+				],
+				"horizontal_role": "서로 다른 세 지점의 작은 포격",
+				"reference_family": "deployable_area",
+				"same_target_policy": {
+					"mode": "shared_hit"
+				},
+				"strengths": [
+					"area_control",
+					"knockback"
+				],
+				"verbs": [
+					"deploy",
+					"bombard"
+				],
+				"vertical_role": "한 지점의 큰 포격",
+				"weaknesses": [
+					"slow_fire",
+					"low_pierce"
+				]
+			},
+			"combo": {
+				"cone": 0.88,
+				"cooldown": 1.25,
+				"deployable_mode": "shell_cluster",
+				"equipment_pose": "bolt_spread",
+				"hit_power": 1.08,
+				"impact": 18.0,
+				"knockback": 440.0,
+				"life": 0.24,
+				"projectile_count": 3.0,
+				"range": 192.0,
+				"reach": 112.0,
+				"recoil": 32.0,
+				"splash_radius": 74.0,
+				"spread": 22.0,
+				"strength": 1.2,
+				"stun": 0.16,
+				"target_cap": 4.0,
+				"vfx_mode": "projectile_orb",
+				"windup": -20.0,
+				"damage": 13.9104,
+				"axis": "horizontal",
+				"crit_chance_pct": 0.0,
+				"pierce": 0,
+				"block": 0.0,
+				"lifesteal_pct": 0.0,
+				"orbit_path_caps": {
+					"horizontal_range": 520.0,
+					"range_upgrade_cap_pct": 30.0,
+					"vertical_range": 640.0
+				},
+				"orbit_archetype": "bow_crossbow"
+			}
+		},
+		{
+			"weapon_id": "bombard_turret",
+			"axis": "vertical",
+			"category": "deployable",
+			"damage_family": "engineering",
+			"label_key": "item.weapon.bombard_turret.name",
+			"motion_role": "deploy",
+			"base_axis": "vertical",
+			"weapon_texture": "./project/assets/ui/backpack/items/class_special_weapons/bombard_turret_2x2_v02.png",
+			"attack_texture": "./project/assets/ui/backpack/items/class_special_weapons/bombard_turret_2x2_v02.png",
+			"projectile_texture": "./project/assets/combat/vfx/weapons/projectiles/turrets/bombard_turret_projectile_1x4.png",
+			"orbit": {
+				"len": 88.0,
+				"scale": 0.69,
+				"grip_point": [
+					0.5,
+					0.74
+				],
+				"tip_point": [
+					0.5,
+					0.1
+				]
+			},
+			"identity": {
+				"chassis": "deployable",
+				"delivery": "deployable",
+				"fantasy": "느린 포탄과 착탄 지점 제어",
+				"forbidden_traits": [
+					"rapid_fire",
+					"high_pierce"
+				],
+				"hit_behaviors": [
+					"splash",
+					"knockback"
+				],
+				"horizontal_role": "서로 다른 세 지점의 작은 포격",
+				"reference_family": "deployable_area",
+				"same_target_policy": {
+					"mode": "shared_hit"
+				},
+				"strengths": [
+					"area_control",
+					"knockback"
+				],
+				"verbs": [
+					"deploy",
+					"bombard"
+				],
+				"vertical_role": "한 지점의 큰 포격",
+				"weaknesses": [
+					"slow_fire",
+					"low_pierce"
+				]
+			},
+			"combo": {
+				"cone": 0.88,
+				"cooldown": 1.25,
+				"deployable_mode": "heavy_shell",
+				"equipment_pose": "piercing_bolt",
+				"hit_power": 1.08,
+				"impact": 18.0,
+				"knockback": 440.0,
+				"life": 0.24,
+				"projectile_count": 1.0,
+				"range": 268.8,
+				"reach": 112.0,
+				"recoil": 32.0,
+				"splash_radius": 64.0,
+				"spread": 0.0,
+				"strength": 1.2,
+				"stun": 0.16,
+				"target_cap": 4.0,
+				"vfx_mode": "projectile_orb",
+				"windup": -20.0,
+				"damage": 19.872,
+				"axis": "vertical",
+				"crit_chance_pct": 0.0,
+				"pierce": 0,
+				"block": 0.0,
+				"lifesteal_pct": 0.0,
+				"orbit_path_caps": {
+					"horizontal_range": 520.0,
+					"range_upgrade_cap_pct": 30.0,
+					"vertical_range": 640.0
+				},
+				"orbit_archetype": "bow_crossbow"
+			}
+		},
+		{
+			"weapon_id": "arc_coil_turret",
+			"axis": "horizontal",
+			"category": "deployable",
+			"damage_family": "engineering",
+			"label_key": "item.weapon.arc_coil_turret.name",
+			"motion_role": "deploy",
+			"base_axis": "vertical",
+			"weapon_texture": "./project/assets/ui/backpack/items/class_special_weapons/arc_coil_turret_2x2_v03.png",
+			"attack_texture": "./project/assets/ui/backpack/items/class_special_weapons/arc_coil_turret_2x2_v03.png",
+			"projectile_texture": "./project/assets/combat/vfx/weapons/projectiles/turrets/arc_coil_turret_projectile_1x4.png",
+			"orbit": {
+				"len": 84.0,
+				"scale": 0.69,
+				"grip_point": [
+					0.5,
+					0.74
+				],
+				"tip_point": [
+					0.5,
+					0.1
+				]
+			},
+			"identity": {
+				"chassis": "deployable",
+				"delivery": "deployable",
+				"fantasy": "전기 연쇄와 집중 방전",
+				"forbidden_traits": [
+					"return_hit",
+					"high_pierce"
+				],
+				"hit_behaviors": [
+					"chain"
+				],
+				"horizontal_role": "약한 다중 연쇄",
+				"reference_family": "deployable_chain",
+				"same_target_policy": {
+					"mode": "capped_multi",
+					"cap": 4.0
+				},
+				"strengths": [
+					"multi_target_chain",
+					"area_pressure"
+				],
+				"verbs": [
+					"deploy",
+					"chain"
+				],
+				"vertical_role": "강한 단일 집중 방전",
+				"weaknesses": [
+					"setup_time",
+					"limited_pierce"
+				]
+			},
+			"combo": {
+				"cone": 0.9,
+				"cooldown": 0.9,
+				"deployable_mode": "chain_arc",
+				"equipment_pose": "bolt_spread",
+				"hit_power": 0.84,
+				"impact": 14.0,
+				"knockback": 220.0,
+				"life": 0.2,
+				"pierce": 1,
+				"projectile_count": 1.0,
+				"range": 184.8,
+				"reach": 104.0,
+				"recoil": 18.0,
+				"spread": 0.0,
+				"strength": 0.92,
+				"stun": 0.1,
+				"target_cap": 4.0,
+				"vfx_mode": "thrust",
+				"windup": -16.0,
+				"damage": 11.013504,
+				"axis": "horizontal",
+				"crit_chance_pct": 0.0,
+				"block": 0.0,
+				"lifesteal_pct": 0.0,
+				"orbit_path_caps": {
+					"horizontal_range": 520.0,
+					"range_upgrade_cap_pct": 30.0,
+					"vertical_range": 640.0
+				},
+				"orbit_archetype": "bow_crossbow"
+			}
+		},
+		{
+			"weapon_id": "arc_coil_turret",
+			"axis": "vertical",
+			"category": "deployable",
+			"damage_family": "engineering",
+			"label_key": "item.weapon.arc_coil_turret.name",
+			"motion_role": "deploy",
+			"base_axis": "vertical",
+			"weapon_texture": "./project/assets/ui/backpack/items/class_special_weapons/arc_coil_turret_2x2_v03.png",
+			"attack_texture": "./project/assets/ui/backpack/items/class_special_weapons/arc_coil_turret_2x2_v03.png",
+			"projectile_texture": "./project/assets/combat/vfx/weapons/projectiles/turrets/arc_coil_turret_projectile_1x4.png",
+			"orbit": {
+				"len": 84.0,
+				"scale": 0.69,
+				"grip_point": [
+					0.5,
+					0.74
+				],
+				"tip_point": [
+					0.5,
+					0.1
+				]
+			},
+			"identity": {
+				"chassis": "deployable",
+				"delivery": "deployable",
+				"fantasy": "전기 연쇄와 집중 방전",
+				"forbidden_traits": [
+					"return_hit",
+					"high_pierce"
+				],
+				"hit_behaviors": [
+					"chain"
+				],
+				"horizontal_role": "약한 다중 연쇄",
+				"reference_family": "deployable_chain",
+				"same_target_policy": {
+					"mode": "capped_multi",
+					"cap": 4.0
+				},
+				"strengths": [
+					"multi_target_chain",
+					"area_pressure"
+				],
+				"verbs": [
+					"deploy",
+					"chain"
+				],
+				"vertical_role": "강한 단일 집중 방전",
+				"weaknesses": [
+					"setup_time",
+					"limited_pierce"
+				]
+			},
+			"combo": {
+				"cone": 0.9,
+				"cooldown": 0.9,
+				"deployable_mode": "focused_chain_arc",
+				"equipment_pose": "piercing_bolt",
+				"hit_power": 0.84,
+				"impact": 14.0,
+				"knockback": 220.0,
+				"life": 0.2,
+				"pierce": 1,
+				"projectile_count": 1.0,
+				"range": 231.0,
+				"reach": 104.0,
+				"recoil": 18.0,
+				"spread": 0.0,
+				"strength": 0.92,
+				"stun": 0.1,
+				"target_cap": 2.0,
+				"vfx_mode": "thrust",
+				"windup": -16.0,
+				"damage": 15.36768,
+				"axis": "vertical",
+				"crit_chance_pct": 0.0,
+				"block": 0.0,
+				"lifesteal_pct": 0.0,
+				"orbit_path_caps": {
+					"horizontal_range": 520.0,
+					"range_upgrade_cap_pct": 30.0,
+					"vertical_range": 640.0
+				},
+				"orbit_archetype": "bow_crossbow"
+			}
+		},
+		{
+			"weapon_id": "saw_turret",
+			"axis": "horizontal",
+			"category": "deployable",
+			"damage_family": "engineering",
+			"label_key": "item.weapon.saw_turret.name",
+			"motion_role": "deploy",
+			"base_axis": "vertical",
+			"weapon_texture": "./project/assets/ui/backpack/items/class_special_weapons/saw_turret_2x2_v02.png",
+			"attack_texture": "./project/assets/ui/backpack/items/class_special_weapons/saw_turret_2x2_v02.png",
+			"projectile_texture": "./project/assets/combat/vfx/weapons/projectiles/turrets/saw_turret_projectile_1x4.png",
+			"orbit": {
+				"len": 86.0,
+				"scale": 0.69,
+				"grip_point": [
+					0.5,
+					0.72
+				],
+				"tip_point": [
+					0.5,
+					0.1
+				]
+			},
+			"identity": {
+				"chassis": "deployable",
+				"delivery": "deployable",
+				"fantasy": "톱날의 도탄과 귀환 경로",
+				"forbidden_traits": [
+					"large_splash",
+					"rapid_fire"
+				],
+				"hit_behaviors": [
+					"ricochet",
+					"return_hit",
+					"limited_pierce"
+				],
+				"horizontal_role": "두 개의 짧은 도탄·귀환 톱날",
+				"reference_family": "deployable_return",
+				"same_target_policy": {
+					"mode": "capped_multi",
+					"cap": 2.0
+				},
+				"strengths": [
+					"ricochet_path",
+					"return_hit"
+				],
+				"verbs": [
+					"deploy",
+					"ricochet"
+				],
+				"vertical_role": "한 개의 긴 왕복 톱날",
+				"weaknesses": [
+					"limited_pierce",
+					"slow_cycle"
+				]
+			},
+			"combo": {
+				"cone": 0.86,
+				"cooldown": 0.8,
+				"deployable_mode": "ricochet_discs",
+				"equipment_pose": "bolt_spread",
+				"hit_power": 0.9,
+				"impact": 14.0,
+				"knockback": 280.0,
+				"life": 0.2,
+				"pierce": 2,
+				"projectile_count": 2.0,
+				"range": 172.0,
+				"reach": 98.0,
+				"recoil": 20.0,
+				"spread": 18.0,
+				"strength": 0.98,
+				"stun": 0.08,
+				"target_cap": 4.0,
+				"vfx_mode": "thrust",
+				"windup": -16.0,
+				"damage": 12.046848,
+				"axis": "horizontal",
+				"crit_chance_pct": 0.0,
+				"block": 0.0,
+				"lifesteal_pct": 0.0,
+				"orbit_path_caps": {
+					"horizontal_range": 520.0,
+					"range_upgrade_cap_pct": 30.0,
+					"vertical_range": 640.0
+				},
+				"orbit_archetype": "bow_crossbow"
+			}
+		},
+		{
+			"weapon_id": "saw_turret",
+			"axis": "vertical",
+			"category": "deployable",
+			"damage_family": "engineering",
+			"label_key": "item.weapon.saw_turret.name",
+			"motion_role": "deploy",
+			"base_axis": "vertical",
+			"weapon_texture": "./project/assets/ui/backpack/items/class_special_weapons/saw_turret_2x2_v02.png",
+			"attack_texture": "./project/assets/ui/backpack/items/class_special_weapons/saw_turret_2x2_v02.png",
+			"projectile_texture": "./project/assets/combat/vfx/weapons/projectiles/turrets/saw_turret_projectile_1x4.png",
+			"orbit": {
+				"len": 86.0,
+				"scale": 0.69,
+				"grip_point": [
+					0.5,
+					0.72
+				],
+				"tip_point": [
+					0.5,
+					0.1
+				]
+			},
+			"identity": {
+				"chassis": "deployable",
+				"delivery": "deployable",
+				"fantasy": "톱날의 도탄과 귀환 경로",
+				"forbidden_traits": [
+					"large_splash",
+					"rapid_fire"
+				],
+				"hit_behaviors": [
+					"ricochet",
+					"return_hit",
+					"limited_pierce"
+				],
+				"horizontal_role": "두 개의 짧은 도탄·귀환 톱날",
+				"reference_family": "deployable_return",
+				"same_target_policy": {
+					"mode": "capped_multi",
+					"cap": 2.0
+				},
+				"strengths": [
+					"ricochet_path",
+					"return_hit"
+				],
+				"verbs": [
+					"deploy",
+					"ricochet"
+				],
+				"vertical_role": "한 개의 긴 왕복 톱날",
+				"weaknesses": [
+					"limited_pierce",
+					"slow_cycle"
+				]
+			},
+			"combo": {
+				"cone": 0.86,
+				"cooldown": 0.8,
+				"deployable_mode": "returning_piercing_disc",
+				"equipment_pose": "piercing_bolt",
+				"hit_power": 0.9,
+				"impact": 14.0,
+				"knockback": 280.0,
+				"life": 0.2,
+				"pierce": 3,
+				"projectile_count": 1.0,
+				"range": 220.0,
+				"reach": 98.0,
+				"recoil": 20.0,
+				"spread": 0.0,
+				"strength": 0.98,
+				"stun": 0.08,
+				"target_cap": 4.0,
+				"vfx_mode": "thrust",
+				"windup": -16.0,
+				"damage": 15.74304,
+				"axis": "vertical",
+				"crit_chance_pct": 0.0,
+				"block": 0.0,
+				"lifesteal_pct": 0.0,
+				"orbit_path_caps": {
+					"horizontal_range": 520.0,
+					"range_upgrade_cap_pct": 30.0,
+					"vertical_range": 640.0
+				},
+				"orbit_archetype": "bow_crossbow"
+			}
+		},
+		{
+			"weapon_id": "trap_satchel",
+			"axis": "horizontal",
+			"category": "ranged",
+			"damage_family": "engineering",
+			"label_key": "item.weapon.trap_satchel.name",
+			"motion_role": "throw",
+			"base_axis": "vertical",
+			"weapon_texture": "./project/assets/ui/backpack/items/class_special_weapons/trap_satchel_2x2.png",
+			"attack_texture": "./project/assets/combat/vfx/runtime/player_trap_charge_6x2_v01.png",
+			"projectile_texture": "./project/assets/combat/vfx/runtime/player_trap_charge_6x2_v01.png",
+			"orbit": {
+				"len": 76.0,
+				"scale": 0.63,
+				"grip_point": [
+					0.5,
+					0.7
+				],
+				"tip_point": [
+					0.5,
+					0.16
+				]
+			},
+			"identity": {
+				"chassis": "deployable",
+				"delivery": "ground_area",
+				"fantasy": "전투 전에 공간을 준비하는 설치 도구",
+				"forbidden_traits": [
+					"instant_burst",
+					"long_range"
+				],
+				"hit_behaviors": [
+					"splash",
+					"slow"
+				],
+				"horizontal_role": "두 개의 작고 짧은 측면 함정",
+				"reference_family": "persistent_control",
+				"same_target_policy": {
+					"mode": "shared_hit"
+				},
+				"strengths": [
+					"prepared_zone",
+					"slow_control"
+				],
+				"verbs": [
+					"place",
+					"trigger"
+				],
+				"vertical_role": "한 개의 크고 오래가는 전방 함정",
+				"weaknesses": [
+					"delayed_damage",
+					"short_throw"
+				]
+			},
+			"combo": {
+				"cone": 0.7,
+				"cooldown": 1.35,
+				"equipment_pose": "fan_throw",
+				"hit_power": 0.2,
+				"impact": 10.0,
+				"impact_atlas_rows": 2.0,
+				"impact_behavior": "area_burst",
+				"impact_damage_mul": 1.0,
+				"impact_frames": 6.0,
+				"impact_radius": 39.6,
+				"impact_row": 1.0,
+				"impact_texture": "res://assets/combat/vfx/runtime/player_trap_charge_6x2_v01.png",
+				"impact_vfx_life": 0.3,
+				"impact_vfx_mode": "trap_satchel_burst",
+				"knockback": 260.0,
+				"life": 0.16,
+				"projectile_count": 3.0,
+				"projectile_motion": "targeted_throw",
+				"projectile_radius": 14.0,
+				"projectile_speed": 380.0,
+				"range": 115.0,
+				"reach": 82.0,
+				"recoil": 18.0,
+				"spread": 26.0,
+				"strength": 1.0,
+				"stun": 0.22,
+				"target_cap": 6.0,
+				"vfx_mode": "projectile_orb",
+				"windup": -12.0,
+				"damage": 7.75008,
+				"hit_stop": 0.0,
+				"vfx_scale": 0.72,
+				"vfx_speed": 1.3,
+				"particle_count": 0.0,
+				"ring_layers": 0.0,
+				"weapon_rotation_deg": 0.0,
+				"weapon_arc_scale": 0.28,
+				"weapon_scale": 0.9,
+				"vfx_row": 22.0,
+				"hit_shape": "ARC",
+				"phase_frames": {
+					"impact": [
+						2.0,
+						3.0
+					],
+					"prep": [
+						0.0,
+						1.0
+					],
+					"recovery": [
+						4.0,
+						5.0
+					]
+				},
+				"weapon_offset": [
+					2.0,
+					0.0
+				],
+				"impact_offset": [
+					42.0,
+					0.0
+				],
+				"shake": 0.2,
+				"color_core": [
+					0.949999988079071,
+					0.949999988079071,
+					1.0,
+					1.0
+				],
+				"color_edge": [
+					0.550000011920929,
+					0.620000004768372,
+					0.800000011920929,
+					1.0
+				],
+				"axis": "horizontal",
+				"crit_chance_pct": 0.0,
+				"pierce": 0,
+				"block": 0.0,
+				"lifesteal_pct": 0.0,
+				"orbit_path_caps": {
+					"horizontal_range": 440.0,
+					"range_upgrade_cap_pct": 30.0,
+					"vertical_range": 530.0
+				},
+				"orbit_archetype": "throwing_return"
+			}
+		},
+		{
+			"weapon_id": "trap_satchel",
+			"axis": "vertical",
+			"category": "ranged",
+			"damage_family": "engineering",
+			"label_key": "item.weapon.trap_satchel.name",
+			"motion_role": "throw",
+			"base_axis": "vertical",
+			"weapon_texture": "./project/assets/ui/backpack/items/class_special_weapons/trap_satchel_2x2.png",
+			"attack_texture": "./project/assets/combat/vfx/runtime/player_trap_charge_6x2_v01.png",
+			"projectile_texture": "./project/assets/combat/vfx/runtime/player_trap_charge_6x2_v01.png",
+			"orbit": {
+				"len": 76.0,
+				"scale": 0.63,
+				"grip_point": [
+					0.5,
+					0.7
+				],
+				"tip_point": [
+					0.5,
+					0.16
+				]
+			},
+			"identity": {
+				"chassis": "deployable",
+				"delivery": "ground_area",
+				"fantasy": "전투 전에 공간을 준비하는 설치 도구",
+				"forbidden_traits": [
+					"instant_burst",
+					"long_range"
+				],
+				"hit_behaviors": [
+					"splash",
+					"slow"
+				],
+				"horizontal_role": "두 개의 작고 짧은 측면 함정",
+				"reference_family": "persistent_control",
+				"same_target_policy": {
+					"mode": "shared_hit"
+				},
+				"strengths": [
+					"prepared_zone",
+					"slow_control"
+				],
+				"verbs": [
+					"place",
+					"trigger"
+				],
+				"vertical_role": "한 개의 크고 오래가는 전방 함정",
+				"weaknesses": [
+					"delayed_damage",
+					"short_throw"
+				]
+			},
+			"combo": {
+				"cone": 0.7,
+				"cooldown": 1.35,
+				"equipment_pose": "focused_throw",
+				"hit_power": 0.18,
+				"impact": 8.0,
+				"impact_atlas_rows": 2.0,
+				"impact_behavior": "area_burst",
+				"impact_damage_mul": 1.0,
+				"impact_frames": 6.0,
+				"impact_radius": 71.28,
+				"impact_row": 1.0,
+				"impact_texture": "res://assets/combat/vfx/runtime/player_trap_charge_6x2_v01.png",
+				"impact_vfx_life": 0.3,
+				"impact_vfx_mode": "trap_satchel_burst",
+				"knockback": 260.0,
+				"life": 0.14,
+				"projectile_count": 1.0,
+				"projectile_motion": "targeted_throw",
+				"projectile_radius": 14.0,
+				"projectile_speed": 380.0,
+				"range": 135.0,
+				"reach": 82.0,
+				"recoil": 18.0,
+				"spread": 0.0,
+				"strength": 1.0,
+				"stun": 0.22,
+				"target_cap": 6.0,
+				"vfx_mode": "projectile_orb",
+				"windup": -8.0,
+				"damage": 11.72448,
+				"hit_stop": 0.0,
+				"vfx_scale": 0.7,
+				"vfx_speed": 1.35,
+				"particle_count": 0.0,
+				"ring_layers": 0.0,
+				"weapon_rotation_deg": 0.0,
+				"weapon_arc_scale": 0.08,
+				"weapon_scale": 0.95,
+				"vfx_row": 23.0,
+				"hit_shape": "LINE",
+				"phase_frames": {
+					"impact": [
+						2.0,
+						3.0
+					],
+					"prep": [
+						0.0,
+						1.0
+					],
+					"recovery": [
+						4.0,
+						5.0
+					]
+				},
+				"weapon_offset": [
+					10.0,
+					0.0
+				],
+				"impact_offset": [
+					60.0,
+					0.0
+				],
+				"shake": 0.18,
+				"color_core": [
+					0.949999988079071,
+					0.949999988079071,
+					1.0,
+					1.0
+				],
+				"color_edge": [
+					0.550000011920929,
+					0.620000004768372,
+					0.800000011920929,
+					1.0
+				],
+				"crit_chance_pct": 4.0,
+				"axis": "vertical",
+				"pierce": 0,
+				"block": 0.0,
+				"lifesteal_pct": 0.0,
+				"orbit_path_caps": {
+					"horizontal_range": 440.0,
+					"range_upgrade_cap_pct": 30.0,
+					"vertical_range": 530.0
+				},
+				"orbit_archetype": "throwing_return"
+			}
+		},
+		{
+			"weapon_id": "snare_bow",
+			"axis": "horizontal",
+			"category": "ranged",
+			"damage_family": "engineering",
+			"label_key": "item.weapon.snare_bow.name",
+			"motion_role": "ranged_fire",
+			"base_axis": "vertical",
+			"weapon_texture": "./project/assets/ui/backpack/items/class_special_weapons/snare_bow_2x2.png",
+			"attack_texture": "./project/assets/combat/vfx/weapons/projectiles/ranged/snare_bow_binding_arrow_1x4_v01.png",
+			"projectile_texture": "./project/assets/combat/vfx/weapons/projectiles/ranged/snare_bow_binding_arrow_1x4_v01.png",
+			"orbit": {
+				"len": 100.0,
+				"scale": 0.87,
+				"grip_point": [
+					0.5,
+					0.72
+				],
+				"tip_point": [
+					0.5,
+					0.08
+				]
+			},
+			"identity": {
+				"chassis": "tether_control",
+				"delivery": "tether",
+				"fantasy": "피해보다 포획과 경로 제어",
+				"forbidden_traits": [
+					"high_direct_damage"
+				],
+				"hit_behaviors": [
+					"root",
+					"slow"
+				],
+				"horizontal_role": "두 화살이 짧은 연결 구역을 만듦",
+				"reference_family": "control_ranged",
+				"same_target_policy": {
+					"mode": "shared_hit"
+				},
+				"strengths": [
+					"route_control",
+					"root"
+				],
+				"verbs": [
+					"tether",
+					"bind"
+				],
+				"vertical_role": "첫 대상에게 단일 강한 속박 화살",
+				"weaknesses": [
+					"low_direct_damage",
+					"setup_dependency"
+				]
+			},
+			"combo": {
+				"cone": 0.88,
+				"cooldown": 0.98,
+				"equipment_pose": "volley",
+				"hit_power": 0.25,
+				"impact": 8.0,
+				"knockback": 150.0,
+				"life": 0.18,
+				"pierce": 1,
+				"projectile_count": 3.0,
+				"range": 170.2,
+				"reach": 116.0,
+				"recoil": 16.0,
+				"spread": 16.0,
+				"strength": 0.82,
+				"stun": 0.1,
+				"target_cap": 4.0,
+				"vfx_mode": "thrust",
+				"windup": -10.0,
+				"damage": 5.9616,
+				"hit_stop": 0.0,
+				"vfx_scale": 0.8,
+				"vfx_speed": 1.2,
+				"particle_count": 0.0,
+				"ring_layers": 0.0,
+				"weapon_rotation_deg": 0.0,
+				"weapon_arc_scale": 0.18,
+				"weapon_scale": 1.0,
+				"vfx_row": 18.0,
+				"hit_shape": "ARC",
+				"phase_frames": {
+					"impact": [
+						2.0,
+						3.0
+					],
+					"prep": [
+						0.0,
+						1.0
+					],
+					"recovery": [
+						4.0,
+						5.0
+					]
+				},
+				"weapon_offset": [
+					4.0,
+					0.0
+				],
+				"impact_offset": [
+					54.0,
+					0.0
+				],
+				"shake": 0.25,
+				"color_core": [
+					0.899999976158142,
+					1.0,
+					0.899999976158142,
+					1.0
+				],
+				"color_edge": [
+					0.419999986886978,
+					0.720000028610229,
+					0.360000014305115,
+					1.0
+				],
+				"axis": "horizontal",
+				"crit_chance_pct": 0.0,
+				"block": 0.0,
+				"lifesteal_pct": 0.0,
+				"orbit_path_caps": {
+					"horizontal_range": 520.0,
+					"range_upgrade_cap_pct": 30.0,
+					"vertical_range": 640.0
+				},
+				"orbit_archetype": "bow_crossbow"
+			}
+		},
+		{
+			"weapon_id": "snare_bow",
+			"axis": "vertical",
+			"category": "ranged",
+			"damage_family": "engineering",
+			"label_key": "item.weapon.snare_bow.name",
+			"motion_role": "ranged_fire",
+			"base_axis": "vertical",
+			"weapon_texture": "./project/assets/ui/backpack/items/class_special_weapons/snare_bow_2x2.png",
+			"attack_texture": "./project/assets/combat/vfx/weapons/projectiles/ranged/snare_bow_binding_arrow_1x4_v01.png",
+			"projectile_texture": "./project/assets/combat/vfx/weapons/projectiles/ranged/snare_bow_binding_arrow_1x4_v01.png",
+			"orbit": {
+				"len": 100.0,
+				"scale": 0.87,
+				"grip_point": [
+					0.5,
+					0.72
+				],
+				"tip_point": [
+					0.5,
+					0.08
+				]
+			},
+			"identity": {
+				"chassis": "tether_control",
+				"delivery": "tether",
+				"fantasy": "피해보다 포획과 경로 제어",
+				"forbidden_traits": [
+					"high_direct_damage"
+				],
+				"hit_behaviors": [
+					"root",
+					"slow"
+				],
+				"horizontal_role": "두 화살이 짧은 연결 구역을 만듦",
+				"reference_family": "control_ranged",
+				"same_target_policy": {
+					"mode": "shared_hit"
+				},
+				"strengths": [
+					"route_control",
+					"root"
+				],
+				"verbs": [
+					"tether",
+					"bind"
+				],
+				"vertical_role": "첫 대상에게 단일 강한 속박 화살",
+				"weaknesses": [
+					"low_direct_damage",
+					"setup_dependency"
+				]
+			},
+			"combo": {
+				"cone": 0.88,
+				"cooldown": 0.98,
+				"equipment_pose": "aimed_shot",
+				"hit_power": 0.2,
+				"impact": 6.0,
+				"knockback": 150.0,
+				"life": 0.16,
+				"pierce": 1,
+				"projectile_count": 1.0,
+				"range": 207.2,
+				"reach": 116.0,
+				"recoil": 16.0,
+				"spread": 0.0,
+				"strength": 0.82,
+				"stun": 0.1,
+				"target_cap": 4.0,
+				"vfx_mode": "thrust",
+				"windup": -6.0,
+				"damage": 7.41888,
+				"hit_stop": 0.0,
+				"vfx_scale": 0.75,
+				"vfx_speed": 1.25,
+				"particle_count": 0.0,
+				"ring_layers": 0.0,
+				"weapon_rotation_deg": 0.0,
+				"weapon_arc_scale": 0.08,
+				"weapon_scale": 1.05,
+				"vfx_row": 19.0,
+				"hit_shape": "LINE",
+				"phase_frames": {
+					"impact": [
+						2.0,
+						3.0
+					],
+					"prep": [
+						0.0,
+						1.0
+					],
+					"recovery": [
+						4.0,
+						5.0
+					]
+				},
+				"weapon_offset": [
+					12.0,
+					0.0
+				],
+				"impact_offset": [
+					74.0,
+					0.0
+				],
+				"shake": 0.2,
+				"color_core": [
+					0.899999976158142,
+					1.0,
+					0.899999976158142,
+					1.0
+				],
+				"color_edge": [
+					0.419999986886978,
+					0.720000028610229,
+					0.360000014305115,
+					1.0
+				],
+				"crit_chance_pct": 5.0,
+				"axis": "vertical",
+				"block": 0.0,
+				"lifesteal_pct": 0.0,
+				"orbit_path_caps": {
+					"horizontal_range": 520.0,
+					"range_upgrade_cap_pct": 30.0,
+					"vertical_range": 640.0
+				},
+				"orbit_archetype": "bow_crossbow"
+			}
+		}
+	],
+	"sources": {
+		"combat": {
+			"path": "res://assets/data/combat/aria_combat.json",
+			"sha256": "d810ec0a9ad808f36bd9a32f0f05ea5a6b6f75492b008f36ec988f615fef30e2"
+		},
+		"motion": {
+			"path": "res://assets/data/combat/weapon_directional_vfx_profiles.json",
+			"sha256": "2a94f3b5d3357c2dead7f76b6fc09b3dba34afda9819a51a5f54f1b8dba25a8a"
+		},
+		"catalog": {
+			"path": "res://assets/ui/backpack/items/weapon_catalog.json",
+			"sha256": "7cd6058e73a7b7079920360caebc08d65b07d217fe29e28feb21cf04d04058b5"
+		}
+	}
+}

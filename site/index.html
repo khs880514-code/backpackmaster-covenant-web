@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>BG2 Orbit Lab</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">BACKPACK MASTER 2 · READ-ONLY QA SITE</p>
+        <h1>ORBIT LAB <span>가로/세로 전수 비교</span></h1>
+      </div>
+      <div class="top-actions">
+        <span id="data-status" class="status-pill">데이터 불러오는 중</span>
+        <button id="fullscreen-btn" class="ghost-button" type="button">전체화면 <kbd>F</kbd></button>
+      </div>
+    </header>
+
+    <div class="workspace">
+      <aside class="control-panel">
+        <section>
+          <div class="section-title">
+            <span>검수 대상</span>
+            <strong id="weapon-count">28종</strong>
+          </div>
+          <label>
+            분류
+            <select id="category-select">
+              <option value="all">전체 무기</option>
+              <option value="melee">근접 9종</option>
+              <option value="shield">방패 3종</option>
+              <option value="ranged">원거리</option>
+              <option value="magic">마법</option>
+              <option value="deployable">설치형</option>
+            </select>
+          </label>
+          <label>
+            무기
+            <select id="weapon-select"></select>
+          </label>
+          <label>
+            적 대형
+            <select id="formation-select">
+              <option value="single">단일</option>
+              <option value="line">일렬</option>
+              <option value="side" selected>측면 분산</option>
+              <option value="semicircle">반원</option>
+              <option value="dense">밀집</option>
+            </select>
+          </label>
+        </section>
+
+        <section>
+          <div class="section-title"><span>동기화 재생</span><strong id="progress-readout">0%</strong></div>
+          <input id="timeline" type="range" min="0" max="1" step="0.001" value="0">
+          <div class="button-row">
+            <button id="play-btn" type="button">일시정지 <kbd>Space</kbd></button>
+            <button id="reset-btn" class="secondary" type="button">처음 <kbd>R</kbd></button>
+          </div>
+          <label>
+            재생 속도
+            <select id="speed-select">
+              <option value="0.25">×0.25</option>
+              <option value="0.5">×0.5</option>
+              <option value="1" selected>×1.0</option>
+              <option value="2">×2.0</option>
+            </select>
+          </label>
+          <label class="range-label">
+            확대 비교 배율 <output id="range-output">×2.00</output>
+            <input id="range-scale" type="range" min="1.1" max="2" step="0.05" value="2">
+          </label>
+        </section>
+
+        <section>
+          <div class="section-title"><span>표시 계층</span></div>
+          <label class="toggle"><input id="trail-toggle" type="checkbox" checked><span>전체 궤적</span></label>
+          <label class="toggle"><input id="hit-toggle" type="checkbox" checked><span>판정 폭·예상 적중</span></label>
+          <label class="toggle"><input id="label-toggle" type="checkbox" checked><span>수치·상태효과</span></label>
+          <label class="toggle"><input id="retarget-toggle" type="checkbox"><span>85% 늦은 재조준</span></label>
+        </section>
+
+        <section class="legend">
+          <div class="section-title"><span>판독 기준</span></div>
+          <p><i class="dot live"></i>현재 시점까지 적중</p>
+          <p><i class="dot predicted"></i>전체 궤적 예상 적중</p>
+          <p><i class="dot outside"></i>판정 범위 밖</p>
+          <p class="help">가로·세로 × 기본·확대 4개 패널이 동일한 시간축으로 움직입니다.</p>
+        </section>
+      </aside>
+
+      <main class="main-panel">
+        <nav class="view-tabs" aria-label="검수 화면">
+          <button class="tab active" data-view="focus" type="button">4면 동기 비교</button>
+          <button class="tab" data-view="matrix" type="button">28종 전수 매트릭스</button>
+          <button class="tab" data-view="evidence" type="button">Godot 실캡처</button>
+        </nav>
+
+        <section id="focus-view" class="view active">
+          <div id="weapon-summary" class="weapon-summary"></div>
+          <div class="canvas-frame">
+            <canvas id="orbit-stage" width="1280" height="820" aria-label="가로 세로 오빗 4면 비교"></canvas>
+          </div>
+          <div id="axis-diff" class="axis-diff"></div>
+        </section>
+
+        <section id="matrix-view" class="view">
+          <div class="matrix-toolbar">
+            <div>
+              <p class="eyebrow">PRODUCTION ACTION MATRIX</p>
+              <h2>모든 무기의 가로/세로 정체성</h2>
+            </div>
+            <input id="matrix-search" type="search" placeholder="무기 이름 검색">
+          </div>
+          <div id="matrix-grid" class="matrix-grid"></div>
+        </section>
+
+        <section id="evidence-view" class="view">
+          <div class="evidence-header">
+            <div>
+              <p class="eyebrow">ACTUAL GODOT STORYBOARD</p>
+              <h2>근접 9종 실런타임 캡처</h2>
+            </div>
+            <p>PlayerWeaponActor와 실제 VFX를 30fps로 캡처한 기준 이미지입니다.</p>
+          </div>
+          <div id="evidence-grid" class="evidence-grid"></div>
+          <div id="evidence-empty" class="empty-state" hidden>
+            선택한 무기는 Godot 스토리보드 대상이 아닙니다. 4면 비교 탭의 런타임 데이터 시각화를 사용하세요.
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script src="./app.js" charset="utf-8"></script>
+</body>
+</html>
