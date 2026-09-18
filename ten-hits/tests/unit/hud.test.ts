@@ -1,0 +1,135 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { createHud } from '../../src/ui/hud';
+import { createGameEngine } from '../../src/game/engine';
+import type { GameSnapshot } from '../../src/game/types';
+
+function root(): HTMLElement {
+  document.body.innerHTML = '<div id="hud"></div>';
+  return document.querySelector<HTMLElement>('#hud')!;
+}
+
+function snapshotAfter(seconds: number): GameSnapshot {
+  const engine = createGameEngine({
+    pose: 'standing-front',
+    shoe: 'pump',
+    power: 5,
+    seed: 3
+  });
+  engine.start();
+  let snapshot = engine.snapshot();
+  for (let t = 0; t < seconds; t += 1 / 60) snapshot = engine.update(1 / 60);
+  return snapshot;
+}
+
+describe('HUD', () => {
+  let host: HTMLElement;
+
+  beforeEach(() => {
+    host = root();
+  });
+
+  it('exposes pose, shoe, and power controls in setup', () => {
+    const hud = createHud(host, {});
+    hud.render(snapshotAfter(0));
+    expect(host.querySelectorAll('[data-pose-option]')).toHaveLength(2);
+    expect(host.querySelectorAll('[data-shoe-option]')).toHaveLength(3);
+    const power = host.querySelector<HTMLInputElement>('[data-power-input]')!;
+    expect(power.min).toBe('1');
+    expect(power.max).toBe('10');
+  });
+
+  it('reports the chosen setup through handlers', () => {
+    const start = vi.fn();
+    const hud = createHud(host, { onStart: start });
+    hud.render(snapshotAfter(0));
+    host.querySelectorAll<HTMLButtonElement>('[data-pose-option]')[1]!.click();
+    host.querySelectorAll<HTMLButtonElement>('[data-shoe-option]')[2]!.click();
+    host.querySelector<HTMLButtonElement>('[data-start]')!.click();
+    expect(start).toHaveBeenCalledWith({
+      pose: 'kneeling-front',
+      shoe: 'platform',
+      power: expect.any(Number)
+    });
+  });
+
+  it('shows exactly ten unlabelled progress dots during play', () => {
+    const hud = createHud(host, {});
+    hud.render(snapshotAfter(1.5));
+    const dots = host.querySelectorAll('[data-hit-dot]');
+    expect(dots).toHaveLength(10);
+    for (const dot of dots) {
+      expect(dot.textContent?.trim()).toBe('');
+    }
+  });
+
+  it('never renders numeric durability anywhere', () => {
+    const hud = createHud(host, {});
+    const snapshot = snapshotAfter(6);
+    hud.render(snapshot);
+    const text = host.textContent ?? '';
+    expect(text).not.toMatch(/\d+\s*%/);
+    expect(text).not.toMatch(/HP|hp\b/);
+    expect(text).not.toMatch(/\d+\s*\/\s*\d+/);
+  });
+
+  it('describes proxy state with classes rather than numbers', () => {
+    const hud = createHud(host, {});
+    hud.render(snapshotAfter(6));
+    const proxies = host.querySelectorAll('[data-proxy]');
+    expect(proxies).toHaveLength(2);
+    for (const proxy of proxies) {
+      const stage = proxy.getAttribute('data-stage');
+      expect(['normal', 'initial', 'damaged', 'critical', 'ruptured']).toContain(stage);
+      expect(proxy.textContent?.trim()).toBe('');
+    }
+  });
+
+  it('shows anger as a mood without a meter', () => {
+    const hud = createHud(host, {});
+    hud.render(snapshotAfter(6));
+    const mood = host.querySelector('[data-anger]')!;
+    expect(['calm', 'annoyed', 'irritated', 'furious', 'seething']).toContain(
+      mood.getAttribute('data-mood')
+    );
+    expect(host.querySelector('progress')).toBeNull();
+    expect(host.querySelector('meter')).toBeNull();
+  });
+
+  it('shows the result and the chosen conditions when the run ends', () => {
+    const hud = createHud(host, {});
+    const snapshot: GameSnapshot = {
+      ...snapshotAfter(1),
+      phase: 'won',
+      result: 'survived'
+    };
+    hud.render(snapshot);
+    const result = host.querySelector('[data-result]')!;
+    expect(result.getAttribute('data-outcome')).toBe('survived');
+    expect(result.textContent).toContain('pump');
+  });
+
+  it('exposes accessible toggles for sound, vibration, and shake', () => {
+    const toggled = vi.fn();
+    const hud = createHud(host, { onToggle: toggled });
+    hud.render(snapshotAfter(0));
+    const toggles = host.querySelectorAll<HTMLButtonElement>('[data-toggle]');
+    expect(toggles).toHaveLength(3);
+    toggles[0]!.click();
+    expect(toggled).toHaveBeenCalled();
+    for (const toggle of toggles) {
+      expect(toggle.getAttribute('aria-pressed')).toMatch(/true|false/);
+    }
+  });
+
+  it('keeps the start menu out of the way during play', () => {
+    const hud = createHud(host, {});
+    hud.render(snapshotAfter(1.5));
+    expect(host.querySelector('[data-setup-panel]')!.getAttribute('hidden')).not.toBeNull();
+  });
+
+  it('is safe to render repeatedly without leaking nodes', () => {
+    const hud = createHud(host, {});
+    for (let i = 0; i < 5; i += 1) hud.render(snapshotAfter(1.5));
+    expect(host.querySelectorAll('[data-hit-dot]')).toHaveLength(10);
+  });
+});
