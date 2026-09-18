@@ -11,7 +11,8 @@
     "test:e2e": "playwright test",
     "check": "npm run test && npm run build",
     "android:sync": "npm run build && cap sync android",
-    "android:apk": "npm run android:sync && cd android && ./gradlew assembleDebug"
+    "android:apk": "npm run android:sync && cd android && ./gradlew assembleRelease",
+    "models:compress": "node scripts/compress-models.mjs"
   },
   "dependencies": {
     "three": "^0.180.0"
@@ -21,11 +22,13 @@
     "@capacitor/cli": "^8.5.2",
     "@capacitor/core": "^8.5.2",
     "@gltf-transform/core": "^4.5.0",
+    "@gltf-transform/extensions": "^4.5.0",
     "@gltf-transform/functions": "^4.5.0",
     "@playwright/test": "^1.55.0",
     "@types/node": "^26.6.1",
     "@types/three": "^0.180.0",
     "jsdom": "^26.1.0",
+    "meshoptimizer": "^1.2.0",
     "sharp": "^0.35.4",
     "typescript": "^5.9.2",
     "vite": "^7.1.5",

@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { POSE_IDS } from '../game/config';
+import { createGltfLoader } from './gltf';
 import type { PoseId } from '../game/types';
 
 /**
@@ -99,8 +100,7 @@ function readEntries(manifest: PoseModelManifest): Array<[PoseId, string]> {
 function defaultSource(): GltfSource {
   return {
     async load(url: string): Promise<THREE.Object3D> {
-      const { GLTFLoader } = await import('three/examples/jsm/loaders/GLTFLoader.js');
-      const loader = new GLTFLoader();
+      const loader = await createGltfLoader();
       const gltf = await loader.loadAsync(url);
       return gltf.scene;
     }

@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { createGltfLoader } from './gltf';
 import { parseSelectionManifest, type AttackTiming } from './selection-manifest';
 import type { GamePhase, PoseId } from '../game/types';
 
@@ -75,8 +76,8 @@ export function hidePostureGuides(scene: THREE.Group): number {
 function defaultSource(): GltfSceneSource {
   return {
     async load(url: string) {
-      const { GLTFLoader } = await import('three/examples/jsm/loaders/GLTFLoader.js');
-      const gltf = await new GLTFLoader().loadAsync(url);
+      const loader = await createGltfLoader();
+      const gltf = await loader.loadAsync(url);
       return { scene: gltf.scene, animations: gltf.animations };
     }
   };

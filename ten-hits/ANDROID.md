@@ -15,14 +15,18 @@ be started by hand from the **Actions** tab. When the run finishes, download
 **`ten-hits-apk`** from the run's *Artifacts* section, unzip it, and install
 `app-debug.apk` on the phone (Android 7.0 / API 24 and newer).
 
-The artifact is a debug build, signed with Android's standard debug key. That is
-enough to install and play. Shipping to a store needs a release build signed
-with your own keystore:
+The artifact is a **release** build: R8-minified, resource-shrunk, and not
+debuggable. With no keystore configured it is signed with Android's standard
+debug key, which installs and plays fine but cannot be published to a store.
 
-```sh
-cd ten-hits/android
-./gradlew assembleRelease   # then sign app-release-unsigned.apk with your key
-```
+To sign it with your own key instead, add four repository secrets —
+`ANDROID_KEYSTORE_PATH`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`,
+`ANDROID_KEY_PASSWORD` — and the same build picks them up. Nothing else
+changes.
+
+> Because the debug key is regenerated on each runner, an APK from one run will
+> not install *over* one from another run. Uninstall first, or configure the
+> keystore secrets above.
 
 ## Building locally
 
@@ -31,10 +35,10 @@ On a machine that has the Android SDK (Android Studio installs it):
 ```sh
 cd ten-hits
 npm ci
-npm run android:apk    # build -> cap sync -> gradlew assembleDebug
+npm run android:apk    # build -> cap sync -> gradlew assembleRelease
 ```
 
-The APK lands in `ten-hits/android/app/build/outputs/apk/debug/`.
+The APK lands in `ten-hits/android/app/build/outputs/apk/release/`.
 
 `npm run android:sync` alone rebuilds the web bundle and copies it into the
 Android project, which is what you want while iterating in Android Studio.
@@ -51,3 +55,20 @@ Android project, which is what you want while iterating in Android Studio.
 
 Everything under `android/app/src/main/assets/public` is copied output and is
 git-ignored; never edit it by hand.
+
+## Where the size went
+
+| | before | after |
+| --- | ---: | ---: |
+| glTF models | 12.52 MB | 5.32 MB |
+| JavaScript | 646 KB | 657 KB |
+| audio | 375 KB | 375 KB |
+
+`scripts/compress-models.mjs` applies `EXT_meshopt_compression` to every shipped
+`.glb`. Geometry, not texture, was the weight: a pose clip carried ~1.7 MB of
+vertex buffers behind ~0.2 MB of WebP. The decoder ships inside `three`, costs
+22 KB, and `src/render/gltf.ts` attaches it to every loader — which is why the
+JavaScript went slightly *up* while the download went down by 7 MB.
+
+Re-run it with `npm run models:compress` after replacing any authored asset; a
+file that is already compressed is skipped.

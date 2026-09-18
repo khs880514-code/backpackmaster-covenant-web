@@ -16,11 +16,39 @@ android {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    signingConfigs {
+        // Only used when a keystore is supplied through the environment. The
+        // release build falls back to the debug key so `assembleRelease` works
+        // on a clean checkout without any secret set up.
+        release {
+            def store = System.getenv('ANDROID_KEYSTORE_PATH')
+            if (store) {
+                storeFile file(store)
+                storePassword System.getenv('ANDROID_KEYSTORE_PASSWORD')
+                keyAlias System.getenv('ANDROID_KEY_ALIAS')
+                keyPassword System.getenv('ANDROID_KEY_PASSWORD')
+            }
+        }
+    }
     buildTypes {
         release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            // R8 only touches the Java shell — the game itself is the web
+            // bundle — but it also strips the debug flag and the unused
+            // AndroidX resources the template pulls in.
+            minifyEnabled true
+            shrinkResources true
+            debuggable false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig System.getenv('ANDROID_KEYSTORE_PATH')
+                ? signingConfigs.release
+                : signingConfigs.debug
         }
+    }
+
+    androidResources {
+        // The .glb files already carry meshopt-compressed buffers, so deflating
+        // them again buys nothing and costs a decompress on every read.
+        noCompress += ['glb']
     }
 }
 
