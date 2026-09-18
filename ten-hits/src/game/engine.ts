@@ -30,7 +30,10 @@ import type {
 } from './types';
 
 export interface ContactContext {
+  /** The toe cap: the leading point of the striking surface. */
   foot: Vec3;
+  /** The instep: the trailing end of it. */
+  instep: Vec3;
   left: Vec3;
   right: Vec3;
   shoe: ShoeProfile;
@@ -76,6 +79,34 @@ const DEPTH_TO_Z = 0.12;
  * the contact test measures is unchanged by it.
  */
 const PROXY_FORWARD = 0.138;
+
+/**
+ * Length of the striking surface, in world metres, measured between the
+ * authored TOE_CAP and INSTEP anchors.
+ *
+ * A shoe does not hit with a point. Treating it as one let the player slide the
+ * pair back along the foot and have a contact on the instep score as a dodge,
+ * which is not what happens when someone is kicked.
+ */
+const STRIKE_SURFACE_LENGTH = 0.13;
+
+/** Shortest distance from a point to the segment between two others. */
+function distanceToSegment(point: Vec3, a: Vec3, b: Vec3, depthScale: number): number {
+  const abx = b.x - a.x;
+  const aby = b.y - a.y;
+  const abz = b.z - a.z;
+  const lengthSq = abx * abx + aby * aby + abz * abz;
+  let t = 0;
+  if (lengthSq > 1e-9) {
+    t = ((point.x - a.x) * abx + (point.y - a.y) * aby + (point.z - a.z) * abz) / lengthSq;
+    t = Math.min(1, Math.max(0, t));
+  }
+  return Math.hypot(
+    point.x - (a.x + abx * t),
+    point.y - (a.y + aby * t),
+    (point.z - (a.z + abz * t)) * depthScale
+  );
+}
 /**
  * How far the pelvis actually travels, in world metres, at full pose range.
  * Pose profiles stay normalized 0..1 so they read as ratios; this is what
@@ -101,7 +132,13 @@ const IMPULSE_BY_GRADE: Record<ImpactGrade, number> = {
 };
 
 /** Default geometric contact test, replaced by an adapter in unit tests. */
-export { PELVIS_RANGE, PROXY_FORWARD, TARGET_RADIUS, followThroughDepth };
+export {
+  PELVIS_RANGE,
+  PROXY_FORWARD,
+  STRIKE_SURFACE_LENGTH,
+  TARGET_RADIUS,
+  followThroughDepth
+};
 
 export interface ContactBands {
   /** Inside this of a proxy centre is a direct compression. */
@@ -121,10 +158,11 @@ export function contactBands(shoe: ShoeProfile): ContactBands {
   return { compression: reach * 0.56, graze: reach * 1.8 };
 }
 
-export const geometricContact: ContactResolver = ({ foot, left, right, shoe }) => {
+export const geometricContact: ContactResolver = ({ foot, instep, left, right, shoe }) => {
   const reach = TARGET_RADIUS * shoe.contactWidth + 0.022;
-  const distance = (t: Vec3): number =>
-    Math.hypot(foot.x - t.x, foot.y - t.y, (foot.z - t.z) * 0.6);
+  // Measured against the whole striking surface, toe cap to instep, so sliding
+  // the pair further along the foot does not read as having slipped it.
+  const distance = (t: Vec3): number => distanceToSegment(t, foot, instep, 0.6);
   const dl = distance(left);
   const dr = distance(right);
   const contacted: TargetSide = dl <= dr ? 'left' : 'right';
@@ -163,6 +201,7 @@ export function createGameEngine(options: EngineOptions): GameEngine {
   let simTime = 0;
   let lastGrade: ImpactGrade | null = null;
   let footWorld: Vec3 = { ...FOOT_REST_POSITION };
+  let instepWorld: Vec3 = { ...FOOT_REST_POSITION };
 
   function targetWorld(side: TargetSide): Vec3 {
     const body = side === 'left' ? pair.left : pair.right;
@@ -222,11 +261,29 @@ export function createGameEngine(options: EngineOptions): GameEngine {
     }
   }
 
+  /**
+   * Trails the instep behind the toe along the direction the foot is
+   * travelling, which is what turns a point into a striking surface.
+   */
+  function updateInstep(currentPlan: AttackPlan): void {
+    const [, , approach, end] = currentPlan.path;
+    const dx = end.x - approach.x;
+    const dy = end.y - approach.y;
+    const dz = end.z - approach.z;
+    const length = Math.hypot(dx, dy, dz) || 1;
+    instepWorld = {
+      x: footWorld.x - (dx / length) * STRIKE_SURFACE_LENGTH,
+      y: footWorld.y - (dy / length) * STRIKE_SURFACE_LENGTH,
+      z: footWorld.z - (dz / length) * STRIKE_SURFACE_LENGTH
+    };
+  }
+
   /** Returns the phase the run settles into after the contact is folded in. */
   function resolveNow(): GamePhase {
     if (!plan) return run.phase;
     const outcome = resolveContact({
       foot: footWorld,
+      instep: instepWorld,
       left: targetWorld('left'),
       right: targetWorld('right'),
       shoe,
@@ -315,6 +372,7 @@ export function createGameEngine(options: EngineOptions): GameEngine {
 
     if (run.phase === 'strike' && plan) {
       footWorld = sampleFootPath(plan, phaseTime / Math.max(dt, plan.strikeDuration));
+      updateInstep(plan);
     } else if (run.phase === 'telegraph' && plan) {
       const ease = Math.min(1, phaseTime / Math.max(dt, plan.telegraphDuration));
       footWorld = sampleFootPath(plan, ease * 0.12);
@@ -330,6 +388,7 @@ export function createGameEngine(options: EngineOptions): GameEngine {
           y: end.y,
           z: end.z - followThroughDepth(power.level) * drive
         };
+        updateInstep(plan);
       }
       if (run.phase === 'recovery' && plan) {
         const ease = Math.min(1, phaseTime / Math.max(dt, plan.recoveryDuration));

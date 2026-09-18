@@ -32,7 +32,7 @@ describe('HUD', () => {
     const hud = createHud(host, {});
     hud.render(snapshotAfter(0));
     expect(host.querySelectorAll('[data-pose-option]')).toHaveLength(6);
-    expect(host.querySelectorAll('[data-shoe-option]')).toHaveLength(3);
+    expect(host.querySelectorAll('[data-shoe-option]')).toHaveLength(5);
     const power = host.querySelector<HTMLInputElement>('[data-power-input]')!;
     expect(power.min).toBe('1');
     expect(power.max).toBe('10');
@@ -43,7 +43,7 @@ describe('HUD', () => {
     const hud = createHud(host, { onStart: start });
     hud.render(snapshotAfter(0));
     host.querySelectorAll<HTMLButtonElement>('[data-pose-option]')[1]!.click();
-    host.querySelectorAll<HTMLButtonElement>('[data-shoe-option]')[2]!.click();
+    host.querySelectorAll<HTMLButtonElement>('[data-shoe-option]')[4]!.click();
     host.querySelector<HTMLButtonElement>('[data-start]')!.click();
     expect(start).toHaveBeenCalledWith({
       pose: 'kneeling-front',

@@ -36,7 +36,7 @@ test('start screen is usable and free of page errors', async ({ page }) => {
   await expect(page.locator('[data-webgl-error]')).toHaveCount(0);
   await expect(page.locator('[data-pose-option]')).toHaveCount(6);
   await expect(page.locator('[data-view-option]')).toHaveCount(6);
-  await expect(page.locator('[data-shoe-option]')).toHaveCount(3);
+  await expect(page.locator('[data-shoe-option]')).toHaveCount(5);
   await expect(page.locator('[data-start]')).toBeVisible();
   expect(errors).toEqual([]);
 });

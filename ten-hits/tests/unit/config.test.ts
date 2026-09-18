@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { POSES, POSE_IDS, SHOES, powerProfile } from '../../src/game/config';
 
 describe('game configuration', () => {
-  it('ships the six approved poses and three approved shoes', () => {
+  it('ships the six approved poses and five approved shoes', () => {
     expect(POSE_IDS).toEqual([
       'standing-front',
       'kneeling-front',
@@ -12,7 +12,13 @@ describe('game configuration', () => {
       'braced-back'
     ]);
     expect(Object.keys(POSES)).toEqual(POSE_IDS);
-    expect(Object.keys(SHOES)).toEqual(['pump', 'stiletto', 'platform']);
+    expect(Object.keys(SHOES)).toEqual([
+      'pump',
+      'stiletto',
+      'plateau',
+      'strap',
+      'platform'
+    ]);
   });
 
   it('clamps power to 1 through 10', () => {

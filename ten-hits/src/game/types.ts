@@ -24,7 +24,7 @@ export type PoseId =
   | 'spread-standing'
   | 'crouch-front'
   | 'braced-back';
-export type ShoeId = 'pump' | 'stiletto' | 'platform';
+export type ShoeId = 'pump' | 'stiletto' | 'plateau' | 'strap' | 'platform';
 export type ImpactGrade =
   | 'miss'
   | 'graze'

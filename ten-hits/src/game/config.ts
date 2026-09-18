@@ -64,27 +64,54 @@ export const POSES: Record<PoseId, PoseProfile> = {
   }
 };
 
+/**
+ * Measured from the authored footwear with `scripts/measure-shoes.mjs`, not
+ * chosen by hand: the forefoot band that actually meets the target decides how
+ * forgiving a contact is, and the shoe's bulk decides how heavily it swings.
+ * A pointed toe puts the same force through less shoe.
+ *
+ *   shoe       toe    sole    width  pressure  mass
+ *   pump      6.5cm  24.6cm   0.983     1.026  1.51   (FOOTWEAR_01)
+ *   stiletto  6.0cm  22.8cm   0.917     1.139  0.912  (FOOTWEAR_05)
+ *   plateau   6.6cm  24.5cm   1.000     1.000  0.987  (FOOTWEAR_04_WHITE)
+ *   strap     8.2cm  24.4cm   1.244     0.721  1.00   (FOOTWEAR_02)
+ *   platform  7.8cm  31.4cm   1.178     0.782  1.60   (FOOTWEAR_07)
+ */
 export const SHOES: Record<ShoeId, ShoeProfile> = {
   pump: {
     id: 'pump',
-    contactWidth: 1,
-    localPressure: 0.55,
-    mass: 0.9,
-    recovery: 1
+    contactWidth: 0.983,
+    localPressure: 1.026,
+    mass: 1.51,
+    recovery: 0.76
   },
   stiletto: {
     id: 'stiletto',
-    contactWidth: 0.55,
+    contactWidth: 0.917,
+    localPressure: 1.139,
+    mass: 0.912,
+    recovery: 1.25
+  },
+  plateau: {
+    id: 'plateau',
+    contactWidth: 1,
     localPressure: 1,
-    mass: 0.75,
-    recovery: 1.18
+    mass: 0.987,
+    recovery: 1.17
+  },
+  strap: {
+    id: 'strap',
+    contactWidth: 1.244,
+    localPressure: 0.721,
+    mass: 1,
+    recovery: 1.15
   },
   platform: {
     id: 'platform',
-    contactWidth: 1.35,
-    localPressure: 0.72,
-    mass: 1.35,
-    recovery: 0.82
+    contactWidth: 1.178,
+    localPressure: 0.782,
+    mass: 1.6,
+    recovery: 0.72
   }
 };
 
@@ -96,7 +123,13 @@ export const POSE_IDS: PoseId[] = [
   'crouch-front',
   'braced-back'
 ];
-export const SHOE_IDS: ShoeId[] = ['pump', 'stiletto', 'platform'];
+export const SHOE_IDS: ShoeId[] = [
+  'pump',
+  'stiletto',
+  'plateau',
+  'strap',
+  'platform'
+];
 
 export const MIN_POWER = 1;
 export const MAX_POWER = 10;

@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { createGameEngine, type EngineOptions } from '../../src/game/engine';
+import {
+  STRIKE_SURFACE_LENGTH,
+  createGameEngine,
+  geometricContact,
+  type EngineOptions
+} from '../../src/game/engine';
+import { SHOES } from '../../src/game/config';
 import type { ImpactGrade } from '../../src/game/types';
 
 function engineWith(grades: ImpactGrade[], overrides: Partial<EngineOptions> = {}) {
@@ -123,5 +129,53 @@ describe('game engine', () => {
     const before = engine.simulationTime();
     engine.update(10);
     expect(engine.simulationTime() - before).toBeLessThanOrEqual(8 / 120 + 1e-9);
+  });
+});
+
+describe('the striking surface', () => {
+  const shoe = SHOES.pump;
+  const plan = {} as never;
+  const at = (x: number, y: number, z: number) => ({ x, y, z });
+
+  /** Toe at the origin, instep trailing 13cm back along +Z toward the attacker. */
+  const toe = at(0, 0.9, 0);
+  const instep = at(0, 0.9, STRIKE_SURFACE_LENGTH);
+
+  function grade(proxy: { x: number; y: number; z: number }) {
+    return geometricContact({
+      foot: toe,
+      instep,
+      left: proxy,
+      right: at(proxy.x + 0.084, proxy.y, proxy.z),
+      shoe,
+      plan
+    }).grade;
+  }
+
+  it('registers a contact on the toe', () => {
+    expect(grade(at(0, 0.9, 0))).not.toBe('miss');
+  });
+
+  it('still registers one further back, on the instep', () => {
+    // Sliding the pair along the length of the foot is not a dodge: the shoe
+    // is still passing through it.
+    expect(grade(at(0, 0.9, STRIKE_SURFACE_LENGTH))).not.toBe('miss');
+    expect(grade(at(0, 0.9, STRIKE_SURFACE_LENGTH * 0.5))).not.toBe('miss');
+  });
+
+  it('grades the whole surface as evenly as the toe alone', () => {
+    const alongTheFoot = [0, 0.25, 0.5, 0.75, 1].map((t) =>
+      grade(at(0, 0.9, STRIKE_SURFACE_LENGTH * t))
+    );
+    expect(new Set(alongTheFoot).size).toBe(1);
+  });
+
+  it('still misses when the pair moves off the side of the foot', () => {
+    // Sideways is the axis a dodge actually works on.
+    expect(grade(at(0.4, 0.9, 0))).toBe('miss');
+  });
+
+  it('misses past the far end of the surface', () => {
+    expect(grade(at(0, 0.9, STRIKE_SURFACE_LENGTH + 0.5))).toBe('miss');
   });
 });

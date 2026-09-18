@@ -47,6 +47,8 @@ const VIEW_LABELS: Record<ViewId, string> = {
 const SHOE_LABELS: Record<ShoeId, string> = {
   pump: '펌프스',
   stiletto: '스틸레토',
+  plateau: '플라토',
+  strap: '스트랩',
   platform: '플랫폼'
 };
 

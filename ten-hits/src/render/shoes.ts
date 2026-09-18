@@ -10,29 +10,50 @@ interface ShoeSpec {
   color: number;
 }
 
+/**
+ * Procedural stand-ins, sized from the same measurements that drive the
+ * contact profiles in `config.ts`, so the shape the player sees matches the
+ * shape the strike is judged against even before the authored shoe loads.
+ */
 const SPECS: Record<ShoeId, ShoeSpec> = {
   pump: {
-    toeWidth: 0.086,
-    toeLength: 0.25,
+    toeWidth: 0.065,
+    toeLength: 0.246,
     soleThickness: 0.014,
-    heelHeight: 0.072,
-    heelRadius: 0.013,
-    color: 0x1b1f2b
+    heelHeight: 0.126,
+    heelRadius: 0.011,
+    color: 0x8f1526
   },
   stiletto: {
-    toeWidth: 0.068,
-    toeLength: 0.275,
+    toeWidth: 0.06,
+    toeLength: 0.228,
     soleThickness: 0.009,
-    heelHeight: 0.108,
+    heelHeight: 0.118,
     heelRadius: 0.005,
     color: 0x6d1230
   },
+  plateau: {
+    toeWidth: 0.066,
+    toeLength: 0.245,
+    soleThickness: 0.049,
+    heelHeight: 0.131,
+    heelRadius: 0.012,
+    color: 0xd8d4cc
+  },
+  strap: {
+    toeWidth: 0.082,
+    toeLength: 0.244,
+    soleThickness: 0.016,
+    heelHeight: 0.131,
+    heelRadius: 0.009,
+    color: 0x2b2028
+  },
   platform: {
-    toeWidth: 0.108,
-    toeLength: 0.262,
-    soleThickness: 0.038,
-    heelHeight: 0.094,
-    heelRadius: 0.024,
+    toeWidth: 0.078,
+    toeLength: 0.314,
+    soleThickness: 0.052,
+    heelHeight: 0.126,
+    heelRadius: 0.026,
     color: 0x24303f
   }
 };

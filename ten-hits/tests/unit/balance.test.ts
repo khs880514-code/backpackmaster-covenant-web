@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { createGameEngine, followThroughDepth } from '../../src/game/engine';
+import { contactBands, createGameEngine, followThroughDepth } from '../../src/game/engine';
+import { SHOES, SHOE_IDS } from '../../src/game/config';
 import { createTargetOverlay } from '../../src/render/targets';
-import type { GameSnapshot, ImpactGrade } from '../../src/game/types';
+import type { GameSnapshot, ImpactGrade, ShoeId } from '../../src/game/types';
 
 /**
  * The design goal is that a run is won by moving out of a direct compression
@@ -268,4 +269,62 @@ function runTo(offset: number): number {
     }
   }
   return worst;
+}
+
+describe('shoe shape drives the strike', () => {
+  it('sizes the judgement bands from each shoe, not from one shared number', () => {
+    const bands = SHOE_IDS.map((id) => contactBands(SHOES[id]).graze);
+    expect(new Set(bands.map((b) => b.toFixed(4))).size).toBe(SHOE_IDS.length);
+  });
+
+  it('gives a narrower toe a tighter window than a broader one', () => {
+    // Measured toe widths: stiletto 6.0cm, strap 8.2cm.
+    expect(SHOES.stiletto.contactWidth).toBeLessThan(SHOES.strap.contactWidth);
+    expect(contactBands(SHOES.stiletto).graze).toBeLessThan(
+      contactBands(SHOES.strap).graze
+    );
+  });
+
+  it('puts more force through less shoe when the toe is pointed', () => {
+    expect(SHOES.stiletto.localPressure).toBeGreaterThan(SHOES.strap.localPressure);
+    expect(SHOES.platform.mass).toBeGreaterThan(SHOES.stiletto.mass);
+    // Heavier shoes pull back more slowly.
+    expect(SHOES.platform.recovery).toBeLessThan(SHOES.stiletto.recovery);
+  });
+
+  it('leaves every shoe winnable somewhere in its own window', () => {
+    for (const shoe of SHOE_IDS) {
+      const best = [0.2, 0.25, 0.3, 0.35].reduce((most, offset) => {
+        const wins = [1, 2, 3, 4].filter((seed) => winsWith(seed, offset, shoe)).length;
+        return Math.max(most, wins);
+      }, 0);
+      expect(best, `${shoe} is unwinnable`).toBeGreaterThan(0);
+    }
+  });
+
+  it('makes the pointed shoe harder to survive than the broad one', () => {
+    const peak = (shoe: ShoeId): number =>
+      [0.2, 0.25, 0.3, 0.35].reduce((most, offset) => {
+        const wins = [1, 2, 3, 4, 5, 6].filter((seed) => winsWith(seed, offset, shoe)).length;
+        return Math.max(most, wins);
+      }, 0);
+    expect(peak('stiletto')).toBeLessThan(peak('pump'));
+  });
+});
+
+/** One run dodging by `offset`; true when it survives all ten contacts. */
+function winsWith(seed: number, offset: number, shoe: ShoeId): boolean {
+  const engine = createGameEngine({ pose: 'standing-front', shoe, power: 5, seed });
+  engine.start();
+  let snapshot: GameSnapshot = engine.snapshot();
+  for (let i = 0; i < 60 * 300; i += 1) {
+    snapshot = engine.update(1 / 60);
+    if (snapshot.phase === 'strike') {
+      engine.movePelvis({ x: snapshot.foot.x > 0 ? -offset : offset, y: 0 });
+    } else if (snapshot.phase === 'recovery') {
+      engine.movePelvis({ x: 0, y: 0 });
+    }
+    if (snapshot.phase === 'won' || snapshot.phase === 'lost') break;
+  }
+  return snapshot.phase === 'won';
 }
