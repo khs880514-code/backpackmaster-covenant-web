@@ -1,4 +1,5 @@
 import { POSE_IDS, REQUIRED_VALID_HITS, SHOE_IDS } from '../game/config';
+import { VIEW_IDS, type ViewId } from '../render/camera';
 import type { GameSnapshot, PoseId, ShoeId } from '../game/types';
 
 export type ToggleName = 'sound' | 'vibration' | 'shake';
@@ -13,24 +14,40 @@ export interface HudHandlers {
   onStart?: (selection: HudSelection) => void;
   onRestart?: () => void;
   onToggle?: (name: ToggleName, enabled: boolean) => void;
+  onView?: (view: ViewId) => void;
+  onInspect?: (enabled: boolean) => void;
 }
 
 export interface HudController {
   render(snapshot: GameSnapshot): void;
   setToggles(state: Record<ToggleName, boolean>): void;
   selection(): HudSelection;
+  inspecting(): boolean;
   destroy(): void;
 }
 
 const POSE_LABELS: Record<PoseId, string> = {
   'standing-front': '서서 정면',
-  'kneeling-front': '무릎 정면'
+  'kneeling-front': '무릎 정면',
+  'seated-chair': 'ㄷ자 의자',
+  'spread-standing': '대자 자세',
+  'crouch-front': '웅크림',
+  'braced-back': '뒤로 기댐'
+};
+
+const VIEW_LABELS: Record<ViewId, string> = {
+  side: '측면',
+  front: '앞',
+  back: '뒤',
+  top: '위',
+  diagonal: '사선',
+  zoom: '확대'
 };
 
 const SHOE_LABELS: Record<ShoeId, string> = {
-  pump: '펌프스 pump',
-  stiletto: '스틸레토 stiletto',
-  platform: '플랫폼 platform'
+  pump: '펌프스',
+  stiletto: '스틸레토',
+  platform: '플랫폼'
 };
 
 const MOOD_LABELS: Record<GameSnapshot['angerMood'], string> = {
@@ -111,7 +128,7 @@ export function createHud(root: HTMLElement, handlers: HudHandlers): HudControll
   let selectedPose: PoseId = 'standing-front';
   let selectedShoe: ShoeId = 'pump';
 
-  const poseGroup = el('div', 'hud__group');
+  const poseGroup = el('div', 'hud__group hud__group--poses');
   poseGroup.setAttribute('role', 'group');
   poseGroup.setAttribute('aria-label', '자세 선택');
   const poseButtons = POSE_IDS.map((id) => {
@@ -127,7 +144,7 @@ export function createHud(root: HTMLElement, handlers: HudHandlers): HudControll
     return button;
   });
 
-  const shoeGroup = el('div', 'hud__group');
+  const shoeGroup = el('div', 'hud__group hud__group--shoes');
   shoeGroup.setAttribute('role', 'group');
   shoeGroup.setAttribute('aria-label', '신발 선택');
   const shoeButtons = SHOE_IDS.map((id) => {
@@ -183,6 +200,44 @@ export function createHud(root: HTMLElement, handlers: HudHandlers): HudControll
     return button;
   });
 
+  // --- review panel -------------------------------------------------------
+  const review = el('section', 'hud__review');
+  review.setAttribute('data-review-panel', '');
+  const reviewLabel = el('span', 'hud__label');
+  reviewLabel.textContent = '시점';
+  const viewRow = el('div', 'hud__group hud__group--views');
+  viewRow.setAttribute('role', 'group');
+  viewRow.setAttribute('aria-label', '시점 프리셋');
+
+  let activeView: ViewId | null = null;
+  const viewButtons = VIEW_IDS.map((id) => {
+    const button = el('button', 'hud__chip hud__chip--view');
+    button.type = 'button';
+    button.setAttribute('data-view-option', id);
+    button.setAttribute('aria-pressed', 'false');
+    button.textContent = VIEW_LABELS[id];
+    button.addEventListener('click', () => {
+      activeView = id;
+      syncViews();
+      handlers.onView?.(id);
+    });
+    viewRow.append(button);
+    return button;
+  });
+
+  const inspectButton = el('button', 'hud__toggle hud__inspect');
+  inspectButton.type = 'button';
+  inspectButton.setAttribute('data-inspect', '');
+  inspectButton.setAttribute('aria-pressed', 'false');
+  inspectButton.textContent = '검토 모드';
+  let inspecting = false;
+  inspectButton.addEventListener('click', () => {
+    setInspecting(!inspecting);
+    handlers.onInspect?.(inspecting);
+  });
+
+  review.append(reviewLabel, viewRow, inspectButton);
+
   const startButton = el('button', 'hud__start');
   startButton.type = 'button';
   startButton.setAttribute('data-start', '');
@@ -191,7 +246,16 @@ export function createHud(root: HTMLElement, handlers: HudHandlers): HudControll
     handlers.onStart?.(currentSelection());
   });
 
-  setup.append(title, subtitle, poseGroup, shoeGroup, powerRow, toggleRow, startButton);
+  setup.append(
+    title,
+    subtitle,
+    poseGroup,
+    shoeGroup,
+    powerRow,
+    toggleRow,
+    review,
+    startButton
+  );
 
   // --- result -------------------------------------------------------------
   const result = el('section', 'hud__result');
@@ -222,6 +286,24 @@ export function createHud(root: HTMLElement, handlers: HudHandlers): HudControll
     };
   }
 
+  function syncViews(): void {
+    viewButtons.forEach((button, index) => {
+      const active = VIEW_IDS[index] === activeView;
+      button.setAttribute('aria-pressed', String(active));
+      button.classList.toggle('is-active', active);
+    });
+  }
+
+  function setInspecting(value: boolean): void {
+    inspecting = value;
+    inspectButton.setAttribute('aria-pressed', String(value));
+    layer.classList.toggle('is-inspecting', value);
+    if (value) {
+      activeView = 'zoom';
+      syncViews();
+    }
+  }
+
   function syncChoices(): void {
     poseButtons.forEach((button, index) => {
       const active = POSE_IDS[index] === selectedPose;
@@ -244,7 +326,10 @@ export function createHud(root: HTMLElement, handlers: HudHandlers): HudControll
       const playing = snapshot.phase !== 'setup';
       const finished = snapshot.phase === 'won' || snapshot.phase === 'lost';
 
+      // Review controls belong to the preparation screen only.
+      if (playing && inspecting) setInspecting(false);
       setup.hidden = playing;
+      review.hidden = playing;
       top.hidden = !playing;
       proxyPanel.hidden = !playing;
       hint.hidden = playing && snapshot.phase !== 'telegraph';
@@ -277,7 +362,9 @@ export function createHud(root: HTMLElement, handlers: HudHandlers): HudControll
         result.setAttribute('data-outcome', snapshot.result);
         resultTitle.textContent =
           snapshot.result === 'survived' ? '버텨냈습니다' : '버티지 못했습니다';
-        resultDetail.textContent = `${POSE_LABELS[snapshot.pose]} · ${SHOE_LABELS[snapshot.shoe]} · 강도 ${snapshot.power}`;
+        resultDetail.textContent =
+          `${POSE_LABELS[snapshot.pose]} · ${SHOE_LABELS[snapshot.shoe]} (${snapshot.shoe})` +
+          ` · 강도 ${snapshot.power}`;
       }
     },
 
@@ -290,6 +377,8 @@ export function createHud(root: HTMLElement, handlers: HudHandlers): HudControll
     },
 
     selection: currentSelection,
+
+    inspecting: () => inspecting,
 
     destroy(): void {
       if (popTimer) clearTimeout(popTimer);

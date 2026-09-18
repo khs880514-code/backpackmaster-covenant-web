@@ -17,7 +17,13 @@ export interface Vec3 {
   z: number;
 }
 
-export type PoseId = 'standing-front' | 'kneeling-front';
+export type PoseId =
+  | 'standing-front'
+  | 'kneeling-front'
+  | 'seated-chair'
+  | 'spread-standing'
+  | 'crouch-front'
+  | 'braced-back';
 export type ShoeId = 'pump' | 'stiletto' | 'platform';
 export type ImpactGrade =
   | 'miss'

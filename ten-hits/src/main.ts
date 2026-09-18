@@ -2,7 +2,7 @@ import './styles.css';
 import { createFeedback, type FeedbackController } from './audio/feedback';
 import { createGameEngine, type GameEngine } from './game/engine';
 import { createAnimation, type AnimationController } from './render/animation';
-import { createCameraController, type CameraController } from './render/camera';
+import { createCameraController, type CameraController, type ViewId } from './render/camera';
 import { createCharacters, applySnapshot, type CharacterRig } from './render/characters';
 import { createScene, type SceneController } from './render/scene';
 import { createPointerController, type PointerController } from './input/pointer-controller';
@@ -144,6 +144,15 @@ export function mountGame(root: HTMLElement, options: MountOptions = {}): GameAp
       feedback.setEnabled(name, enabled);
       animation.setShakeEnabled(save.settings.shake);
       persist();
+    },
+    onView: (view: ViewId) => {
+      camera.setView(view);
+      feedback.play('select');
+    },
+    onInspect: (enabled: boolean) => {
+      rig.setInspect(enabled);
+      camera.setInspect(enabled);
+      feedback.play('select');
     }
   });
   hud.setToggles(save.settings);
@@ -157,6 +166,8 @@ export function mountGame(root: HTMLElement, options: MountOptions = {}): GameAp
     rig = createCharacters(selection.pose, selection.shoe);
     animation = createAnimation(rig);
     animation.setShakeEnabled(save.settings.shake);
+    // A rebuilt rig starts clean, so drop any review state with it.
+    camera.setInspect(false);
     scene.scene.add(rig.root);
     scene.scene.add(animation.trail);
 
@@ -218,6 +229,7 @@ export function mountGame(root: HTMLElement, options: MountOptions = {}): GameAp
 
     const snapshot = engine.update(delta);
     quality.setStriking(snapshot.phase === 'strike');
+    if (rig.inspecting() && snapshot.phase !== 'setup') rig.setInspect(false);
 
     applySnapshot(rig, snapshot);
     animation.update(snapshot, delta);

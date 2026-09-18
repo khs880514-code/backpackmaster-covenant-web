@@ -34,7 +34,8 @@ test('start screen is usable and free of page errors', async ({ page }) => {
   await expect(page.locator('[data-game-canvas]')).toBeVisible();
   await expect(page.locator('[data-setup-panel]')).toBeVisible();
   await expect(page.locator('[data-webgl-error]')).toHaveCount(0);
-  await expect(page.locator('[data-pose-option]')).toHaveCount(2);
+  await expect(page.locator('[data-pose-option]')).toHaveCount(6);
+  await expect(page.locator('[data-view-option]')).toHaveCount(6);
   await expect(page.locator('[data-shoe-option]')).toHaveCount(3);
   await expect(page.locator('[data-start]')).toBeVisible();
   expect(errors).toEqual([]);
@@ -57,6 +58,51 @@ test('every visible control meets the minimum touch target size', async ({ page 
     expect(box.h, box.label).toBeGreaterThanOrEqual(43.5);
     expect(box.w, box.label).toBeGreaterThanOrEqual(43.5);
   }
+});
+
+test('the review menu drives the camera without page errors', async ({ page }) => {
+  const errors = collectPageErrors(page);
+  await page.goto('/');
+
+  for (const view of ['side', 'front', 'back', 'top', 'diagonal', 'zoom']) {
+    await page.locator(`[data-view-option="${view}"]`).click();
+    await expect(page.locator(`[data-view-option="${view}"]`)).toHaveAttribute(
+      'aria-pressed',
+      'true'
+    );
+  }
+
+  const inspect = page.locator('[data-inspect]');
+  await inspect.click();
+  await expect(inspect).toHaveAttribute('aria-pressed', 'true');
+  await page.waitForTimeout(600);
+
+  // Starting a run must leave review mode and hide the review controls.
+  await page.locator('[data-start]').click();
+  await expect(page.locator('[data-review-panel]')).toBeHidden();
+  await expect(inspect).toHaveAttribute('aria-pressed', 'false');
+  expect(errors).toEqual([]);
+});
+
+test('every pose can start a run', async ({ page }) => {
+  const errors = collectPageErrors(page);
+  const poses = [
+    'standing-front',
+    'kneeling-front',
+    'seated-chair',
+    'spread-standing',
+    'crouch-front',
+    'braced-back'
+  ];
+
+  for (const pose of poses) {
+    await page.goto('/');
+    await page.locator(`[data-pose-option="${pose}"]`).click();
+    await page.locator('[data-start]').click();
+    await expect(page.locator('[data-hit-dot]')).toHaveCount(10);
+    await page.waitForTimeout(300);
+  }
+  expect(errors).toEqual([]);
 });
 
 test('a run starts with the selected pose, shoe, and power', async ({ page }) => {

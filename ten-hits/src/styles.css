@@ -203,10 +203,13 @@ body {
   align-self: center;
   justify-self: center;
   width: min(440px, 100%);
+  max-height: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 20px;
+  gap: 10px;
+  padding: 16px;
   background: var(--panel);
   border: 1px solid var(--panel-edge);
   border-radius: 20px;
@@ -216,8 +219,8 @@ body {
 
 .hud__title {
   margin: 0;
-  font-size: 30px;
-  letter-spacing: 0.16em;
+  font-size: 26px;
+  letter-spacing: 0.14em;
 }
 
 .hud__subtitle,
@@ -235,15 +238,31 @@ body {
   align-items: center;
 }
 
+.hud__group--poses,
+.hud__group--shoes,
+.hud__group--toggles {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.hud__group--power {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 8px;
+}
+
 .hud__chip,
 .hud__toggle,
 .hud__start {
   font: inherit;
+  font-size: 14px;
+  text-align: center;
   color: var(--ink);
   background: rgba(110, 168, 255, 0.1);
   border: 1px solid var(--panel-edge);
   border-radius: 12px;
-  padding: 10px 14px;
+  padding: 10px 6px;
   cursor: pointer;
 }
 
@@ -330,6 +349,10 @@ body {
   .hud__start {
     grid-column: 1 / -1;
   }
+
+  .hud__setup {
+    gap: 10px 14px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -339,5 +362,70 @@ body {
   .hud__dot {
     animation: none !important;
     transition: none !important;
+  }
+}
+
+/* ------------------------------------------------------- review controls -- */
+
+.hud__review {
+  display: grid;
+  gap: 6px;
+  padding: 10px;
+  background: rgba(110, 168, 255, 0.07);
+  border: 1px solid var(--panel-edge);
+  border-radius: 14px;
+}
+
+.hud__group--views {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.hud__chip--view {
+  padding: 10px 2px;
+  font-size: 13px;
+}
+
+.hud__inspect[aria-pressed='true'] {
+  background: rgba(74, 212, 160, 0.3);
+  border-color: var(--ok);
+}
+
+/* Inspecting is about seeing the model, so the tuning controls step back. */
+.hud.is-inspecting .hud__subtitle,
+.hud.is-inspecting .hud__group--shoes,
+.hud.is-inspecting .hud__group--power,
+.hud.is-inspecting .hud__group--toggles,
+.hud.is-inspecting .hud__hint {
+  display: none;
+}
+
+.hud.is-inspecting .hud__setup {
+  width: min(440px, 100%);
+  align-self: start;
+  background: transparent;
+  border-color: transparent;
+  backdrop-filter: none;
+  padding: 8px 0 0;
+  gap: 8px;
+}
+
+.hud.is-inspecting .hud__title {
+  font-size: 18px;
+  opacity: 0.6;
+}
+
+.hud.is-inspecting .hud__start {
+  padding: 12px;
+}
+
+@media (min-width: 720px) {
+  .hud.is-inspecting .hud__setup {
+    width: min(720px, 92%);
+  }
+
+  .hud__review {
+    grid-column: 1 / -1;
   }
 }

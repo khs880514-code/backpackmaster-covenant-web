@@ -4,6 +4,29 @@ import { createShoe } from './shoes';
 import { createTargetOverlay, type TargetOverlay } from './targets';
 import type { GameSnapshot, PoseId, ShoeId } from '../game/types';
 
+interface PoseShape {
+  /** Vertical drop applied to the whole figure. */
+  drop: number;
+  /** Vertical squash, so a crouch reads as compressed rather than shrunk. */
+  squash: number;
+  /** Forward or backward lean in radians. */
+  lean: number;
+  /** How far the legs and arms open out to the sides. */
+  spread: number;
+  seat: boolean;
+}
+
+const POSE_SHAPES: Record<PoseId, PoseShape> = {
+  'standing-front': { drop: 0, squash: 1, lean: 0, spread: 1, seat: false },
+  'kneeling-front': { drop: -0.34, squash: 0.9, lean: 0.1, spread: 0.92, seat: false },
+  'seated-chair': { drop: -0.27, squash: 0.94, lean: 0.05, spread: 1.15, seat: true },
+  'spread-standing': { drop: -0.07, squash: 0.97, lean: -0.04, spread: 1.8, seat: false },
+  'crouch-front': { drop: -0.47, squash: 0.82, lean: 0.22, spread: 1.25, seat: false },
+  'braced-back': { drop: -0.13, squash: 0.98, lean: -0.2, spread: 1.05, seat: false }
+};
+
+const INSPECT_BODY_OPACITY = 0.22;
+
 const THIGH_LENGTH = 0.46;
 const SHIN_LENGTH = 0.46;
 const PLAYER_HEIGHT = 1.8;
@@ -53,6 +76,8 @@ interface FigureParts {
   hips: THREE.Group;
   /** Thigh and shin of the right leg, hidden on the attacker while kicking. */
   rightLeg: THREE.Mesh[];
+  /** Every limb that opens outward, paired with the side it belongs to. */
+  limbs: Array<{ mesh: THREE.Mesh; side: number; baseX: number }>;
 }
 
 /**
@@ -99,16 +124,19 @@ function buildFigure(
   hips.add(hipMesh);
   root.add(hips);
 
+  const limbs: Array<{ mesh: THREE.Mesh; side: number; baseX: number }> = [];
+
   for (const side of [-1, 1]) {
     const upperArm = capsule(0.047 * s, 0.22 * s, top);
     upperArm.rotation.z = side * 0.14;
     place(upperArm, side * 0.212 * s, 1.36 * s, 0);
     root.add(upperArm);
+    limbs.push({ mesh: upperArm, side, baseX: side * 0.212 * s });
 
     const forearm = capsule(0.041 * s, 0.2 * s, palette.skin);
-    upperArm.rotation.z = side * 0.14;
     place(forearm, side * 0.246 * s, 1.11 * s, 0.01 * s);
     root.add(forearm);
+    limbs.push({ mesh: forearm, side, baseX: side * 0.246 * s });
   }
 
   const rightLeg: THREE.Mesh[] = [];
@@ -116,10 +144,12 @@ function buildFigure(
     const thigh = capsule(0.072 * s, 0.32 * s, bottom);
     place(thigh, side * 0.082 * s, 0.76 * s, 0);
     root.add(thigh);
+    limbs.push({ mesh: thigh, side, baseX: side * 0.082 * s });
 
     const shin = capsule(0.055 * s, 0.34 * s, palette.skin);
     place(shin, side * 0.082 * s, 0.34 * s, 0);
     root.add(shin);
+    limbs.push({ mesh: shin, side, baseX: side * 0.082 * s });
 
     // A flat foot closes the gap between the shin capsule and the ground.
     const foot = new THREE.Mesh(
@@ -128,11 +158,34 @@ function buildFigure(
     );
     place(foot, side * 0.082 * s, 0.031 * s, 0.03 * s);
     root.add(foot);
+    limbs.push({ mesh: foot, side, baseX: side * 0.082 * s });
 
     if (side === 1) rightLeg.push(thigh, shin, foot);
   }
 
-  return { root, hips, rightLeg };
+  return { root, hips, rightLeg, limbs };
+}
+
+/** A three-sided seat: two uprights and a back panel, no soft furnishing. */
+function buildSeat(material: THREE.Material): THREE.Group {
+  const seat = new THREE.Group();
+  seat.name = 'seat';
+
+  const pad = new THREE.Mesh(new THREE.BoxGeometry(0.46, 0.06, 0.4), material);
+  pad.position.set(0, 0.42, -0.02);
+  seat.add(pad);
+
+  const back = new THREE.Mesh(new THREE.BoxGeometry(0.46, 0.5, 0.06), material);
+  back.position.set(0, 0.68, -0.2);
+  seat.add(back);
+
+  for (const side of [-1, 1]) {
+    const arm = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.34, 0.4), material);
+    arm.position.set(side * 0.2, 0.25, -0.02);
+    seat.add(arm);
+  }
+
+  return seat;
 }
 
 export interface CharacterRig {
@@ -147,6 +200,9 @@ export interface CharacterRig {
   attackerThigh: THREE.Mesh;
   attackerShin: THREE.Mesh;
   poseId: PoseId;
+  /** Review mode: hide the attacker and see the abstract proxy through the body. */
+  setInspect(enabled: boolean): void;
+  inspecting(): boolean;
   dispose(): void;
 }
 
@@ -170,12 +226,15 @@ export function createCharacters(poseId: PoseId, shoeId: ShoeId): CharacterRig {
   player.name = 'player';
   player.add(playerParts.root);
 
-  if (poseId === 'kneeling-front') {
-    // Kneeling drops the whole silhouette and shortens the usable reach.
-    playerParts.root.position.y = -0.34;
-    playerParts.root.scale.set(1, 0.9, 1);
-    playerParts.root.rotation.x = 0.1;
+  const shape = POSE_SHAPES[poseId];
+  playerParts.root.position.y = shape.drop;
+  playerParts.root.scale.set(1, shape.squash, 1);
+  playerParts.root.rotation.x = shape.lean;
+  for (const limb of playerParts.limbs) {
+    limb.mesh.position.x = limb.baseX * shape.spread;
+    limb.mesh.rotation.z = limb.side * (shape.spread - 1) * 0.22;
   }
+  if (shape.seat) player.add(buildSeat(palette.attackerBottom));
   root.add(player);
 
   // --- attacker -----------------------------------------------------------
@@ -219,6 +278,32 @@ export function createCharacters(poseId: PoseId, shoeId: ShoeId): CharacterRig {
   rightOverlay.group.name = 'rightTarget';
   targetAnchor.add(leftOverlay.group, rightOverlay.group);
 
+  const bodyMaterials: THREE.MeshStandardMaterial[] = [
+    palette.skin,
+    palette.hair,
+    palette.playerTop,
+    palette.playerBottom,
+    palette.attackerTop,
+    palette.attackerBottom
+  ];
+  let inspect = false;
+
+  function setInspect(enabled: boolean): void {
+    inspect = enabled;
+    attacker.visible = !enabled;
+    attackingFoot.visible = !enabled;
+    attackerThigh.visible = !enabled;
+    attackerShin.visible = !enabled;
+    for (const material of bodyMaterials) {
+      material.transparent = enabled;
+      material.opacity = enabled ? INSPECT_BODY_OPACITY : 1;
+      material.depthWrite = !enabled;
+      material.needsUpdate = true;
+    }
+    leftOverlay.setInspect(enabled);
+    rightOverlay.setInspect(enabled);
+  }
+
   return {
     root,
     player,
@@ -231,6 +316,8 @@ export function createCharacters(poseId: PoseId, shoeId: ShoeId): CharacterRig {
     attackerThigh,
     attackerShin,
     poseId,
+    setInspect,
+    inspecting: () => inspect,
     dispose(): void {
       leftOverlay.dispose();
       rightOverlay.dispose();

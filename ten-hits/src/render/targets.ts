@@ -25,8 +25,12 @@ export interface TargetOverlay {
   group: THREE.Group;
   mesh: THREE.Mesh;
   apply(proxy: ProxySnapshot): void;
+  /** Review mode makes the proxy read louder instead of fading with the body. */
+  setInspect(enabled: boolean): void;
   dispose(): void;
 }
+
+const INSPECT_OPACITY = 0.95;
 
 export function createTargetOverlay(): TargetOverlay {
   const group = new THREE.Group();
@@ -47,13 +51,23 @@ export function createTargetOverlay(): TargetOverlay {
   mesh.renderOrder = 10;
   group.add(mesh);
 
+  let inspecting = false;
+
   return {
     group,
     mesh,
+    setInspect(enabled: boolean): void {
+      inspecting = enabled;
+      if (enabled) material.opacity = INSPECT_OPACITY;
+    },
     apply(proxy: ProxySnapshot): void {
       material.color.setHex(STAGE_COLORS[proxy.colorStage] ?? STAGE_COLORS[0]);
       material.emissive.setHex(STAGE_EMISSIVE[proxy.colorStage] ?? STAGE_EMISSIVE[0]);
-      material.opacity = proxy.stage === 'ruptured' ? 0.42 : 0.62 - proxy.cracking * 0.12;
+      material.opacity = inspecting
+        ? INSPECT_OPACITY
+        : proxy.stage === 'ruptured'
+          ? 0.42
+          : 0.62 - proxy.cracking * 0.12;
       // Rubber-ball deformation: flatten vertically, bulge sideways.
       const squash = Math.min(1, Math.max(0, proxy.squash));
       group.scale.set(

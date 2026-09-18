@@ -21,6 +21,43 @@ export const POSES: Record<PoseId, PoseProfile> = {
     rotationLimit: 0.65,
     telegraphMultiplier: 0.82,
     anchorHeight: 0.58
+  },
+  // A three-sided seat pins the hips: almost no depth, a little side-to-side.
+  'seated-chair': {
+    id: 'seated-chair',
+    lateralLimit: 0.48,
+    depthLimit: 0.22,
+    rotationLimit: 0.5,
+    telegraphMultiplier: 0.9,
+    anchorHeight: 0.62
+  },
+  // The spread stance trades nearly all mobility for a longer read on the
+  // attack, so it stays winnable through timing rather than through dodging.
+  'spread-standing': {
+    id: 'spread-standing',
+    lateralLimit: 0.3,
+    depthLimit: 0.35,
+    rotationLimit: 0.28,
+    telegraphMultiplier: 1.18,
+    anchorHeight: 0.86
+  },
+  // Lowest target and the shortest warning: fast hands, no time to think.
+  'crouch-front': {
+    id: 'crouch-front',
+    lateralLimit: 0.8,
+    depthLimit: 0.55,
+    rotationLimit: 0.75,
+    telegraphMultiplier: 0.7,
+    anchorHeight: 0.44
+  },
+  // Leaning back buys depth instead of width.
+  'braced-back': {
+    id: 'braced-back',
+    lateralLimit: 0.7,
+    depthLimit: 1.15,
+    rotationLimit: 0.8,
+    telegraphMultiplier: 0.96,
+    anchorHeight: 0.74
   }
 };
 
@@ -48,7 +85,14 @@ export const SHOES: Record<ShoeId, ShoeProfile> = {
   }
 };
 
-export const POSE_IDS: PoseId[] = ['standing-front', 'kneeling-front'];
+export const POSE_IDS: PoseId[] = [
+  'standing-front',
+  'kneeling-front',
+  'seated-chair',
+  'spread-standing',
+  'crouch-front',
+  'braced-back'
+];
 export const SHOE_IDS: ShoeId[] = ['pump', 'stiletto', 'platform'];
 
 export const MIN_POWER = 1;

@@ -4,6 +4,7 @@ import { createCharacters, applySnapshot } from '../../src/render/characters';
 import { createShoe } from '../../src/render/shoes';
 import { createTargetOverlay } from '../../src/render/targets';
 import { createGameEngine } from '../../src/game/engine';
+import { POSES, POSE_IDS } from '../../src/game/config';
 import type { ShoeId } from '../../src/game/types';
 
 function countGeometry(root: THREE.Object3D): number {
@@ -106,5 +107,71 @@ describe('applySnapshot', () => {
     expect(overlay.group.scale.y).toBeLessThan(1);
     expect(overlay.group.scale.x).toBeGreaterThan(1);
     expect(rig.leftTarget.name).toBe('leftTarget');
+  });
+});
+
+describe('pose variety and inspection', () => {
+  it('gives every pose a distinct player silhouette height', () => {
+    const heights = POSE_IDS.map((id) => {
+      const rig = createCharacters(id, 'pump');
+      return new THREE.Box3().setFromObject(rig.player).max.y.toFixed(3);
+    });
+    expect(new Set(heights).size).toBe(POSE_IDS.length);
+  });
+
+  it('places each pose overlay at that pose profile height', () => {
+    for (const id of POSE_IDS) {
+      const rig = createCharacters(id, 'pump');
+      expect(rig.targetAnchor.position.y).toBeCloseTo(POSES[id].anchorHeight, 5);
+    }
+  });
+
+  it('builds a seat prop only for the seated pose', () => {
+    expect(createCharacters('seated-chair', 'pump').root.getObjectByName('seat')).toBeTruthy();
+    expect(createCharacters('standing-front', 'pump').root.getObjectByName('seat')).toBeFalsy();
+  });
+
+  it('spreads the stance wider than the standing pose', () => {
+    const width = (id: (typeof POSE_IDS)[number]): number => {
+      const box = new THREE.Box3().setFromObject(createCharacters(id, 'pump').player);
+      return box.max.x - box.min.x;
+    };
+    expect(width('spread-standing')).toBeGreaterThan(width('standing-front'));
+  });
+
+  it('hides the attacker and fades the body while inspecting', () => {
+    const rig = createCharacters('standing-front', 'pump');
+    const bodyMaterials = (): THREE.MeshStandardMaterial[] => {
+      const found: THREE.MeshStandardMaterial[] = [];
+      rig.player.traverse((node) => {
+        const mesh = node as THREE.Mesh;
+        if (mesh.isMesh) found.push(mesh.material as THREE.MeshStandardMaterial);
+      });
+      return found;
+    };
+
+    expect(rig.attacker.visible).toBe(true);
+    expect(bodyMaterials().every((m) => m.opacity === 1)).toBe(true);
+
+    rig.setInspect(true);
+    expect(rig.attacker.visible).toBe(false);
+    expect(rig.attackingFoot.visible).toBe(false);
+    expect(rig.attackerThigh.visible).toBe(false);
+    expect(bodyMaterials().every((m) => m.transparent && m.opacity < 1)).toBe(true);
+    // The abstract proxy must read louder, not quieter, while being reviewed.
+    expect((rig.overlays.left.mesh.material as THREE.MeshStandardMaterial).opacity).toBeGreaterThan(
+      0.62
+    );
+
+    rig.setInspect(false);
+    expect(rig.attacker.visible).toBe(true);
+    expect(bodyMaterials().every((m) => m.opacity === 1)).toBe(true);
+  });
+
+  it('reports the inspection state', () => {
+    const rig = createCharacters('standing-front', 'pump');
+    expect(rig.inspecting()).toBe(false);
+    rig.setInspect(true);
+    expect(rig.inspecting()).toBe(true);
   });
 });

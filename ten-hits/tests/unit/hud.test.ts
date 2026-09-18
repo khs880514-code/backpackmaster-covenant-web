@@ -31,7 +31,7 @@ describe('HUD', () => {
   it('exposes pose, shoe, and power controls in setup', () => {
     const hud = createHud(host, {});
     hud.render(snapshotAfter(0));
-    expect(host.querySelectorAll('[data-pose-option]')).toHaveLength(2);
+    expect(host.querySelectorAll('[data-pose-option]')).toHaveLength(6);
     expect(host.querySelectorAll('[data-shoe-option]')).toHaveLength(3);
     const power = host.querySelector<HTMLInputElement>('[data-power-input]')!;
     expect(power.min).toBe('1');
@@ -131,5 +131,86 @@ describe('HUD', () => {
     const hud = createHud(host, {});
     for (let i = 0; i < 5; i += 1) hud.render(snapshotAfter(1.5));
     expect(host.querySelectorAll('[data-hit-dot]')).toHaveLength(10);
+  });
+});
+
+describe('HUD review controls', () => {
+  let host: HTMLElement;
+
+  beforeEach(() => {
+    host = root();
+  });
+
+  it('offers a six-entry view menu', () => {
+    const hud = createHud(host, {});
+    hud.render(snapshotAfter(0));
+    const views = host.querySelectorAll('[data-view-option]');
+    expect(views).toHaveLength(6);
+    expect([...views].map((node) => node.getAttribute('data-view-option'))).toEqual([
+      'side',
+      'front',
+      'back',
+      'top',
+      'diagonal',
+      'zoom'
+    ]);
+  });
+
+  it('reports the chosen view and marks it active', () => {
+    const onView = vi.fn();
+    const hud = createHud(host, { onView });
+    hud.render(snapshotAfter(0));
+    const top = host.querySelector<HTMLButtonElement>('[data-view-option="top"]')!;
+    top.click();
+    expect(onView).toHaveBeenCalledWith('top');
+    expect(top.getAttribute('aria-pressed')).toBe('true');
+    expect(
+      host.querySelector('[data-view-option="side"]')!.getAttribute('aria-pressed')
+    ).toBe('false');
+  });
+
+  it('exposes an inspect toggle that is separate from the feedback toggles', () => {
+    const onInspect = vi.fn();
+    const hud = createHud(host, { onInspect });
+    hud.render(snapshotAfter(0));
+    const inspect = host.querySelector<HTMLButtonElement>('[data-inspect]')!;
+    expect(inspect.getAttribute('aria-pressed')).toBe('false');
+    expect(host.querySelectorAll('[data-toggle]')).toHaveLength(3);
+
+    inspect.click();
+    expect(onInspect).toHaveBeenCalledWith(true);
+    expect(inspect.getAttribute('aria-pressed')).toBe('true');
+    expect(host.querySelector('.hud')!.classList.contains('is-inspecting')).toBe(true);
+
+    inspect.click();
+    expect(onInspect).toHaveBeenLastCalledWith(false);
+    expect(host.querySelector('.hud')!.classList.contains('is-inspecting')).toBe(false);
+  });
+
+  it('keeps the review menu out of an attack', () => {
+    const hud = createHud(host, {});
+    hud.render(snapshotAfter(1.5));
+    expect(host.querySelector('[data-review-panel]')!.getAttribute('hidden')).not.toBeNull();
+  });
+
+  it('leaves inspection when a run starts', () => {
+    const onInspect = vi.fn();
+    const hud = createHud(host, { onInspect });
+    hud.render(snapshotAfter(0));
+    host.querySelector<HTMLButtonElement>('[data-inspect]')!.click();
+    hud.render(snapshotAfter(1.5));
+    expect(host.querySelector('.hud')!.classList.contains('is-inspecting')).toBe(false);
+    expect(
+      host.querySelector('[data-inspect]')!.getAttribute('aria-pressed')
+    ).toBe('false');
+  });
+
+  it('still prints no numbers with the review menu open', () => {
+    const hud = createHud(host, {});
+    hud.render(snapshotAfter(0));
+    host.querySelector<HTMLButtonElement>('[data-inspect]')!.click();
+    const text = host.textContent ?? '';
+    expect(text).not.toMatch(/\d+\s*%/);
+    expect(text).not.toMatch(/\d+\s*\/\s*\d+/);
   });
 });

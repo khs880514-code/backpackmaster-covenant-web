@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import * as THREE from 'three';
-import { createCameraController } from '../../src/render/camera';
+import { VIEW_IDS, createCameraController } from '../../src/render/camera';
+import { POSE_IDS } from '../../src/game/config';
 
 function controller() {
   const camera = new THREE.PerspectiveCamera(46, 1, 0.1, 40);
@@ -81,5 +82,89 @@ describe('camera controller', () => {
     expect(ctrl.distance()).toBeGreaterThan(0.5);
     ctrl.zoom(100);
     expect(ctrl.distance()).toBeLessThan(8);
+  });
+});
+
+describe('camera view presets', () => {
+  it('exposes six review views', () => {
+    expect(VIEW_IDS).toEqual(['side', 'front', 'back', 'top', 'diagonal', 'zoom']);
+  });
+
+  it('moves to a named view and reports it', () => {
+    const { ctrl } = controller();
+    ctrl.applyPhase('setup', 'standing-front');
+    ctrl.setView('side');
+    ctrl.update(1);
+    expect(ctrl.view()).toBe('side');
+    expect(ctrl.yaw()).toBeCloseTo(-Math.PI / 2, 3);
+  });
+
+  it('gives every view a distinct camera position', () => {
+    const seen = new Set<string>();
+    for (const id of VIEW_IDS) {
+      const { camera, ctrl } = controller();
+      ctrl.applyPhase('setup', 'standing-front');
+      ctrl.setView(id);
+      ctrl.update(1);
+      seen.add(
+        [camera.position.x, camera.position.y, camera.position.z]
+          .map((n) => n.toFixed(3))
+          .join('|')
+      );
+    }
+    expect(seen.size).toBe(VIEW_IDS.length);
+  });
+
+  it('pulls the zoom view closer than the diagonal view', () => {
+    const wide = controller();
+    wide.ctrl.applyPhase('setup', 'standing-front');
+    wide.ctrl.setView('diagonal');
+    wide.ctrl.update(1);
+
+    const close = controller();
+    close.ctrl.applyPhase('setup', 'standing-front');
+    close.ctrl.setView('zoom');
+    close.ctrl.update(1);
+
+    expect(close.ctrl.distance()).toBeLessThan(wide.ctrl.distance());
+  });
+
+  it('refuses a view change while the camera is locked', () => {
+    const { ctrl } = controller();
+    ctrl.applyPhase('strike', 'standing-front');
+    ctrl.setView('top');
+    expect(ctrl.view()).toBeNull();
+  });
+
+  it('drops the named view as soon as the player orbits', () => {
+    const { ctrl } = controller();
+    ctrl.applyPhase('setup', 'standing-front');
+    ctrl.setView('top');
+    ctrl.orbit({ x: 0.1, y: 0 });
+    expect(ctrl.view()).toBeNull();
+  });
+
+  it('pulls in close on the target anchor while inspecting', () => {
+    const wide = controller();
+    wide.ctrl.applyPhase('setup', 'standing-front');
+    wide.ctrl.update(1);
+
+    const close = controller();
+    close.ctrl.applyPhase('setup', 'standing-front');
+    close.ctrl.setInspect(true);
+    close.ctrl.update(1);
+
+    expect(close.ctrl.distance()).toBeLessThan(wide.ctrl.distance());
+    expect(close.camera.position.y).toBeLessThan(wide.camera.position.y);
+  });
+
+  it('frames every pose without leaving the target behind', () => {
+    for (const id of POSE_IDS) {
+      const { camera, ctrl } = controller();
+      ctrl.applyPhase('telegraph', id);
+      ctrl.update(1);
+      expect(Number.isFinite(camera.position.x)).toBe(true);
+      expect(camera.position.y).toBeGreaterThan(0);
+    }
   });
 });

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { POSES } from '../../src/game/config';
+import { POSES, POSE_IDS } from '../../src/game/config';
 import { clampPelvis, poseAnchor } from '../../src/game/pose';
 
 describe('clampPelvis', () => {
@@ -31,5 +31,14 @@ describe('clampPelvis', () => {
     expect(poseAnchor(POSES['kneeling-front'])).toBeLessThan(
       poseAnchor(POSES['standing-front'])
     );
+  });
+
+  it('clamps each pose to its own ellipse', () => {
+    for (const id of POSE_IDS) {
+      const pose = POSES[id];
+      const clamped = clampPelvis({ x: 9, y: 9 }, pose);
+      expect(Math.abs(clamped.x)).toBeLessThanOrEqual(pose.lateralLimit + 1e-9);
+      expect(Math.abs(clamped.y)).toBeLessThanOrEqual(pose.depthLimit + 1e-9);
+    }
   });
 });
