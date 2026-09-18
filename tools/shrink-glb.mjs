@@ -8,7 +8,8 @@
  * at a couple of megabytes.
  *
  * Usage: node shrink-glb.mjs <file.glb> [...]
- * Writes <name>.small.glb beside each input and never touches the original.
+ * Also takes the authoring pipeline's `.glb.raw` exports. Writes
+ * <name>.small.glb beside each input and never touches the original.
  */
 import { stat, readFile, writeFile } from 'node:fs/promises';
 import { basename, dirname, join } from 'node:path';
@@ -79,9 +80,11 @@ function stripAuthoringNodes(document) {
 const MB = (bytes) => (bytes / 1048576).toFixed(2);
 
 async function main() {
-  const files = process.argv.slice(2).filter((a) => a.toLowerCase().endsWith('.glb'));
+  // The authored exports arrive as .glb or as .glb.raw, depending on which
+  // stage of their pipeline they came out of.
+  const files = process.argv.slice(2).filter((a) => /\.(glb|glb\.raw|raw)$/i.test(a));
   if (files.length === 0) {
-    console.error('사용법: node shrink-glb.mjs <파일.glb> [...]');
+    console.error('사용법: node shrink-glb.mjs <파일.glb> [...]  (.glb.raw 도 가능)');
     process.exitCode = 1;
     return;
   }
@@ -125,7 +128,8 @@ async function main() {
         meshopt({ encoder: MeshoptEncoder, level: 'medium' })
       );
 
-      const out = join(dirname(file), `${name.replace(/\.glb$/i, '')}.small.glb`);
+      const stem = name.replace(/\.raw$/i, '').replace(/\.glb$/i, '');
+      const out = join(dirname(file), `${stem}.small.glb`);
       const bytes = await io.writeBinary(document);
       await writeFile(out, bytes);
 

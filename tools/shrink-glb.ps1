@@ -41,10 +41,13 @@ while ($true) {
   $line = Read-Host ' 파일'
   if ([string]::IsNullOrWhiteSpace($line)) { break }
 
-  # 한 줄에 여러 개를 끌어다 놓으면 따옴표로 묶여서 들어옵니다.
-  $quoted = [regex]::Matches($line, '"([^"]+)"')
-  $paths = if ($quoted.Count -gt 0) { $quoted | ForEach-Object { $_.Groups[1].Value } }
-           else { @($line.Trim().Trim('"')) }
+  # 여러 개를 한 번에 끌어다 놓으면 한 줄에 이어져 들어옵니다. 경로에 공백이
+  # 있으면 따옴표가 붙고, 없으면 그냥 공백으로만 이어지므로 따옴표에 기댈 수
+  # 없습니다. 드라이브 문자(C:\) 나 네트워크 경로(\\) 앞에서 자릅니다.
+  $paths = @([regex]::Split(($line -replace '"', ''), '(?=(?:[A-Za-z]:\\|\\\\))') |
+    ForEach-Object { $_.Trim() } |
+    Where-Object { $_ -ne '' })
+  if ($paths.Count -eq 0) { $paths = @($line.Trim()) }
 
   foreach ($path in $paths) {
     if (Test-Path -LiteralPath $path) {
@@ -56,13 +59,17 @@ while ($true) {
   }
 }
 
-$files = @($files | Where-Object { $_ -match '\.glb$' } | Select-Object -Unique)
+# 작업자가 내보낸 파일은 .glb 일 수도, .glb.raw 일 수도 있습니다.
+$files = @($files | Where-Object { $_ -match '\.(glb|glb\.raw|raw)$' } | Select-Object -Unique)
 if ($files.Count -eq 0) {
   Write-Host ''
-  Write-Host ' [!] .glb 파일이 하나도 없습니다.' -ForegroundColor Yellow
+  Write-Host ' [!] 처리할 파일이 없습니다 (.glb / .glb.raw 만 받습니다).' -ForegroundColor Yellow
   Write-Host ''
   return
 }
+
+Write-Host ''
+Write-Host (' 파일 ' + $files.Count + '개를 처리합니다.') -ForegroundColor Green
 
 # --- 도구 준비 (처음 한 번만 설치되고 다음부터 재사용) --------------------
 if (-not (Test-Path $Work)) { New-Item -ItemType Directory -Path $Work | Out-Null }
