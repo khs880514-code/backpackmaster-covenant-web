@@ -9,12 +9,17 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
-    "check": "npm run test && npm run build"
+    "check": "npm run test && npm run build",
+    "android:sync": "npm run build && cap sync android",
+    "android:apk": "npm run android:sync && cd android && ./gradlew assembleDebug"
   },
   "dependencies": {
     "three": "^0.180.0"
   },
   "devDependencies": {
+    "@capacitor/android": "^8.5.2",
+    "@capacitor/cli": "^8.5.2",
+    "@capacitor/core": "^8.5.2",
     "@gltf-transform/core": "^4.5.0",
     "@gltf-transform/functions": "^4.5.0",
     "@playwright/test": "^1.55.0",

@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">TEN HITS</string>
+    <string name="title_activity_main">TEN HITS</string>
+    <string name="package_name">com.tenhits.game</string>
+    <string name="custom_url_scheme">com.tenhits.game</string>
+</resources>

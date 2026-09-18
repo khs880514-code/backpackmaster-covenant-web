@@ -1,0 +1,59 @@
+name: Android APK
+
+# Builds the installable APK. The web bundle and the APK are the same game;
+# Capacitor only wraps `play/` in a WebView shell.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, 'claude/**']
+    paths:
+      - 'ten-hits/**'
+      - '.github/workflows/android-apk.yml'
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ten-hits
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: ten-hits/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build the web bundle
+        run: npm run build
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: 'platforms;android-36 build-tools;36.0.0'
+
+      - name: Copy the bundle into the Android project
+        run: npx cap sync android
+
+      - name: Assemble the APK
+        run: ./gradlew --no-daemon assembleDebug
+        working-directory: ten-hits/android
+
+      - name: Report the APK size
+        run: ls -lh app/build/outputs/apk/debug/
+        working-directory: ten-hits/android
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ten-hits-apk
+          path: ten-hits/android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
