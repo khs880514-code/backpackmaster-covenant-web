@@ -12,7 +12,9 @@ export const POSES: Record<PoseId, PoseProfile> = {
     depthLimit: 1,
     rotationLimit: 1,
     telegraphMultiplier: 1,
-    anchorHeight: 0.92
+    // Low enough that the thighs have parted; at 0.92 they are still closed
+    // on the authored body and nothing can hang between them.
+    anchorHeight: 0.86
   },
   'kneeling-front': {
     id: 'kneeling-front',
@@ -39,7 +41,8 @@ export const POSES: Record<PoseId, PoseProfile> = {
     depthLimit: 0.35,
     rotationLimit: 0.28,
     telegraphMultiplier: 1.18,
-    anchorHeight: 0.86
+    // A braced stance parts the thighs, so the pair hangs lower and freer.
+    anchorHeight: 0.83
   },
   // Lowest target and the shortest warning: fast hands, no time to think.
   'crouch-front': {

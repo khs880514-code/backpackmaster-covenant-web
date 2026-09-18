@@ -230,3 +230,108 @@ export function createContactBands(shoeId: ShoeId): ContactBandRings {
     }
   };
 }
+
+
+export interface TargetShell {
+  group: THREE.Group;
+  /** Re-fits the shell and tethers around wherever the pair has swung to. */
+  apply(left: ProxySnapshot, right: ProxySnapshot): void;
+  setInspect(enabled: boolean): void;
+  dispose(): void;
+}
+
+/**
+ * The structure the pair hangs in: one soft outer envelope holding both, and a
+ * tether from the anchor down to each.
+ *
+ * Without it the proxies float with nothing joining them to the body, which is
+ * what makes them read as stuck on rather than suspended — and it is also why
+ * they swing at all, so drawing it explains the mechanic.
+ *
+ * This is the same topology the authoring verification checks for: one outer
+ * closed surface around two bodies.
+ */
+export function createTargetShell(): TargetShell {
+  const group = new THREE.Group();
+  group.name = 'targetShell';
+
+  const envelopeGeometry = new THREE.SphereGeometry(1, 24, 18);
+  roughenSurface(envelopeGeometry, 0.04);
+  const envelopeMaterial = new THREE.MeshStandardMaterial({
+    color: 0xb6a091,
+    roughness: 0.85,
+    metalness: 0,
+    transparent: true,
+    opacity: 0.4,
+    depthWrite: false,
+    depthTest: false
+  });
+  const envelope = new THREE.Mesh(envelopeGeometry, envelopeMaterial);
+  envelope.renderOrder = 8;
+  group.add(envelope);
+
+  const tetherGeometry = new THREE.CylinderGeometry(0.004, 0.009, 1, 8, 1, true);
+  // The cylinder is built along +Y and anchored at its top, so scaling its
+  // length grows it downward from the attachment rather than about its middle.
+  tetherGeometry.translate(0, -0.5, 0);
+  const tetherMaterial = new THREE.MeshStandardMaterial({
+    color: 0xa8907f,
+    roughness: 0.9,
+    metalness: 0,
+    transparent: true,
+    opacity: 0.75,
+    depthWrite: false,
+    depthTest: false
+  });
+  const tethers = [0, 1].map(() => {
+    const mesh = new THREE.Mesh(tetherGeometry, tetherMaterial);
+    mesh.renderOrder = 9;
+    group.add(mesh);
+    return mesh;
+  });
+
+  const UP = new THREE.Vector3(0, 1, 0);
+  const to = new THREE.Vector3();
+
+  return {
+    group,
+    apply(left: ProxySnapshot, right: ProxySnapshot): void {
+      const pair = [left, right];
+
+      // Envelope: centred between the two, wide enough to contain both.
+      const cx = (left.position.x + right.position.x) / 2;
+      const cy = (left.position.y + right.position.y) / 2;
+      const spread = Math.abs(right.position.x - left.position.x);
+      const drop = Math.abs(right.position.y - left.position.y);
+      envelope.position.set(cx, cy, 0);
+      envelope.scale.set(
+        spread / 2 + TARGET_RADIUS * 1.5,
+        TARGET_RADIUS * PROXY_HEIGHT_RATIO * 1.35 + drop / 2,
+        TARGET_RADIUS * 1.45
+      );
+
+      // Tethers: from the anchor at the origin down to each proxy.
+      tethers.forEach((tether, i) => {
+        const proxy = pair[i]!;
+        to.set(proxy.position.x, proxy.position.y, 0);
+        const length = Math.max(0.004, to.length());
+        tether.position.set(0, 0, 0);
+        tether.scale.set(1, length, 1);
+        tether.quaternion.setFromUnitVectors(
+          UP,
+          to.clone().multiplyScalar(-1 / length)
+        );
+      });
+    },
+    setInspect(enabled: boolean): void {
+      envelopeMaterial.opacity = enabled ? 0.28 : 0.4;
+      tetherMaterial.opacity = enabled ? 0.9 : 0.75;
+    },
+    dispose(): void {
+      envelopeGeometry.dispose();
+      envelopeMaterial.dispose();
+      tetherGeometry.dispose();
+      tetherMaterial.dispose();
+    }
+  };
+}

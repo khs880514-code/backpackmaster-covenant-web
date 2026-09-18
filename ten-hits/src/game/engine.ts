@@ -66,14 +66,16 @@ const IMPACT_HOLD = 0.25;
 const TARGET_RADIUS = 0.028;
 const DEPTH_TO_Z = 0.12;
 /**
- * How far in front of the pelvis the pair hangs, in world metres. The
- * procedural figure was thin enough not to need it; an authored body is not,
- * and the proxies would otherwise sit buried inside the torso.
+ * How far in front of the pelvis the pair hangs, in world metres.
+ *
+ * Measured against the authored body: its front surface sits at 12.0cm at this
+ * height, so anything closer than that is inside the figure. The procedural
+ * capsule was thin enough to hide the problem; a real body is not.
  *
  * Both the target and the strike's aim carry this same offset, so the geometry
  * the contact test measures is unchanged by it.
  */
-const PROXY_FORWARD = 0.115;
+const PROXY_FORWARD = 0.138;
 /**
  * How far the pelvis actually travels, in world metres, at full pose range.
  * Pose profiles stay normalized 0..1 so they read as ratios; this is what

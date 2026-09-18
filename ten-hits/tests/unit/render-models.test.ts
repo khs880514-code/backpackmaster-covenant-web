@@ -337,3 +337,26 @@ describe('authored attack clip playback', () => {
     expect(rig.attacker.visible).toBe(true);
   });
 });
+
+describe('fading an alpha-masked body', () => {
+  it('lifts the alpha mask so a masked figure turns see-through, not invisible', () => {
+    const rig = createCharacters('standing-front', 'pump');
+    const masked = new THREE.Mesh(
+      new THREE.BoxGeometry(0.4, 1.7, 0.3),
+      new THREE.MeshStandardMaterial({ alphaTest: 0.5, transparent: false, opacity: 1 })
+    );
+    const model = new THREE.Group();
+    model.add(masked);
+    rig.applyPoseModel(model);
+
+    const material = masked.material as THREE.MeshStandardMaterial;
+    rig.setInspect(true);
+    // Opacity below the mask threshold would discard every fragment.
+    expect(material.opacity).toBeLessThan(0.5);
+    expect(material.alphaTest).toBe(0);
+
+    rig.setInspect(false);
+    expect(material.alphaTest).toBe(0.5);
+    expect(material.opacity).toBe(1);
+  });
+});

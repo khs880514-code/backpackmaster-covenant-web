@@ -6,8 +6,10 @@ import { createShoe } from './shoes';
 import {
   createContactBands,
   createTargetOverlay,
+  createTargetShell,
   type ContactBandRings,
-  type TargetOverlay
+  type TargetOverlay,
+  type TargetShell
 } from './targets';
 import type { GameSnapshot, PoseId, ShoeId } from '../game/types';
 
@@ -209,6 +211,7 @@ export interface CharacterRig {
   rightTarget: THREE.Group;
   overlays: { left: TargetOverlay; right: TargetOverlay };
   bands: ContactBandRings;
+  shell: TargetShell;
   attackerThigh: THREE.Mesh;
   attackerShin: THREE.Mesh;
   poseId: PoseId;
@@ -234,6 +237,7 @@ interface MaterialBaseline {
   opacity: number;
   transparent: boolean;
   depthWrite: boolean;
+  alphaTest: number;
 }
 
 /** Collects every distinct standard material under a subtree. */
@@ -319,6 +323,9 @@ export function createCharacters(poseId: PoseId, shoeId: ShoeId): CharacterRig {
   const bands = createContactBands(shoeId);
   targetAnchor.add(bands.group);
 
+  const shell = createTargetShell();
+  targetAnchor.add(shell.group);
+
   const leftOverlay = createTargetOverlay();
   leftOverlay.group.name = 'leftTarget';
   const rightOverlay = createTargetOverlay();
@@ -340,7 +347,8 @@ export function createCharacters(poseId: PoseId, shoeId: ShoeId): CharacterRig {
         baselines.set(material, {
           opacity: material.opacity,
           transparent: material.transparent,
-          depthWrite: material.depthWrite
+          depthWrite: material.depthWrite,
+          alphaTest: material.alphaTest
         });
       }
       const base = baselines.get(material)!;
@@ -349,6 +357,10 @@ export function createCharacters(poseId: PoseId, shoeId: ShoeId): CharacterRig {
         ? Math.min(base.opacity, INSPECT_BODY_OPACITY)
         : base.opacity;
       material.depthWrite = enabled ? false : base.depthWrite;
+      // An authored body uses alpha masking; fading it below the mask's
+      // threshold would discard every fragment and the figure would vanish
+      // outright instead of turning see-through.
+      material.alphaTest = enabled ? 0 : base.alphaTest;
       material.needsUpdate = true;
     }
   }
@@ -390,6 +402,7 @@ export function createCharacters(poseId: PoseId, shoeId: ShoeId): CharacterRig {
     fadeBody(enabled);
     leftOverlay.setInspect(enabled);
     rightOverlay.setInspect(enabled);
+    shell.setInspect(enabled);
   }
 
   function applyPoseModel(model: THREE.Group | null): void {
@@ -418,6 +431,7 @@ export function createCharacters(poseId: PoseId, shoeId: ShoeId): CharacterRig {
     rightTarget: rightOverlay.group,
     overlays: { left: leftOverlay, right: rightOverlay },
     bands,
+    shell,
     attackerThigh,
     attackerShin,
     poseId,
@@ -441,6 +455,7 @@ export function createCharacters(poseId: PoseId, shoeId: ShoeId): CharacterRig {
     setInspect,
     inspecting: () => inspect,
     dispose(): void {
+      shell.dispose();
       bands.dispose();
       leftOverlay.dispose();
       rightOverlay.dispose();
@@ -508,6 +523,7 @@ export function applySnapshot(rig: CharacterRig, snapshot: GameSnapshot): void {
 
   rig.overlays.left.apply(snapshot.proxies[0]);
   rig.overlays.right.apply(snapshot.proxies[1]);
+  rig.shell.apply(snapshot.proxies[0], snapshot.proxies[1]);
 
   // The bands only matter while a strike is inbound, so they fade in with it.
   const incoming =
