@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { contactBands, TARGET_RADIUS } from '../game/engine';
-import type { ColorStage, ProxySnapshot, ShoeId } from '../game/types';
+import type { ColorStage, ProxyImprint, ProxySnapshot, ShoeId } from '../game/types';
 import { SHOES } from '../game/config';
 
 /**
@@ -37,6 +37,8 @@ const PROXY_DEPTH_RATIO = 0.97;
 
 /** The core sits inside the shell and shows through it as the shell thins. */
 const CORE_SCALE = 0.62;
+/** How far into the proxy the striking surface can press, as a fraction of its radius. */
+const IMPRINT_DEPTH = 0.62;
 const CORE_COLORS: Record<ColorStage, number> = {
   0: 0x8f7d74,
   1: 0x7c675f,
@@ -78,6 +80,58 @@ export interface TargetOverlay {
 
 const INSPECT_OPACITY = 0.97;
 const BASE_OPACITY = 0.88;
+
+/**
+ * Presses the shape of the striking surface into a proxy mesh.
+ *
+ * The dent is a cosine-falloff displacement along the direction the shoe came
+ * from. Its sharpness is what carries the footwear: a stiletto's narrow cap
+ * concentrates into a deep local pit, a platform sole spreads the same depth
+ * across most of the facing hemisphere. Without this the only thing separating
+ * one shoe from another on screen was a slightly different shade.
+ */
+export function pressImprint(
+  geometry: THREE.BufferGeometry,
+  rest: Float32Array,
+  imprint: ProxyImprint | null,
+  radius: number
+): void {
+  const position = geometry.getAttribute('position') as THREE.BufferAttribute;
+  const array = position.array as Float32Array;
+
+  if (!imprint || imprint.depth <= 1e-4) {
+    if (array !== rest) array.set(rest);
+    position.needsUpdate = true;
+    geometry.computeVertexNormals();
+    return;
+  }
+
+  const length = Math.hypot(imprint.x, imprint.y, imprint.z) || 1;
+  const dx = imprint.x / length;
+  const dy = imprint.y / length;
+  const dz = imprint.z / length;
+
+  // A narrow cap concentrates the dent; a broad sole spreads it.
+  const sharpness = 1.4 + (1 - Math.min(1, Math.max(0, imprint.width))) * 9;
+  const reach = radius * IMPRINT_DEPTH * Math.min(1, Math.max(0, imprint.depth));
+
+  for (let i = 0; i < rest.length; i += 3) {
+    const x = rest[i]!;
+    const y = rest[i + 1]!;
+    const z = rest[i + 2]!;
+    const norm = Math.hypot(x, y, z) || 1;
+    // How square-on this vertex faces the incoming shoe. The dot product is
+    // against the surface direction, so only the struck side moves.
+    const facing = -((x / norm) * dx + (y / norm) * dy + (z / norm) * dz);
+    const falloff = facing <= 0 ? 0 : Math.pow(facing, sharpness);
+    array[i] = x + dx * reach * falloff;
+    array[i + 1] = y + dy * reach * falloff;
+    array[i + 2] = z + dz * reach * falloff;
+  }
+
+  position.needsUpdate = true;
+  geometry.computeVertexNormals();
+}
 
 export function createTargetOverlay(): TargetOverlay {
   const group = new THREE.Group();
@@ -123,6 +177,15 @@ export function createTargetOverlay(): TargetOverlay {
   core.renderOrder = 11;
   group.add(core);
 
+  // The undented shape, kept so every frame starts from the authored surface
+  // instead of accumulating its own rounding error.
+  const restShell = Float32Array.from(
+    (geometry.getAttribute('position') as THREE.BufferAttribute).array as Float32Array
+  );
+  const restCore = Float32Array.from(
+    (coreGeometry.getAttribute('position') as THREE.BufferAttribute).array as Float32Array
+  );
+
   let inspecting = false;
 
   return {
@@ -162,6 +225,16 @@ export function createTargetOverlay(): TargetOverlay {
       coreMaterial.opacity = inspecting ? Math.min(0.95, crushed * 1.4) : crushed * 0.9;
       const coreFlatten = 1 - crushed * 0.55;
       core.scale.set(1 / Math.sqrt(coreFlatten), coreFlatten, 1 / Math.sqrt(coreFlatten));
+
+      // The shoe's shape, pressed in where it landed. The core keeps the part
+      // that never comes back, so a spent proxy carries the mark of what did it.
+      pressImprint(geometry, restShell, proxy.imprint, TARGET_RADIUS);
+      pressImprint(
+        coreGeometry,
+        restCore,
+        proxy.imprint ? { ...proxy.imprint, depth: crushed } : null,
+        TARGET_RADIUS * CORE_SCALE
+      );
 
       group.position.set(proxy.position.x, proxy.position.y, 0);
     },

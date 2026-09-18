@@ -1,4 +1,11 @@
-import { FIXED_STEP, MAX_SUBSTEPS, POSES, SHOES, powerProfile } from './config';
+import {
+  FIXED_STEP,
+  MAX_SUBSTEPS,
+  POSES,
+  SHOES,
+  SHOE_WIDTH_RANGE,
+  powerProfile
+} from './config';
 import {
   crackingFactor,
   createTargetState,
@@ -15,11 +22,13 @@ import { angerMood, applyImpact, createRunState, hitDots, runResult } from './st
 import type {
   AttackPlan,
   CameraPhase,
+  ContactPoint,
   GamePhase,
   GameSnapshot,
   ImpactGrade,
   PendulumPair,
   PoseId,
+  ProxyImprint,
   ProxySnapshot,
   ShoeId,
   ShoeProfile,
@@ -66,6 +75,27 @@ export interface GameEngine {
 }
 
 const IMPACT_HOLD = 0.25;
+
+/**
+ * How long the impact is held open, by grade.
+ *
+ * A quarter of a second is long enough to register that something happened and
+ * far too short to read *what* — which is the whole complaint about not being
+ * able to learn the dodge. A scored contact now stays on screen while the shoe
+ * finishes pressing through, so the follow-through plays out slowly instead of
+ * snapping. The attacker's clip is sampled from this same phase progress, so
+ * lengthening the hold slows her motion to match at no extra cost.
+ */
+const REVIEW_HOLD: Record<ImpactGrade, number> = {
+  miss: IMPACT_HOLD,
+  graze: 0.55,
+  'single-compression': 1.25,
+  'center-compression': 1.6
+};
+
+function impactHold(grade: ImpactGrade | null): number {
+  return grade === null ? IMPACT_HOLD : REVIEW_HOLD[grade];
+}
 const TARGET_RADIUS = 0.028;
 const DEPTH_TO_Z = 0.12;
 /**
@@ -192,6 +222,15 @@ export function createGameEngine(options: EngineOptions): GameEngine {
   let right: TargetState = createTargetState();
 
   let requestedPelvis: Vec2 = { x: 0, y: 0 };
+  let contactPoint: ContactPoint | null = null;
+  /**
+   * The lasting shape of what hit each side. Kept here rather than in
+   * `TargetState` so the damage model stays a pure function of the grade.
+   */
+  const imprints: Record<TargetSide, Omit<ProxyImprint, 'depth'> | null> = {
+    left: null,
+    right: null
+  };
   let pelvis: Vec2 = { x: 0, y: 0 };
   let drift: Vec2 = { x: 0, y: 0 };
 
@@ -253,7 +292,7 @@ export function createGameEngine(options: EngineOptions): GameEngine {
       case 'strike':
         return plan.strikeDuration;
       case 'impact':
-        return IMPACT_HOLD;
+        return impactHold(lastGrade);
       case 'recovery':
         return plan.recoveryDuration;
       default:
@@ -275,6 +314,29 @@ export function createGameEngine(options: EngineOptions): GameEngine {
       x: footWorld.x - (dx / length) * STRIKE_SURFACE_LENGTH,
       y: footWorld.y - (dy / length) * STRIKE_SURFACE_LENGTH,
       z: footWorld.z - (dz / length) * STRIKE_SURFACE_LENGTH
+    };
+  }
+
+  /** The narrowest shoe in the set maps to 0, the broadest to 1. */
+  function contactBreadth(): number {
+    const span = SHOE_WIDTH_RANGE.max - SHOE_WIDTH_RANGE.min;
+    if (span <= 0) return 0.5;
+    const t = (shoe.contactWidth - SHOE_WIDTH_RANGE.min) / span;
+    return Math.min(1, Math.max(0, t));
+  }
+
+  /** Stores which way the shoe pressed into one side, as a unit direction. */
+  function recordImprint(side: TargetSide, target: Vec3): void {
+    const dx = target.x - footWorld.x;
+    const dy = target.y - footWorld.y;
+    const dz = target.z - footWorld.z;
+    const length = Math.hypot(dx, dy, dz);
+    if (length < 1e-6) return;
+    imprints[side] = {
+      x: dx / length,
+      y: dy / length,
+      z: dz / length,
+      width: contactBreadth()
     };
   }
 
@@ -319,6 +381,29 @@ export function createGameEngine(options: EngineOptions): GameEngine {
     }
 
     lastGrade = outcome.grade;
+    // Where the shoe actually met the pair, so the camera can frame the spot
+    // rather than the body's midline.
+    const struck = targetWorld(outcome.contacted);
+    if (outcome.grade !== 'miss') {
+      recordImprint(outcome.contacted, struck);
+      if (outcome.grade === 'center-compression') {
+        const other = outcome.contacted === 'left' ? 'right' : 'left';
+        recordImprint(other, targetWorld(other));
+      }
+    }
+    contactPoint =
+      outcome.grade === 'miss'
+        ? null
+        : {
+            side: outcome.contacted,
+            // Halfway between the shoe and the proxy it met: the spot the
+            // player has to see to learn where the dodge went wrong.
+            point: {
+              x: (struck.x + footWorld.x) / 2,
+              y: (struck.y + footWorld.y) / 2,
+              z: (struck.z + footWorld.z) / 2
+            }
+          };
     run = applyImpact(run, outcome.grade, result.ruptured);
     return run.phase;
   }
@@ -341,6 +426,7 @@ export function createGameEngine(options: EngineOptions): GameEngine {
         run = { ...run, phase: 'recovery' };
         phaseTime = 0;
         lastGrade = null;
+        contactPoint = null;
         break;
       case 'recovery':
         beginTelegraph();
@@ -381,7 +467,7 @@ export function createGameEngine(options: EngineOptions): GameEngine {
       right = recoverTarget(right, dt);
       if (run.phase === 'impact' && plan) {
         // Carry the shoe through the contact rather than parking it there.
-        const drive = Math.min(1, phaseTime / IMPACT_HOLD);
+        const drive = Math.min(1, phaseTime / impactHold(lastGrade));
         const end = sampleFootPath(plan, 1);
         footWorld = {
           x: end.x,
@@ -413,6 +499,9 @@ export function createGameEngine(options: EngineOptions): GameEngine {
       squash: squashFactor(state),
       cracking: crackingFactor(state),
       core: Math.min(1, Math.max(0, state.permanent)),
+      imprint: imprints[side]
+        ? { ...imprints[side]!, depth: squashFactor(state) }
+        : null,
       position: { x: body.position.x, y: body.position.y }
     };
   }
@@ -437,6 +526,7 @@ export function createGameEngine(options: EngineOptions): GameEngine {
       attackKind: plan ? plan.kind : null,
       phaseProgress: duration > 0 ? Math.min(1, phaseTime / duration) : 0,
       lastGrade,
+      contact: contactPoint,
       pose: pose.id,
       shoe: shoe.id,
       power: power.level

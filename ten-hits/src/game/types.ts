@@ -164,12 +164,37 @@ export interface ProxySnapshot {
    * recovers, so it is what a run leaves behind.
    */
   core: number;
+  /** Null until something has actually landed on this side. */
+  imprint: ProxyImprint | null;
   position: Vec2;
 }
 
 export type AngerMood = 'calm' | 'annoyed' | 'irritated' | 'furious' | 'seething';
 export type CameraPhase = 'free-orbit' | 'recentering' | 'locked';
 export type RunResult = 'in-progress' | 'survived' | 'ruptured';
+
+/**
+ * The dent the shoe left: which way it came from, how wide the contact patch
+ * was, and how deep it currently sits. A stiletto leaves a narrow deep mark and
+ * a platform a broad shallow one, which is what makes the footwear choice
+ * visible on the proxy rather than only in the numbers behind it.
+ */
+export interface ProxyImprint {
+  /** Unit direction the shoe pressed along, in the proxy's own axes. */
+  x: number;
+  y: number;
+  z: number;
+  /** 0 for the narrowest shoe in the set, 1 for the broadest. */
+  width: number;
+  /** 0..1, deepest at contact and settling to what never recovers. */
+  depth: number;
+}
+
+/** Where the shoe met the pair on the last scored contact, in world metres. */
+export interface ContactPoint {
+  side: TargetSide;
+  point: Vec3;
+}
 
 export interface GameSnapshot {
   phase: GamePhase;
@@ -186,6 +211,8 @@ export interface GameSnapshot {
   phaseProgress: number;
   /** Set for one snapshot right after a contact resolves. */
   lastGrade: ImpactGrade | null;
+  /** Null on a miss and outside the impact phase. */
+  contact: ContactPoint | null;
   pose: PoseId;
   shoe: ShoeId;
   power: number;

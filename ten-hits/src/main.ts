@@ -247,6 +247,7 @@ export function mountGame(root: HTMLElement, options: MountOptions = {}): GameAp
 
     applySnapshot(rig, snapshot);
     animation.update(snapshot, delta);
+    camera.focusContact(snapshot.contact?.point ?? null);
     camera.applyPhase(snapshot.phase, snapshot.pose);
     camera.update(delta);
 

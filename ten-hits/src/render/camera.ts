@@ -1,6 +1,6 @@
 import type * as THREE from 'three';
 import { POSES } from '../game/config';
-import type { CameraPhase, GamePhase, PoseId, Vec2 } from '../game/types';
+import type { CameraPhase, GamePhase, PoseId, Vec2, Vec3 } from '../game/types';
 
 interface PosePreset {
   /** Look-at point sits between the two figures so both stay in frame. */
@@ -56,6 +56,14 @@ const VIEW_BLEND_SECONDS = 0.3;
 const BLEND_SECONDS = 0.22;
 /** How tight the camera gets at the moment of contact. */
 const IMPACT_DISTANCE_SCALE = 0.32;
+/**
+ * How close the camera gets once it knows the exact spot that was struck.
+ *
+ * Tighter than the generic punch-in: the point of the review is to show which
+ * proxy the shoe caught and how far it pushed in, and 0.32 of the arena
+ * distance still reads as a body, not a contact.
+ */
+const CONTACT_DISTANCE_SCALE = 0.19;
 const PUNCH_IN_RATE = 9;
 const PUNCH_OUT_RATE = 2.6;
 const MIN_DISTANCE = 0.9;
@@ -74,6 +82,11 @@ export interface CameraController {
   inspecting(): boolean;
   /** 0 while framing the arena, 1 while pushed in on the contact. */
   punch(): number;
+  /**
+   * The world point the review framing pushes in on. Passing null returns the
+   * punch-in to the body anchor, which is all a miss deserves.
+   */
+  focusContact(point: Vec3 | null): void;
   mode(): CameraPhase;
   orbitEnabled(): boolean;
   blendProgress(): number;
@@ -122,6 +135,7 @@ export function createCameraController(camera: THREE.PerspectiveCamera): CameraC
   // and looks at it. Without this the deformation is simply too small to read.
   let punchAmount = 0;
   let punchTarget = 0;
+  let contact: Vec3 | null = null;
   let viewBlend = VIEW_BLEND_SECONDS;
   let viewFrom = { yaw: userYaw, pitch: userPitch, distance: preset.distance };
   let viewTo = { yaw: userYaw, pitch: userPitch, distance: preset.distance };
@@ -144,20 +158,26 @@ export function createCameraController(camera: THREE.PerspectiveCamera): CameraC
 
   function frame(yaw: number, pitch: number, distance: number): void {
     const t = punchAmount;
-    // Blend the arena framing toward a close look at the target anchor.
+    // Blend the arena framing toward a close look at the spot that was struck,
+    // falling back to the anchor when nothing has landed yet.
     const anchorY = POSES[poseId].anchorHeight;
-    const targetY = lookAtY() * (1 - t) + anchorY * t;
-    const targetZ = lookAtZ() * (1 - t);
-    const framedDistance = distance * (1 - t) + distance * IMPACT_DISTANCE_SCALE * t;
+    const focusX = contact ? contact.x : 0;
+    const focusY = contact ? contact.y : anchorY;
+    const focusZ = contact ? contact.z : 0;
+    const targetX = focusX * t;
+    const targetY = lookAtY() * (1 - t) + focusY * t;
+    const targetZ = lookAtZ() * (1 - t) + focusZ * t;
+    const scale = contact ? CONTACT_DISTANCE_SCALE : IMPACT_DISTANCE_SCALE;
+    const framedDistance = distance * (1 - t) + distance * scale * t;
     const framedPitch = pitch * (1 - t) + 0.02 * t;
 
     const horizontal = Math.cos(framedPitch) * framedDistance;
     camera.position.set(
-      Math.sin(yaw) * horizontal,
+      targetX + Math.sin(yaw) * horizontal,
       targetY + Math.sin(framedPitch) * framedDistance + 0.28 * (1 - t) + 0.02 * t,
       targetZ + Math.cos(yaw) * horizontal
     );
-    camera.lookAt(0, targetY, targetZ);
+    camera.lookAt(targetX, targetY, targetZ);
   }
 
   function stepPunch(delta: number): void {
@@ -205,9 +225,11 @@ export function createCameraController(camera: THREE.PerspectiveCamera): CameraC
       if (phase === 'strike' || phase === 'impact') {
         currentMode = 'locked';
         punchTarget = phase === 'impact' ? 1 : 0;
+        if (phase === 'strike') contact = null;
         return;
       }
       punchTarget = 0;
+      contact = null;
       if (phase !== 'setup') {
         // Review framing belongs to the menus, never to an attack in flight.
         inspect = false;
@@ -294,6 +316,10 @@ export function createCameraController(camera: THREE.PerspectiveCamera): CameraC
 
     inspecting(): boolean {
       return inspect;
+    },
+
+    focusContact(point: Vec3 | null): void {
+      contact = point ? { x: point.x, y: point.y, z: point.z } : null;
     },
 
     punch(): number {

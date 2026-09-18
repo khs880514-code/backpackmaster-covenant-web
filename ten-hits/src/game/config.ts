@@ -123,6 +123,13 @@ export const POSE_IDS: PoseId[] = [
   'crouch-front',
   'braced-back'
 ];
+/**
+ * The measured spread of contact widths across the shoe set, so the renderer
+ * can say "narrow" or "broad" relative to what is actually in the game rather
+ * than against an invented scale.
+ */
+export const SHOE_WIDTH_RANGE = { min: 0.917, max: 1.244 } as const;
+
 export const SHOE_IDS: ShoeId[] = [
   'pump',
   'stiletto',

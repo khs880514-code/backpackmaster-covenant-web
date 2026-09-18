@@ -102,6 +102,7 @@ describe('applySnapshot', () => {
       colorStage: 3,
       squash: 0.8,
       cracking: 0.6,
+      imprint: null,
       core: 0.5,
       position: { x: 0, y: 0 }
     });

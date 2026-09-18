@@ -166,6 +166,7 @@ describe('damage progression', () => {
         colorStage: 2,
         squash,
         cracking: 0,
+        imprint: null,
         core: 0,
         position: { x: 0, y: 0 }
       });
