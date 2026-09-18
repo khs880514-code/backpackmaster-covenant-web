@@ -35,6 +35,16 @@ const STAGE_EMISSIVE: Record<ColorStage, number> = {
 const PROXY_HEIGHT_RATIO = 1.42;
 const PROXY_DEPTH_RATIO = 0.97;
 
+/** The core sits inside the shell and shows through it as the shell thins. */
+const CORE_SCALE = 0.62;
+const CORE_COLORS: Record<ColorStage, number> = {
+  0: 0x8f7d74,
+  1: 0x7c675f,
+  2: 0x63504c,
+  3: 0x46363a,
+  4: 0x2a2226
+};
+
 /**
  * A smooth, seeded ripple so the surface is not mathematically perfect. Real
  * soft tissue and real rubber both carry low-frequency irregularity, and its
@@ -58,6 +68,8 @@ function roughenSurface(geometry: THREE.BufferGeometry, amount: number): void {
 export interface TargetOverlay {
   group: THREE.Group;
   mesh: THREE.Mesh;
+  /** The permanently crushed inner body, visible through the shell. */
+  core: THREE.Mesh;
   apply(proxy: ProxySnapshot): void;
   /** Review mode makes the proxy read louder instead of fading with the body. */
   setInspect(enabled: boolean): void;
@@ -93,11 +105,30 @@ export function createTargetOverlay(): TargetOverlay {
   mesh.renderOrder = 10;
   group.add(mesh);
 
+  // The core carries only permanent damage: it crushes down over a run and
+  // never recovers, so what is left at the end is what the run actually cost.
+  const coreGeometry = new THREE.SphereGeometry(TARGET_RADIUS * CORE_SCALE, 20, 16);
+  coreGeometry.scale(1, PROXY_HEIGHT_RATIO, PROXY_DEPTH_RATIO);
+  roughenSurface(coreGeometry, 0.05);
+  const coreMaterial = new THREE.MeshStandardMaterial({
+    color: CORE_COLORS[0],
+    roughness: 0.92,
+    metalness: 0,
+    transparent: true,
+    opacity: 0,
+    depthWrite: false,
+    depthTest: false
+  });
+  const core = new THREE.Mesh(coreGeometry, coreMaterial);
+  core.renderOrder = 11;
+  group.add(core);
+
   let inspecting = false;
 
   return {
     group,
     mesh,
+    core,
     setInspect(enabled: boolean): void {
       inspecting = enabled;
       if (enabled) material.opacity = INSPECT_OPACITY;
@@ -124,11 +155,21 @@ export function createTargetOverlay(): TargetOverlay {
         // geometry, spill, or wound. It simply stops holding itself up.
         group.scale.set(bulge * 1.22, flatten * 0.34, bulge * 1.16);
       }
+      // Permanent crushing: the core flattens and darkens, and only becomes
+      // visible once there is something to see. It never springs back.
+      const crushed = Math.min(1, Math.max(0, proxy.core));
+      coreMaterial.color.setHex(CORE_COLORS[proxy.colorStage] ?? CORE_COLORS[0]);
+      coreMaterial.opacity = inspecting ? Math.min(0.95, crushed * 1.4) : crushed * 0.9;
+      const coreFlatten = 1 - crushed * 0.55;
+      core.scale.set(1 / Math.sqrt(coreFlatten), coreFlatten, 1 / Math.sqrt(coreFlatten));
+
       group.position.set(proxy.position.x, proxy.position.y, 0);
     },
     dispose(): void {
       geometry.dispose();
       material.dispose();
+      coreGeometry.dispose();
+      coreMaterial.dispose();
     }
   };
 }

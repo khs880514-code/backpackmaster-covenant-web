@@ -7,7 +7,7 @@ import {
   resolveImpact,
   squashFactor
 } from './impact';
-import { createPendulumPair, stepPendulum } from './pendulum';
+import { applyImpulse, createPendulumPair, stepPendulum } from './pendulum';
 import { clampPelvis } from './pose';
 import { mixSeed, mulberry32 } from './random';
 import { sampleFootPath, selectAttack, FOOT_REST_POSITION } from './attack-director';
@@ -72,8 +72,25 @@ const DEPTH_TO_Z = 0.12;
  */
 const PELVIS_RANGE = 0.45;
 
+/**
+ * How far past the contact plane the shoe keeps travelling, in world metres.
+ * A strike that stops dead on the surface reads as a tap; carrying through
+ * toward the pelvis is what makes a heavy contact feel like it connected.
+ */
+function followThroughDepth(powerLevel: number): number {
+  return 0.012 + Math.min(10, Math.max(1, powerLevel)) * 0.0062;
+}
+
+/** How hard a graded contact shoves the pair it just landed on. */
+const IMPULSE_BY_GRADE: Record<ImpactGrade, number> = {
+  miss: 0,
+  graze: 0.18,
+  'single-compression': 0.55,
+  'center-compression': 0.8
+};
+
 /** Default geometric contact test, replaced by an adapter in unit tests. */
-export { PELVIS_RANGE, TARGET_RADIUS };
+export { PELVIS_RANGE, TARGET_RADIUS, followThroughDepth };
 
 export interface ContactBands {
   /** Inside this of a proxy centre is a direct compression. */
@@ -215,6 +232,20 @@ export function createGameEngine(options: EngineOptions): GameEngine {
 
     left = result.left;
     right = result.right;
+
+    // The pair is knocked by what just hit it. Grading is already done above,
+    // so this can only affect the attacks that follow.
+    const shove = IMPULSE_BY_GRADE[outcome.grade] * power.impulse;
+    if (shove > 0) {
+      const from = { x: footWorld.x, y: footWorld.y - pose.anchorHeight };
+      if (outcome.grade === 'center-compression') {
+        pair = applyImpulse(pair, 'left', from, shove);
+        pair = applyImpulse(pair, 'right', from, shove);
+      } else {
+        pair = applyImpulse(pair, outcome.contacted, from, shove);
+      }
+    }
+
     lastGrade = outcome.grade;
     run = applyImpact(run, outcome.grade, result.ruptured);
     return run.phase;
@@ -275,6 +306,16 @@ export function createGameEngine(options: EngineOptions): GameEngine {
     } else if (run.phase === 'recovery' || run.phase === 'impact') {
       left = recoverTarget(left, dt);
       right = recoverTarget(right, dt);
+      if (run.phase === 'impact' && plan) {
+        // Carry the shoe through the contact rather than parking it there.
+        const drive = Math.min(1, phaseTime / IMPACT_HOLD);
+        const end = sampleFootPath(plan, 1);
+        footWorld = {
+          x: end.x,
+          y: end.y,
+          z: end.z - followThroughDepth(power.level) * drive
+        };
+      }
       if (run.phase === 'recovery' && plan) {
         const ease = Math.min(1, phaseTime / Math.max(dt, plan.recoveryDuration));
         const end = sampleFootPath(plan, 1);
@@ -297,6 +338,7 @@ export function createGameEngine(options: EngineOptions): GameEngine {
       colorStage: state.colorStage,
       squash: squashFactor(state),
       cracking: crackingFactor(state),
+      core: Math.min(1, Math.max(0, state.permanent)),
       position: { x: body.position.x, y: body.position.y }
     };
   }

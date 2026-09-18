@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { createGameEngine } from '../../src/game/engine';
+import { createGameEngine, followThroughDepth } from '../../src/game/engine';
 import { createTargetOverlay } from '../../src/render/targets';
 import type { GameSnapshot, ImpactGrade } from '../../src/game/types';
 
@@ -165,6 +165,7 @@ describe('damage progression', () => {
         colorStage: 2,
         squash,
         cracking: 0,
+        core: 0,
         position: { x: 0, y: 0 }
       });
       const { x, y, z } = overlay.group.scale;
@@ -173,3 +174,98 @@ describe('damage progression', () => {
     overlay.dispose();
   });
 });
+
+describe('strike follow-through', () => {
+  it('drives deeper the harder the strike is', () => {
+    for (let level = 2; level <= 10; level += 1) {
+      expect(followThroughDepth(level)).toBeGreaterThan(followThroughDepth(level - 1));
+    }
+    expect(followThroughDepth(1)).toBeGreaterThan(0);
+  });
+
+  it('carries the shoe past the contact plane during the impact hold', () => {
+    const engine = createGameEngine({
+      pose: 'standing-front',
+      shoe: 'pump',
+      power: 10,
+      seed: 2
+    });
+    engine.start();
+
+    let atContact: number | null = null;
+    let deepest = Infinity;
+    let snapshot: GameSnapshot = engine.snapshot();
+    let previous = snapshot.phase;
+
+    for (let i = 0; i < 60 * 30; i += 1) {
+      snapshot = engine.update(1 / 60);
+      if (snapshot.phase === 'impact') {
+        if (previous !== 'impact') atContact = snapshot.foot.z;
+        deepest = Math.min(deepest, snapshot.foot.z);
+      }
+      previous = snapshot.phase;
+      if (atContact !== null && snapshot.phase === 'recovery') break;
+    }
+
+    expect(atContact).not.toBeNull();
+    // Depth is along -Z, toward the player, so the deepest point is smaller.
+    expect(deepest).toBeLessThan(atContact! - followThroughDepth(10) * 0.7);
+  });
+
+  it('leaves permanent core damage that never recovers', () => {
+    const engine = createGameEngine({
+      pose: 'standing-front',
+      shoe: 'pump',
+      power: 8,
+      seed: 3
+    });
+    engine.start();
+
+    let highest = 0;
+    let snapshot: GameSnapshot = engine.snapshot();
+    for (let i = 0; i < 60 * 200; i += 1) {
+      snapshot = engine.update(1 / 60);
+      for (const proxy of snapshot.proxies) {
+        expect(proxy.core).toBeGreaterThanOrEqual(0);
+        expect(proxy.core).toBeLessThanOrEqual(1);
+      }
+      const worst = Math.max(snapshot.proxies[0]!.core, snapshot.proxies[1]!.core);
+      expect(worst).toBeGreaterThanOrEqual(highest - 1e-9);
+      highest = Math.max(highest, worst);
+      if (snapshot.phase === 'won' || snapshot.phase === 'lost') break;
+    }
+    expect(highest).toBeGreaterThan(0.2);
+  });
+
+  it('records how badly a run went in the core it leaves behind', () => {
+    const still = runTo(0);
+    const measured = runTo(0.3);
+    expect(still).toBeGreaterThan(measured);
+  });
+});
+
+/** Highest permanent core damage reached while dodging by `offset`. */
+function runTo(offset: number): number {
+  let worst = 0;
+  for (const seed of [1, 2, 3, 4]) {
+    const engine = createGameEngine({
+      pose: 'standing-front',
+      shoe: 'pump',
+      power: 5,
+      seed
+    });
+    engine.start();
+    let snapshot: GameSnapshot = engine.snapshot();
+    for (let i = 0; i < 60 * 300; i += 1) {
+      snapshot = engine.update(1 / 60);
+      worst = Math.max(worst, snapshot.proxies[0]!.core, snapshot.proxies[1]!.core);
+      if (snapshot.phase === 'strike') {
+        engine.movePelvis({ x: snapshot.foot.x > 0 ? -offset : offset, y: 0 });
+      } else if (snapshot.phase === 'recovery') {
+        engine.movePelvis({ x: 0, y: 0 });
+      }
+      if (snapshot.phase === 'won' || snapshot.phase === 'lost') break;
+    }
+  }
+  return worst;
+}

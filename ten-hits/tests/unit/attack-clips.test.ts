@@ -141,3 +141,28 @@ describe('loadAttackClips', () => {
     expect(library.count()).toBe(0);
   });
 });
+
+describe('clip follow-through', () => {
+  const contact = timing.contactFrames[0]! / timing.fps;
+
+  it('runs past the contact frame instead of freezing on it', () => {
+    expect(clipTimeForPhase(timing, 'impact', 0, 0.2)).toBeCloseTo(contact, 5);
+    expect(clipTimeForPhase(timing, 'impact', 1, 0.2)).toBeCloseTo(contact + 0.2, 5);
+  });
+
+  it('still freezes when there is no follow-through to run', () => {
+    expect(clipTimeForPhase(timing, 'impact', 1)).toBeCloseTo(contact, 5);
+  });
+
+  it('starts the recovery from where the follow-through ended', () => {
+    expect(clipTimeForPhase(timing, 'recovery', 0, 0.2)).toBeCloseTo(contact + 0.2, 5);
+  });
+
+  it('never runs the clip backwards across the contact', () => {
+    const before = clipTimeForPhase(timing, 'strike', 1, 0.2);
+    const during = clipTimeForPhase(timing, 'impact', 0.5, 0.2);
+    const after = clipTimeForPhase(timing, 'recovery', 0, 0.2);
+    expect(during).toBeGreaterThanOrEqual(before);
+    expect(after).toBeGreaterThanOrEqual(during);
+  });
+});

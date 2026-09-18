@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  applyImpulse,
   createPendulumPair,
   stepPendulum,
   advancePendulum
@@ -47,5 +48,34 @@ describe('paired pendulum', () => {
       expect(Number.isFinite(body.position.x)).toBe(true);
       expect(Number.isFinite(body.position.y)).toBe(true);
     }
+  });
+});
+
+describe('contact impulse', () => {
+  it('drives the struck target away from what hit it', () => {
+    const pair = createPendulumPair();
+    const struck = applyImpulse(pair, 'right', { x: -0.2, y: 0 }, 0.5);
+    expect(struck.right.velocity.x).toBeGreaterThan(pair.right.velocity.x);
+    expect(struck.left.velocity.x).toBe(pair.left.velocity.x);
+  });
+
+  it('drives a dead-centre contact downward rather than nowhere', () => {
+    const pair = createPendulumPair();
+    const centred = { x: pair.left.position.x, y: pair.left.position.y };
+    const struck = applyImpulse(pair, 'left', centred, 0.5);
+    expect(struck.left.velocity.y).toBeLessThan(0);
+    expect(Number.isNaN(struck.left.velocity.x)).toBe(false);
+  });
+
+  it('leaves the position alone so a hit cannot teleport the pair', () => {
+    const pair = createPendulumPair();
+    const struck = applyImpulse(pair, 'left', { x: 1, y: 1 }, 0.9);
+    expect(struck.left.position).toEqual(pair.left.position);
+  });
+
+  it('settles back to rest after being knocked', () => {
+    let pair = applyImpulse(createPendulumPair(), 'left', { x: 0.4, y: 0 }, 1.2);
+    for (let i = 0; i < 1200; i += 1) pair = stepPendulum(pair, { x: 0, y: 0 }, 1 / 120);
+    expect(pair.left.position.x).toBeCloseTo(pair.left.restOffset.x, 2);
   });
 });

@@ -159,6 +159,11 @@ export interface ProxySnapshot {
   squash: number;
   /** 0..1 crack overlay strength, purely visual. */
   cracking: number;
+  /**
+   * 0..1 permanent crushing of the inner core. Unlike `squash` this never
+   * recovers, so it is what a run leaves behind.
+   */
+  core: number;
   position: Vec2;
 }
 

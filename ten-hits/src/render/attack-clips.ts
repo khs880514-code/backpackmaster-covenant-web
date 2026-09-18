@@ -138,7 +138,8 @@ export async function loadAttackClips(
 export function clipTimeForPhase(
   timing: AttackTiming,
   phase: GamePhase,
-  progress: number
+  progress: number,
+  followThroughSeconds = 0
 ): number {
   const t = Math.min(1, Math.max(0, progress));
   const { fps } = timing;
@@ -152,9 +153,12 @@ export function clipTimeForPhase(
     case 'strike':
       return prep + (contact - prep) * t;
     case 'impact':
-      return contact;
+      // Freezing on the contact frame is what made a heavy kick look like a
+      // tap: the authored clip already carries the follow-through, so let it
+      // run on past the contact by an amount the power decides.
+      return contact + Math.max(0, followThroughSeconds) * t;
     case 'recovery':
-      return contact + timing.recoverySeconds * t;
+      return contact + followThroughSeconds + timing.recoverySeconds * t;
     default:
       return start;
   }

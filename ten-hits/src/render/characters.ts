@@ -218,7 +218,11 @@ export interface CharacterRig {
   applyAttackClip(clip: AttackClip | null): void;
   usingAuthoredAttacker(): boolean;
   /** Positions the authored clip at the point in the attack the engine is at. */
-  scrubAttackClip(phase: GameSnapshot['phase'], progress: number): void;
+  scrubAttackClip(
+    phase: GameSnapshot['phase'],
+    progress: number,
+    followThroughSeconds?: number
+  ): void;
   /** Review mode: hide the attacker and see the abstract proxy through the body. */
   setInspect(enabled: boolean): void;
   inspecting(): boolean;
@@ -420,12 +424,17 @@ export function createCharacters(poseId: PoseId, shoeId: ShoeId): CharacterRig {
     usingAuthoredModel: () => authoredModel !== null,
     applyAttackClip,
     usingAuthoredAttacker: () => attackClip !== null,
-    scrubAttackClip(phase, progress): void {
+    scrubAttackClip(phase, progress, followThroughSeconds = 0): void {
       if (!attackClip || !mixer || !action) return;
       // The engine owns the clock, so the action is positioned directly and
       // then evaluated with a zero delta. `mixer.setTime` would rewind the
       // action to zero first, which on a paused action leaves it stuck there.
-      action.time = clipTimeForPhase(attackClip.timing, phase, progress);
+      action.time = clipTimeForPhase(
+        attackClip.timing,
+        phase,
+        progress,
+        followThroughSeconds
+      );
       mixer.update(0);
     },
     setInspect,
@@ -505,7 +514,13 @@ export function applySnapshot(rig: CharacterRig, snapshot: GameSnapshot): void {
   rig.bands.setStrength(incoming ? 1 : rig.inspecting() ? 0.8 : 0);
 
   if (rig.usingAuthoredAttacker()) {
-    rig.scrubAttackClip(snapshot.phase, snapshot.phaseProgress);
+    // Seconds of authored motion past the contact frame, scaled by power the
+    // same way the procedural strike's depth is.
+    rig.scrubAttackClip(
+      snapshot.phase,
+      snapshot.phaseProgress,
+      0.05 + snapshot.power * 0.019
+    );
     return;
   }
 

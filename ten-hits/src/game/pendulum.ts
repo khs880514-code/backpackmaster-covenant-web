@@ -100,6 +100,36 @@ export function advancePendulum(
   return { pair: next, remainder: accumulator, steps };
 }
 
+/**
+ * Drives one target away from the point that struck it. The contact has
+ * already been graded by the time this runs, so a hit can never change its own
+ * outcome — it only shoves the pair for whatever comes next.
+ */
+export function applyImpulse(
+  pair: PendulumPair,
+  side: 'left' | 'right',
+  from: Vec2,
+  strength: number
+): PendulumPair {
+  const body = side === 'left' ? pair.left : pair.right;
+  const dx = body.position.x - from.x;
+  const dy = body.position.y - from.y;
+  const length = Math.hypot(dx, dy);
+  // A dead-centre contact has no direction to push along, so it drives down.
+  const nx = length > 1e-5 ? dx / length : 0;
+  const ny = length > 1e-5 ? dy / length : -1;
+
+  const pushed: PendulumBody = {
+    position: body.position,
+    velocity: {
+      x: body.velocity.x + nx * strength,
+      y: body.velocity.y + ny * strength - strength * 0.35
+    },
+    restOffset: body.restOffset
+  };
+  return side === 'left' ? { ...pair, left: pushed } : { ...pair, right: pushed };
+}
+
 export function bodyDistance(a: Vec2, b: Vec2): number {
   return Math.hypot(a.x - b.x, a.y - b.y);
 }

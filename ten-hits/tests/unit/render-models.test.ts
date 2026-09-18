@@ -102,6 +102,7 @@ describe('applySnapshot', () => {
       colorStage: 3,
       squash: 0.8,
       cracking: 0.6,
+      core: 0.5,
       position: { x: 0, y: 0 }
     });
     expect(overlay.group.scale.y).toBeLessThan(1);
