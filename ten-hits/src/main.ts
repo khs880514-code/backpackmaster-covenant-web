@@ -219,15 +219,7 @@ export function mountGame(root: HTMLElement, options: MountOptions = {}): GameAp
     if (snapshot.phase === 'telegraph') feedback.play('warning');
     if (snapshot.phase === 'impact') {
       if (snapshot.lastGrade === 'miss') missesThisRun += 1;
-      const cue =
-        snapshot.lastGrade === 'center-compression'
-          ? 'critical'
-          : snapshot.lastGrade === 'single-compression'
-            ? 'compression'
-            : snapshot.lastGrade === 'graze'
-              ? 'graze'
-              : 'warning';
-      feedback.play(cue);
+      feedback.playContact(snapshot.lastGrade ?? 'miss', snapshot.pose);
     }
     if (snapshot.phase === 'won') feedback.play('win');
     if (snapshot.phase === 'lost') feedback.play('rupture');
