@@ -175,3 +175,81 @@ describe('pose variety and inspection', () => {
     expect(rig.inspecting()).toBe(true);
   });
 });
+
+describe('authored model swapping', () => {
+  const authored = (): THREE.Group => {
+    const group = new THREE.Group();
+    group.name = 'authored-model';
+    const mesh = new THREE.Mesh(
+      new THREE.BoxGeometry(0.5, 1.8, 0.4),
+      new THREE.MeshStandardMaterial({ color: 0x884422 })
+    );
+    mesh.position.y = 0.9;
+    group.add(mesh);
+    return group;
+  };
+
+  it('hides the built-in figure once an authored model arrives', () => {
+    const rig = createCharacters('standing-front', 'pump');
+    expect(rig.usingAuthoredModel()).toBe(false);
+
+    rig.applyPoseModel(authored());
+    expect(rig.usingAuthoredModel()).toBe(true);
+    expect(rig.proceduralPlayer.visible).toBe(false);
+    expect(rig.player.getObjectByName('authored-model')).toBeTruthy();
+  });
+
+  it('restores the built-in figure when the model is cleared', () => {
+    const rig = createCharacters('standing-front', 'pump');
+    rig.applyPoseModel(authored());
+    rig.applyPoseModel(null);
+    expect(rig.usingAuthoredModel()).toBe(false);
+    expect(rig.proceduralPlayer.visible).toBe(true);
+    expect(rig.player.getObjectByName('authored-model')).toBeFalsy();
+  });
+
+  it('replaces a previous model instead of stacking them', () => {
+    const rig = createCharacters('standing-front', 'pump');
+    rig.applyPoseModel(authored());
+    rig.applyPoseModel(authored());
+    let count = 0;
+    rig.player.traverse((node) => {
+      if (node.name === 'authored-model') count += 1;
+    });
+    expect(count).toBe(1);
+  });
+
+  it('keeps the gameplay overlay above an authored model', () => {
+    const rig = createCharacters('standing-front', 'pump');
+    rig.applyPoseModel(authored());
+    // The overlay lives on its own anchor, never inside the swapped figure.
+    expect(rig.leftTarget.parent).toBe(rig.targetAnchor);
+    expect(rig.player.getObjectByName('leftTarget')).toBeFalsy();
+  });
+
+  it('fades an authored model in review mode like the built-in figure', () => {
+    const rig = createCharacters('standing-front', 'pump');
+    const model = authored();
+    rig.applyPoseModel(model);
+    const material = (model.children[0] as THREE.Mesh)
+      .material as THREE.MeshStandardMaterial;
+    expect(material.opacity).toBe(1);
+
+    rig.setInspect(true);
+    expect(material.transparent).toBe(true);
+    expect(material.opacity).toBeLessThan(1);
+
+    rig.setInspect(false);
+    expect(material.opacity).toBe(1);
+  });
+
+  it('fades a model that arrives while review mode is already on', () => {
+    const rig = createCharacters('standing-front', 'pump');
+    rig.setInspect(true);
+    const model = authored();
+    rig.applyPoseModel(model);
+    const material = (model.children[0] as THREE.Mesh)
+      .material as THREE.MeshStandardMaterial;
+    expect(material.opacity).toBeLessThan(1);
+  });
+});

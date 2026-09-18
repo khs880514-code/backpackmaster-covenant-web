@@ -8,6 +8,7 @@ import { createScene, type SceneController } from './render/scene';
 import { createPointerController, type PointerController } from './input/pointer-controller';
 import { createHud, type HudSelection, type ToggleName } from './ui/hud';
 import { createQualityMonitor } from './performance/quality';
+import { loadPoseModels, type PoseModelLibrary } from './render/model-library';
 import {
   defaultSave,
   loadSave,
@@ -30,10 +31,16 @@ export interface MountOptions {
   storage?: Storage;
   feedback?: FeedbackController;
   seed?: number;
+  /** Where authored glTF models and their manifest live. */
+  modelBaseUrl?: string;
+  /** Set false to skip the model fetch entirely, as tests do. */
+  loadModels?: boolean;
 }
 
 export interface GameApp {
   snapshot(): GameSnapshot;
+  /** How many authored models are in play, zero when running procedurally. */
+  authoredModelCount(): number;
   movePelvis(input: Vec2): void;
   frameCount(): number;
   simulationTime(): number;
@@ -91,6 +98,7 @@ export function mountGame(root: HTMLElement, options: MountOptions = {}): GameAp
       snapshot: () => {
         throw new Error('renderer unavailable');
       },
+      authoredModelCount: () => 0,
       movePelvis: () => {},
       frameCount: () => 0,
       simulationTime: () => 0,
@@ -117,6 +125,7 @@ export function mountGame(root: HTMLElement, options: MountOptions = {}): GameAp
   const quality = createQualityMonitor();
   let qualityLevel = quality.level();
 
+  let models: PoseModelLibrary | null = null;
   let frames = 0;
   let running = true;
   let paused = false;
@@ -171,6 +180,8 @@ export function mountGame(root: HTMLElement, options: MountOptions = {}): GameAp
     scene.scene.add(rig.root);
     scene.scene.add(animation.trail);
 
+    applyModels();
+
     engine = createGameEngine({
       ...selection,
       seed: (options.seed ?? Math.floor(Math.random() * 0xffffffff)) >>> 0
@@ -179,6 +190,12 @@ export function mountGame(root: HTMLElement, options: MountOptions = {}): GameAp
     missesThisRun = 0;
     lastPhase = 'setup';
     hud.render(engine.snapshot());
+  }
+
+  /** Swaps the authored figure for the current pose in, when one exists. */
+  function applyModels(): void {
+    if (!models) return;
+    rig.applyPoseModel(models.pose(selection.pose));
   }
 
   function recordResult(snapshot: GameSnapshot): void {
@@ -285,8 +302,20 @@ export function mountGame(root: HTMLElement, options: MountOptions = {}): GameAp
   hud.render(engine.snapshot());
   rafId = requestAnimationFrame(frame);
 
+  // Art loads in the background: the game is already playable without it.
+  if (options.loadModels !== false) {
+    void loadPoseModels({
+      baseUrl: options.modelBaseUrl ?? `${import.meta.env.BASE_URL}models/`
+    }).then((library) => {
+      if (!running) return;
+      models = library;
+      applyModels();
+    });
+  }
+
   return {
     snapshot: () => engine.snapshot(),
+    authoredModelCount: () => models?.count() ?? 0,
     movePelvis: (input: Vec2) => engine.movePelvis(input),
     frameCount: () => frames,
     simulationTime: () => engine.simulationTime(),

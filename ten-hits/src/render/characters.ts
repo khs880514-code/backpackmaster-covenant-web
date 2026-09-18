@@ -191,6 +191,8 @@ function buildSeat(material: THREE.Material): THREE.Group {
 export interface CharacterRig {
   root: THREE.Group;
   player: THREE.Group;
+  /** The built-in capsule figure, hidden while an authored model is in use. */
+  proceduralPlayer: THREE.Group;
   attacker: THREE.Group;
   attackingFoot: THREE.Group;
   targetAnchor: THREE.Group;
@@ -200,10 +202,33 @@ export interface CharacterRig {
   attackerThigh: THREE.Mesh;
   attackerShin: THREE.Mesh;
   poseId: PoseId;
+  /** Swaps in an authored glTF figure, or `null` to go back to the built-in one. */
+  applyPoseModel(model: THREE.Group | null): void;
+  usingAuthoredModel(): boolean;
   /** Review mode: hide the attacker and see the abstract proxy through the body. */
   setInspect(enabled: boolean): void;
   inspecting(): boolean;
   dispose(): void;
+}
+
+interface MaterialBaseline {
+  opacity: number;
+  transparent: boolean;
+  depthWrite: boolean;
+}
+
+/** Collects every distinct standard material under a subtree. */
+function collectMaterials(root: THREE.Object3D): THREE.MeshStandardMaterial[] {
+  const found = new Set<THREE.MeshStandardMaterial>();
+  root.traverse((node) => {
+    const mesh = node as THREE.Mesh;
+    if (!mesh.isMesh) return;
+    const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+    for (const material of materials) {
+      if (material) found.add(material as THREE.MeshStandardMaterial);
+    }
+  });
+  return [...found];
 }
 
 export function createCharacters(poseId: PoseId, shoeId: ShoeId): CharacterRig {
@@ -278,15 +303,30 @@ export function createCharacters(poseId: PoseId, shoeId: ShoeId): CharacterRig {
   rightOverlay.group.name = 'rightTarget';
   targetAnchor.add(leftOverlay.group, rightOverlay.group);
 
-  const bodyMaterials: THREE.MeshStandardMaterial[] = [
-    palette.skin,
-    palette.hair,
-    palette.playerTop,
-    palette.playerBottom,
-    palette.attackerTop,
-    palette.attackerBottom
-  ];
+  // Remember how each material looked before review mode touched it, so an
+  // authored file's own transparency is restored rather than overwritten.
+  const baselines = new Map<THREE.MeshStandardMaterial, MaterialBaseline>();
   let inspect = false;
+  let authoredModel: THREE.Group | null = null;
+
+  function fadeBody(enabled: boolean): void {
+    for (const material of collectMaterials(player)) {
+      if (!baselines.has(material)) {
+        baselines.set(material, {
+          opacity: material.opacity,
+          transparent: material.transparent,
+          depthWrite: material.depthWrite
+        });
+      }
+      const base = baselines.get(material)!;
+      material.transparent = enabled ? true : base.transparent;
+      material.opacity = enabled
+        ? Math.min(base.opacity, INSPECT_BODY_OPACITY)
+        : base.opacity;
+      material.depthWrite = enabled ? false : base.depthWrite;
+      material.needsUpdate = true;
+    }
+  }
 
   function setInspect(enabled: boolean): void {
     inspect = enabled;
@@ -294,19 +334,30 @@ export function createCharacters(poseId: PoseId, shoeId: ShoeId): CharacterRig {
     attackingFoot.visible = !enabled;
     attackerThigh.visible = !enabled;
     attackerShin.visible = !enabled;
-    for (const material of bodyMaterials) {
-      material.transparent = enabled;
-      material.opacity = enabled ? INSPECT_BODY_OPACITY : 1;
-      material.depthWrite = !enabled;
-      material.needsUpdate = true;
-    }
+    fadeBody(enabled);
     leftOverlay.setInspect(enabled);
     rightOverlay.setInspect(enabled);
+  }
+
+  function applyPoseModel(model: THREE.Group | null): void {
+    if (authoredModel) {
+      player.remove(authoredModel);
+      authoredModel = null;
+    }
+    if (model) {
+      model.name = 'authored-model';
+      player.add(model);
+      authoredModel = model;
+    }
+    playerParts.root.visible = model === null;
+    // A newly attached subtree has to pick up the current review state.
+    if (inspect) fadeBody(true);
   }
 
   return {
     root,
     player,
+    proceduralPlayer: playerParts.root,
     attacker,
     attackingFoot,
     targetAnchor,
@@ -316,6 +367,8 @@ export function createCharacters(poseId: PoseId, shoeId: ShoeId): CharacterRig {
     attackerThigh,
     attackerShin,
     poseId,
+    applyPoseModel,
+    usingAuthoredModel: () => authoredModel !== null,
     setInspect,
     inspecting: () => inspect,
     dispose(): void {

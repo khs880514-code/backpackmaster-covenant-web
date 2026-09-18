@@ -76,6 +76,7 @@ describe('mountGame', () => {
     return mountGame(root, {
       createScene: fakeScene as never,
       storage: memoryStorage(),
+      loadModels: false,
       feedback: {
         unlock: vi.fn(),
         play: vi.fn(),
@@ -192,5 +193,46 @@ describe('mountGame', () => {
     resize.mockClear();
     window.dispatchEvent(new Event('resize'));
     expect(resize).not.toHaveBeenCalled();
+  });
+});
+
+describe('mountGame authored models', () => {
+  let root: HTMLElement;
+
+  beforeEach(() => {
+    document.body.innerHTML = '<main id="app"></main>';
+    root = document.querySelector<HTMLElement>('#app')!;
+    frameHarness();
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+  });
+
+  it('plays procedurally when no models are configured', () => {
+    const app = mountGame(root, {
+      createScene: fakeScene as never,
+      storage: memoryStorage(),
+      loadModels: false
+    });
+    expect(app.authoredModelCount()).toBe(0);
+    expect(root.querySelector('[data-setup-panel]')).toBeTruthy();
+    app.destroy();
+  });
+
+  it('never blocks startup on a model fetch that fails', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockRejectedValue(new Error('offline')) as unknown as typeof fetch
+    );
+    const app = mountGame(root, {
+      createScene: fakeScene as never,
+      storage: memoryStorage()
+    });
+    expect(root.querySelector('[data-start]')).toBeTruthy();
+    await Promise.resolve();
+    expect(app.authoredModelCount()).toBe(0);
+    app.destroy();
   });
 });
