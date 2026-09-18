@@ -117,25 +117,39 @@ describe('loadAttackClips', () => {
     }));
     const library = await loadAttackClips({ fetchImpl: fetchOk(), source: { load } });
 
-    // Four authored clips plus the two poses that borrow the standing kick.
+    // Four postures with their own clip, spread-standing with POSE_17, and
+    // braced-back borrowing the standing take.
     expect(library.count()).toBe(6);
-    expect(library.get('spread-standing')?.sourceId).toBe('POSE_12');
-    expect(library.get('braced-back')?.sourceId).toBe('POSE_12');
+    expect(library.get('spread-standing')?.sourceId).toBe('POSE_17');
+    expect(library.get('braced-back')?.sourceId).toBe('POSE_01');
     const standing = library.get('standing-front')!;
-    expect(standing.sourceId).toBe('POSE_12');
+    expect(standing.sourceId).toBe('POSE_01');
     expect(standing.animation?.name).toBe('Scene');
     expect(standing.scene.getObjectByName('POSTURE_GUIDE_Pelvis')!.visible).toBe(false);
-    expect(load).toHaveBeenCalledWith('models/assets/pose-12.glb');
+    expect(load).toHaveBeenCalledWith('models/assets/pose-01.glb');
   });
 
-  it('leaves a pose procedural when its clip will not load', async () => {
+  it('falls back to the next take when the preferred one is not delivered', async () => {
+    // Only four of the twelve clips the manifest describes actually exist, so
+    // a pose whose best take is missing has to use the one that is there.
     const load = vi.fn(async (url: string) => {
-      if (url.includes('pose-12')) throw new Error('bad file');
+      if (url.includes('pose-01')) throw new Error('not delivered');
+      return { scene: authoredScene(), animations: [] };
+    });
+    const library = await loadAttackClips({ fetchImpl: fetchOk(), source: { load } });
+    expect(library.get('standing-front')?.sourceId).toBe('POSE_12');
+    expect(load).toHaveBeenCalledWith('models/assets/pose-01.glb');
+  });
+
+  it('leaves a pose procedural only when every take fails', async () => {
+    const load = vi.fn(async (url: string) => {
+      if (url.includes('pose-01') || url.includes('pose-12')) throw new Error('bad file');
       return { scene: authoredScene(), animations: [] };
     });
     const library = await loadAttackClips({ fetchImpl: fetchOk(), source: { load } });
     expect(library.get('standing-front')).toBeNull();
-    expect(library.count()).toBe(3);
+    // braced-back borrows the standing take, so it goes with it.
+    expect(library.get('braced-back')).toBeNull();
   });
 
   it('returns an empty library when the manifest is missing', async () => {

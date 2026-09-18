@@ -76,3 +76,41 @@ game already did, and what was adopted from it:
 Nothing from `anatomical_pose_presets`, `LATEST_MEDICAL_*_ROOT` or the
 `medical_phantom_*` materials is used. The target the player sees and the target
 the contact test measures are both the abstract proxy pair.
+
+
+## Which authored clips we actually have
+
+The selection manifest describes **twelve** attack clips. Four were delivered.
+The other eight are named in `selection-manifest.json` and wired to the poses
+they belong to, so each one starts working the moment its `.glb` is dropped into
+`assets/` — no code change needed.
+
+| source | file | posture | delivered |
+| --- | --- | --- | :-: |
+| POSE_01 | `assets/pose-01.glb` | RUN_IN — the two-step approach kick | no |
+| POSE_04 | `assets/pose-04.glb` | STATIONARY | no |
+| POSE_05 | `assets/pose-05.glb` | STEP_IN | no |
+| POSE_07 | `assets/pose-07.glb` | STEP_IN | no |
+| POSE_10 | `assets/pose-10.glb` | STATIONARY | no |
+| POSE_11 | `assets/pose-11.glb` | UPRIGHT_KNEELING | **yes** |
+| POSE_12 | `assets/pose-12.glb` | STANDING_BRACED | **yes** |
+| POSE_13 | `assets/pose-13.glb` | KNEELING_LOW | **yes** |
+| POSE_14 | `assets/pose-14.glb` | ALL_FOURS_LATERAL | no |
+| POSE_15 | `assets/pose-15.glb` | KNEELING_FOLDED | no |
+| POSE_16 | `assets/pose-16.glb` | SEATED_APERTURE | **yes** |
+| POSE_17 | `assets/pose-17.glb` | PRONE_SPREAD | no |
+
+`POSE_01` is the current take for the standing pose and is preferred over
+`POSE_12`; `POSE_17` is the spread pose's own clip. Neither file exists yet, so
+both fall through to what is delivered and the game plays exactly as before.
+
+## The attacker's outfit is part of the clip, not a choice
+
+`DarkElf_Visual` inside each kick clip is **one mesh, one material, one
+texture** — 19,654 triangles covering her body and her dress together. Nothing
+in it can be hidden or replaced separately, so the five wardrobe exports cannot
+be layered over it; they would z-fight the dress that is already there.
+
+What she wears is therefore decided by which clip is loaded. The delivered
+clips have her in the long dress. A clip exported with leggings and black pumps
+would simply arrive wearing them.

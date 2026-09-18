@@ -104,21 +104,26 @@ export async function loadAttackClips(
   const clips = new Map<PoseId, AttackClip>();
 
   await Promise.all(
-    Object.entries(imported.poses).map(async ([id, pose]) => {
-      if (!pose) return;
-      try {
-        const { scene, animations } = await source.load(`${baseUrl}${pose.asset}`);
-        alignToTargetGuide(scene);
-        hidePostureGuides(scene);
-        clips.set(id as PoseId, {
-          poseId: id as PoseId,
-          sourceId: pose.sourceId,
-          scene,
-          animation: animations[0] ?? null,
-          timing: pose.timing
-        });
-      } catch {
-        // A clip that will not load simply leaves that pose procedural.
+    Object.entries(imported.candidates).map(async ([id, list]) => {
+      // Best take first. The authoring manifest describes twelve clips and
+      // only some have been delivered, so a preferred one that is not there
+      // must fall through to the next rather than cost the pose its clip.
+      for (const pose of list ?? []) {
+        try {
+          const { scene, animations } = await source.load(`${baseUrl}${pose.asset}`);
+          alignToTargetGuide(scene);
+          hidePostureGuides(scene);
+          clips.set(id as PoseId, {
+            poseId: id as PoseId,
+            sourceId: pose.sourceId,
+            scene,
+            animation: animations[0] ?? null,
+            timing: pose.timing
+          });
+          return;
+        } catch {
+          // Try the next take; only an exhausted list leaves a pose procedural.
+        }
       }
     })
   );

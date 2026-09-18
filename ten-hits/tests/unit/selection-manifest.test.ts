@@ -25,7 +25,14 @@ describe('parseSelectionManifest', () => {
   });
 
   it('maps the four target postures that match a game pose', () => {
-    expect(imported.poses['standing-front']?.sourceId).toBe('POSE_12');
+    // POSE_01 is the run-in kick and carries no target posture, so it used to
+    // be dropped. It is the current take for the standing pose.
+    expect(imported.poses['standing-front']?.sourceId).toBe('POSE_01');
+    expect(imported.candidates['standing-front']?.map((p) => p.sourceId)).toEqual([
+      'POSE_01',
+      'POSE_12'
+    ]);
+    expect(imported.poses['spread-standing']?.sourceId).toBe('POSE_17');
     expect(imported.poses['seated-chair']?.sourceId).toBe('POSE_16');
     expect(imported.poses['kneeling-front']?.sourceId).toBe('POSE_11');
     expect(imported.poses['crouch-front']?.sourceId).toBe('POSE_13');
@@ -44,30 +51,42 @@ describe('parseSelectionManifest', () => {
       // A borrowed clip was authored for a different posture, so this
       // invariant is the authored rows' to keep.
       if (id in BORROWED_CLIP) continue;
+      // Some authored clips declare no target height; there is nothing to
+      // check against for those.
+      if (!pose!.targetHeightM) continue;
       const anchor = POSES[id as keyof typeof POSES].anchorHeight;
-      expect(Math.abs((pose!.targetHeightM ?? 0) - anchor)).toBeLessThan(0.06);
+      expect(Math.abs(pose!.targetHeightM - anchor)).toBeLessThan(0.06);
     }
   });
 
-  it('borrows a clip only from a pose that has its own', () => {
+  it('keeps a borrowed clip behind the pose own takes', () => {
     for (const [id, from] of Object.entries(BORROWED_CLIP)) {
+      // A lender must not itself be borrowing, or the fallback is circular.
       expect(BORROWED_CLIP[from as keyof typeof BORROWED_CLIP]).toBeUndefined();
-      expect(imported.poses[id as keyof typeof imported.poses]?.sourceId).toBe(
-        imported.poses[from as keyof typeof imported.poses]?.sourceId
+      const list = (imported.candidates[id as keyof typeof imported.candidates] ?? []).map(
+        (pose) => pose.sourceId
       );
+      const lent = (imported.candidates[from as keyof typeof imported.candidates] ?? []).map(
+        (pose) => pose.sourceId
+      );
+      // The lender's takes sit at the very end, behind anything the pose owns.
+      expect(list.slice(-lent.length)).toEqual(lent);
+      // spread-standing has POSE_17 of its own, so the borrow must not displace it.
+      if (list.length > lent.length) expect(list[0]).not.toBe(lent[0]);
     }
   });
 
   it('reports the postures that have no game pose yet', () => {
     expect(imported.unmapped.map((p) => p.targetPosture).sort()).toEqual([
       'ALL_FOURS_LATERAL',
-      'KNEELING_FOLDED',
-      'PRONE_SPREAD'
+      'KNEELING_FOLDED'
     ]);
   });
 
   it('splits an authored clip into telegraph, strike, and recovery', () => {
-    const standing = imported.poses['standing-front']!;
+    const standing = imported.candidates['standing-front']!.find(
+      (pose) => pose.sourceId === 'POSE_12'
+    )!;
     expect(standing.timing.fps).toBe(25);
     expect(standing.timing.preparationFrames[0]).toBe(26);
     expect(standing.timing.contactFrames[0]).toBe(32);
@@ -123,7 +142,7 @@ describe('toPoseModelManifest', () => {
   it('projects the import onto the loader manifest shape', () => {
     const manifest = toPoseModelManifest(imported);
     expect(manifest.version).toBe(1);
-    expect(manifest.poses?.['standing-front']).toBe('assets/pose-12.glb');
+    expect(manifest.poses?.['standing-front']).toBe('assets/pose-01.glb');
     expect(manifest.poses?.['seated-chair']).toBe('assets/pose-16.glb');
     expect(Object.keys(manifest.poses ?? {})).toHaveLength(POSE_IDS.length);
   });
