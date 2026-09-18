@@ -9,6 +9,10 @@
  *  2. Prune whatever the removal orphaned, so the download shrinks with it.
  *
  * Usage: node scripts/prepare-models.mjs <src-dir> <out-dir>
+ *
+ * Note: these exports already carry the Z-up to Y-up correction on their root
+ * nodes, so nothing here re-orients them. Read world-space bounds, not a
+ * mesh's local POSITION range, before concluding a model is lying down.
  */
 import { readdir, mkdir, stat } from 'node:fs/promises';
 import { basename, join } from 'node:path';
@@ -24,6 +28,39 @@ const STRIP_ROOTS = [/^LATEST_MEDICAL_\d+_ROOT$/, /^MED_/];
 
 function shouldStrip(name) {
   return STRIP_ROOTS.some((pattern) => pattern.test(name ?? ''));
+}
+
+/**
+ * Repairs two faults the body exports carry.
+ *
+ * They ship every material as alpha BLEND, which on a double-sided closed body
+ * mesh sorts against itself and punches black holes through the figure; MASK
+ * keeps genuine cutouts without the sorting.
+ *
+ * And one material has a colour map bound to its normal slot, which shades the
+ * skin as noise. It is rebound to the real normal map when the file has one.
+ */
+function repairMaterials(document) {
+  const normalMaps = new Map();
+  for (const texture of document.getRoot().listTextures()) {
+    const name = texture.getName() ?? '';
+    if (/normal/i.test(name)) normalMaps.set(name, texture);
+  }
+  const fallbackNormal = [...normalMaps.values()][0] ?? null;
+
+  let repaired = 0;
+  for (const material of document.getRoot().listMaterials()) {
+    if (material.getAlphaMode() === 'BLEND') {
+      material.setAlphaMode('MASK').setAlphaCutoff(0.5);
+      repaired += 1;
+    }
+    const normal = material.getNormalTexture();
+    if (normal && !/normal/i.test(normal.getName() ?? '')) {
+      material.setNormalTexture(fallbackNormal);
+      repaired += 1;
+    }
+  }
+  return repaired;
 }
 
 async function convert(io, srcPath, outPath) {
@@ -54,6 +91,8 @@ async function convert(io, srcPath, outPath) {
       removed += 1;
     }
   }
+
+  removed += repairMaterials(document);
 
   await document.transform(
     prune(),

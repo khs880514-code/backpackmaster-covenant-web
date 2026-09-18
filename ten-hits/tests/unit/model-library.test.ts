@@ -198,3 +198,56 @@ describe('separation from the authoring manifest', () => {
     expect(load).toHaveBeenCalledWith('models/b.glb');
   });
 });
+
+describe('authored scale', () => {
+  const tall = (): THREE.Mesh =>
+    new THREE.Mesh(new THREE.BoxGeometry(0.5, 1.79, 0.36));
+
+  it('leaves a model alone when the manifest says it is already to scale', async () => {
+    const fetchImpl = vi.fn(async (url: string) => {
+      if (url.endsWith('manifest.json')) {
+        return {
+          ok: true,
+          json: async () => ({
+            version: 1,
+            normalize: false,
+            poses: { 'standing-front': 'body.glb' }
+          })
+        };
+      }
+      return { ok: false, json: async () => ({}) };
+    }) as unknown as typeof fetch;
+
+    const library = await loadPoseModels({
+      fetchImpl,
+      source: { load: async () => tall() }
+    });
+    const size = new THREE.Vector3();
+    boxOf(library.pose('standing-front')!).getSize(size);
+    expect(size.y).toBeCloseTo(1.79, 4);
+  });
+
+  it('still fits a model when normalization is left on', async () => {
+    const fetchImpl = vi.fn(async (url: string) => {
+      if (url.endsWith('manifest.json')) {
+        return {
+          ok: true,
+          json: async () => ({
+            version: 1,
+            playerHeight: 1.8,
+            poses: { 'standing-front': 'body.glb' }
+          })
+        };
+      }
+      return { ok: false, json: async () => ({}) };
+    }) as unknown as typeof fetch;
+
+    const library = await loadPoseModels({
+      fetchImpl,
+      source: { load: async () => tall() }
+    });
+    const size = new THREE.Vector3();
+    boxOf(library.pose('standing-front')!).getSize(size);
+    expect(size.y).toBeCloseTo(1.8, 4);
+  });
+});

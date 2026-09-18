@@ -66,6 +66,15 @@ const IMPACT_HOLD = 0.25;
 const TARGET_RADIUS = 0.028;
 const DEPTH_TO_Z = 0.12;
 /**
+ * How far in front of the pelvis the pair hangs, in world metres. The
+ * procedural figure was thin enough not to need it; an authored body is not,
+ * and the proxies would otherwise sit buried inside the torso.
+ *
+ * Both the target and the strike's aim carry this same offset, so the geometry
+ * the contact test measures is unchanged by it.
+ */
+const PROXY_FORWARD = 0.115;
+/**
  * How far the pelvis actually travels, in world metres, at full pose range.
  * Pose profiles stay normalized 0..1 so they read as ratios; this is what
  * turns one of those ratios into a distance the shoe can miss by.
@@ -90,7 +99,7 @@ const IMPULSE_BY_GRADE: Record<ImpactGrade, number> = {
 };
 
 /** Default geometric contact test, replaced by an adapter in unit tests. */
-export { PELVIS_RANGE, TARGET_RADIUS, followThroughDepth };
+export { PELVIS_RANGE, PROXY_FORWARD, TARGET_RADIUS, followThroughDepth };
 
 export interface ContactBands {
   /** Inside this of a proxy centre is a direct compression. */
@@ -158,7 +167,7 @@ export function createGameEngine(options: EngineOptions): GameEngine {
     return {
       x: body.position.x,
       y: pose.anchorHeight + body.position.y,
-      z: pelvis.y * DEPTH_TO_Z
+      z: pelvis.y * DEPTH_TO_Z + PROXY_FORWARD
     };
   }
 
@@ -167,7 +176,11 @@ export function createGameEngine(options: EngineOptions): GameEngine {
     const cy = (pair.left.position.y + pair.right.position.y) / 2;
     const vx = (pair.left.velocity.x + pair.right.velocity.x) / 2;
     const vy = (pair.left.velocity.y + pair.right.velocity.y) / 2;
-    return { x: cx + vx * lookahead, y: cy + vy * lookahead, z: pelvis.y * DEPTH_TO_Z };
+    return {
+      x: cx + vx * lookahead,
+      y: cy + vy * lookahead,
+      z: pelvis.y * DEPTH_TO_Z + PROXY_FORWARD
+    };
   }
 
   function buildPlan(): AttackPlan {

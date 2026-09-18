@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { POSES } from '../game/config';
+import { PROXY_FORWARD } from '../game/engine';
 import { clipTimeForPhase, type AttackClip } from './attack-clips';
 import { createShoe } from './shoes';
 import {
@@ -503,7 +504,7 @@ function solveKnee(hip: THREE.Vector3, foot: THREE.Vector3): THREE.Vector3 {
 export function applySnapshot(rig: CharacterRig, snapshot: GameSnapshot): void {
   const depth = snapshot.anchor.y * DEPTH_TO_Z;
   rig.player.position.set(snapshot.anchor.x * PELVIS_RANGE, 0, depth);
-  rig.targetAnchor.position.set(0, POSES[rig.poseId].anchorHeight, depth);
+  rig.targetAnchor.position.set(0, POSES[rig.poseId].anchorHeight, depth + PROXY_FORWARD);
 
   rig.overlays.left.apply(snapshot.proxies[0]);
   rig.overlays.right.apply(snapshot.proxies[1]);

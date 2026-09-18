@@ -11,6 +11,11 @@ import type { PoseId } from '../game/types';
  */
 export interface PoseModelManifest {
   version: number;
+  /**
+   * False when the files are already authored at true scale with their feet on
+   * the ground, in which case re-fitting them would only introduce error.
+   */
+  normalize?: boolean;
   /** World-unit height every player model is normalized to. */
   playerHeight?: number;
   /** World-unit height the attacker model is normalized to. */
@@ -126,14 +131,24 @@ export async function loadPoseModels(options: LoadOptions = {}): Promise<PoseMod
   }
 
   const source = options.source ?? defaultSource();
+  const normalize = manifest.normalize !== false;
   const playerHeight = manifest.playerHeight ?? DEFAULT_PLAYER_HEIGHT;
   const attackerHeight = manifest.attackerHeight ?? DEFAULT_ATTACKER_HEIGHT;
+
+  /** Wraps a loaded model, fitting it only when the manifest asks for it. */
+  function present(object: THREE.Object3D, targetHeight: number): THREE.Group {
+    if (normalize) return fitModel(object, targetHeight);
+    const wrapper = new THREE.Group();
+    wrapper.name = 'authored-model';
+    wrapper.add(object);
+    return wrapper;
+  }
 
   const poses = new Map<PoseId, THREE.Group>();
   await Promise.all(
     readEntries(manifest).map(async ([id, file]) => {
       try {
-        poses.set(id, fitModel(await source.load(`${baseUrl}${file}`), playerHeight));
+        poses.set(id, present(await source.load(`${baseUrl}${file}`), playerHeight));
       } catch {
         // One bad file must not cost the whole set.
       }
@@ -143,7 +158,7 @@ export async function loadPoseModels(options: LoadOptions = {}): Promise<PoseMod
   let attacker: THREE.Group | null = null;
   if (typeof manifest.attacker === 'string' && !manifest.attacker.includes('..')) {
     try {
-      attacker = fitModel(
+      attacker = present(
         await source.load(`${baseUrl}${manifest.attacker}`),
         attackerHeight
       );

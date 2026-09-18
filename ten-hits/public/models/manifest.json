@@ -1,5 +1,11 @@
 {
   "version": 1,
-  "_note": "No authored player figures yet; the game draws its own. Attacker clips live in selection-manifest.json.",
-  "poses": {}
+  "normalize": false,
+  "_note": "Authored player figures, already metric with feet at y=0. Attacker clips live in selection-manifest.json.",
+  "poses": {
+    "standing-front": "assets/body/neutral_standing.glb",
+    "kneeling-front": "assets/body/neutral_kneeling.glb",
+    "seated-chair": "assets/body/a_open_chair_seated.glb",
+    "braced-back": "assets/body/neutral_table_supported.glb"
+  }
 }
