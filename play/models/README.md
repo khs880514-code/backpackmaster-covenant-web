@@ -1,28 +1,55 @@
-# Authored pose models
+# Authored models
 
-Drop `.glb` files here next to a `manifest.json` and the game uses them in
-place of its procedural figures. Nothing here is required: with no manifest,
-or with a file that fails to load, the game falls back to the built-in
-capsule figures and plays exactly the same.
+The game ships with procedural capsule figures and plays fine without anything
+here. Files in this folder upgrade the attacker; if one is missing or fails to
+load, that pose simply stays procedural.
 
-Copy `manifest.example.json` to `manifest.json` and point each pose id at the
-file that should represent it:
+## What is in here
 
-| pose id | meaning |
-| --- | --- |
-| `standing-front` | 서서 정면 |
-| `kneeling-front` | 무릎 정면 |
-| `seated-chair` | ㄷ자 의자 |
-| `spread-standing` | 대자 자세 |
-| `crouch-front` | 웅크림 |
-| `braced-back` | 뒤로 기댐 |
+`selection-manifest.json` is the authoring pipeline's own
+`impact-shift.godot-playable-selection.v1` file, trimmed to the poses the web
+build ships. Each entry is an **attack clip**: a rigged attacker plus the kick
+authored for the posture the player is in. `src/render/selection-manifest.ts`
+reads it directly, so nothing is maintained by hand.
 
-`attacker` is optional and names the model used for the attacking figure.
+| authored target posture | game pose | clip |
+| --- | --- | --- |
+| `STANDING_BRACED` | `standing-front` | `pose-12.glb` |
+| `UPRIGHT_KNEELING` | `kneeling-front` | `pose-11.glb` |
+| `SEATED_APERTURE` | `seated-chair` | `pose-16.glb` |
+| `KNEELING_LOW` | `crouch-front` | `pose-13.glb` |
 
-Every model is normalized on load: uniform-scaled to `playerHeight` world
-units, centered on the x/z origin, and dropped so its lowest point rests at
-`y = 0`. Authored pivots and units therefore do not need to match anything.
+`manifest.json` is this loader's own simpler format and describes authored
+**player** figures. There are none yet, so it is empty.
 
-Files must be glTF 2.0 binary (`.glb`). Godot scenes (`.tscn`, `.tres`) and
-Blender files (`.blend`) are not readable by the browser — export to glTF 2.0
-first.
+## Preparing new exports
+
+Raw pipeline exports are not shipped as-is. Run them through:
+
+```bash
+node scripts/prepare-models.mjs <export-dir> public/models/assets
+```
+
+That does two things:
+
+1. **Removes the anatomical target subtree** (`LATEST_MEDICAL_*_ROOT` and its
+   `MED_*` meshes). TEN HITS renders its target as two abstract proxy spheres
+   by design, so this geometry is never displayed — and it is 82% of every
+   file.
+2. **Downscales textures** to 1K WebP. The authoring textures are 2K PNGs,
+   which is more than a stylized game at phone size can use.
+
+Together these take a pose export from about 10 MB to about 2 MB.
+
+## How a clip is placed and played
+
+- The authoring files put the attacker on -Z and the receiving figure on +Z;
+  the game is laid out the other way round. `alignToTargetGuide` turns the
+  scene halfway round and slides it until `POSTURE_GUIDE_Pelvis` sits on the
+  origin, which is where the player stands.
+- The authored `POSTURE_GUIDE_*` stand-ins are hidden: the game animates its
+  own player, which moves under player input.
+- The engine keeps owning the pacing. Power and anger still decide how long
+  each phase lasts, and `clipTimeForPhase` resamples the clip onto that
+  schedule so the telegraph still ends on the authored wind-up frame and the
+  strike still lands on the authored contact frame.

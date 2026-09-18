@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { POSES } from '../game/config';
+import { clipTimeForPhase, type AttackClip } from './attack-clips';
 import { createShoe } from './shoes';
 import { createTargetOverlay, type TargetOverlay } from './targets';
 import type { GameSnapshot, PoseId, ShoeId } from '../game/types';
@@ -205,6 +206,11 @@ export interface CharacterRig {
   /** Swaps in an authored glTF figure, or `null` to go back to the built-in one. */
   applyPoseModel(model: THREE.Group | null): void;
   usingAuthoredModel(): boolean;
+  /** Swaps the procedural attacker for an authored rig and its kick clip. */
+  applyAttackClip(clip: AttackClip | null): void;
+  usingAuthoredAttacker(): boolean;
+  /** Positions the authored clip at the point in the attack the engine is at. */
+  scrubAttackClip(phase: GameSnapshot['phase'], progress: number): void;
   /** Review mode: hide the attacker and see the abstract proxy through the body. */
   setInspect(enabled: boolean): void;
   inspecting(): boolean;
@@ -308,6 +314,9 @@ export function createCharacters(poseId: PoseId, shoeId: ShoeId): CharacterRig {
   const baselines = new Map<THREE.MeshStandardMaterial, MaterialBaseline>();
   let inspect = false;
   let authoredModel: THREE.Group | null = null;
+  let attackClip: AttackClip | null = null;
+  let mixer: THREE.AnimationMixer | null = null;
+  let action: THREE.AnimationAction | null = null;
 
   function fadeBody(enabled: boolean): void {
     for (const material of collectMaterials(player)) {
@@ -328,12 +337,40 @@ export function createCharacters(poseId: PoseId, shoeId: ShoeId): CharacterRig {
     }
   }
 
+  /** The procedural attacker stands down whenever an authored rig is present. */
+  function syncAttackerVisibility(): void {
+    const procedural = attackClip === null && !inspect;
+    attacker.visible = procedural;
+    attackingFoot.visible = procedural;
+    attackerThigh.visible = procedural;
+    attackerShin.visible = procedural;
+    if (attackClip) attackClip.scene.visible = !inspect;
+  }
+
+  function applyAttackClip(clip: AttackClip | null): void {
+    if (attackClip) {
+      root.remove(attackClip.scene);
+      mixer?.stopAllAction();
+      mixer = null;
+      action = null;
+    }
+    attackClip = clip;
+    if (clip) {
+      root.add(clip.scene);
+      if (clip.animation) {
+        mixer = new THREE.AnimationMixer(clip.scene);
+        action = mixer.clipAction(clip.animation);
+        action.play();
+        // The engine drives the clock, so the action is only ever scrubbed.
+        action.paused = true;
+      }
+    }
+    syncAttackerVisibility();
+  }
+
   function setInspect(enabled: boolean): void {
     inspect = enabled;
-    attacker.visible = !enabled;
-    attackingFoot.visible = !enabled;
-    attackerThigh.visible = !enabled;
-    attackerShin.visible = !enabled;
+    syncAttackerVisibility();
     fadeBody(enabled);
     leftOverlay.setInspect(enabled);
     rightOverlay.setInspect(enabled);
@@ -369,6 +406,16 @@ export function createCharacters(poseId: PoseId, shoeId: ShoeId): CharacterRig {
     poseId,
     applyPoseModel,
     usingAuthoredModel: () => authoredModel !== null,
+    applyAttackClip,
+    usingAuthoredAttacker: () => attackClip !== null,
+    scrubAttackClip(phase, progress): void {
+      if (!attackClip || !mixer || !action) return;
+      // The engine owns the clock, so the action is positioned directly and
+      // then evaluated with a zero delta. `mixer.setTime` would rewind the
+      // action to zero first, which on a paused action leaves it stuck there.
+      action.time = clipTimeForPhase(attackClip.timing, phase, progress);
+      mixer.update(0);
+    },
     setInspect,
     inspecting: () => inspect,
     dispose(): void {
@@ -438,6 +485,11 @@ export function applySnapshot(rig: CharacterRig, snapshot: GameSnapshot): void {
 
   rig.overlays.left.apply(snapshot.proxies[0]);
   rig.overlays.right.apply(snapshot.proxies[1]);
+
+  if (rig.usingAuthoredAttacker()) {
+    rig.scrubAttackClip(snapshot.phase, snapshot.phaseProgress);
+    return;
+  }
 
   rig.attackingFoot.position.set(snapshot.foot.x, snapshot.foot.y, snapshot.foot.z);
   rig.attackingFoot.lookAt(0, snapshot.foot.y, snapshot.foot.z - 1);

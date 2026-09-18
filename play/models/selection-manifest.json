@@ -1,0 +1,168 @@
+{
+  "schema": "impact-shift.godot-playable-selection.v1",
+  "revision": "2026-09-16-common-material-footwear-r01",
+  "model_id": "IS-TASM-v1",
+  "coordinate_system": {
+    "unit": "metres",
+    "runtime_axes": "Godot Y-up; glTF importer converts Blender Z-up",
+    "planning_plane": "support/target values are two-axis pose-local metres",
+    "target_control": "Lateral/height offsets reprojected onto the actual external shell; support depth maps to Godot -Z"
+  },
+  "character": {
+    "id": "DARK_ELF_UNIFIED_V11",
+    "skeleton": "Rig_DarkElf_Deform/Skeleton3D",
+    "bones": 27,
+    "strike_chain": [
+      "thigh.R",
+      "shin.R",
+      "foot.R"
+    ],
+    "footwear": "FOOTWEAR_01",
+    "footwear_selection_note": "Five selected existing footwear sources; named skin binds map to the existing skeleton. No motion replacement."
+  },
+  "poses": {
+    "POSE_11": {
+      "asset": "assets/pose-11.glb",
+      "sha256": "6a28761030b301b913a31105d0ea53771d8430913e9d2a87bf0cb7c90bba6c5a",
+      "label_ko": "P11  무릎 세우기 · 한 발 디딤 킥",
+      "source_blend": "F:\\codex\\outputs\\impact-shift-blender-template-20260914\\is-tasm-v01\\requested-posture-motions-20260916-r01\\pose_11\\pose_11-source-frame-diagnostic.blend",
+      "source_sha256": "59da1c595df5b1cd2a80292e766c51b2157d02096020b0771a9d89680b3eb16d",
+      "animation": "Scene",
+      "fps": 25,
+      "frame_range": [
+        1,
+        152
+      ],
+      "contact_frames": [
+        32,
+        116
+      ],
+      "driver": "POSE_11_RightFoot_SourceDriver",
+      "preparation_frames": [
+        26,
+        110
+      ],
+      "playable_frame_end": 152,
+      "first_frame_time_s": 0.04,
+      "start_mode": "STEP_IN",
+      "support_depth": 0.087,
+      "target_control_height": 0.67,
+      "provenance": "assets/source-poses/pose_11-delivery.json",
+      "provenance_sha256": "8aecd003411c6879dd72521071f6b47be0544d91764df1bbe8c06044f91723cc",
+      "motion_estimation": "MANUALLY_AUTHORED_FROM_REVIEWED_CURRENT_SOURCE_FRAMES_NOT_CALIBRATED_MOCAP",
+      "existing_motion_used": false,
+      "target_response": "S0_S3_SHARED_MATERIAL",
+      "target_posture": "UPRIGHT_KNEELING",
+      "target_height_m": 0.54,
+      "fixture": "STATIC_CYAN_POSTURE_GUIDE_NOT_CORRECTED_MALE_MODEL"
+    },
+    "POSE_12": {
+      "asset": "assets/pose-12.glb",
+      "sha256": "2943c48459b6b7c24ecdc4590c81c46167e4b379b8ce2c4c12383cbf77b38470",
+      "label_ko": "P12  서서 지지 · 무릎 들어 앞차기",
+      "source_blend": "F:\\codex\\outputs\\impact-shift-blender-template-20260914\\is-tasm-v01\\requested-posture-motions-20260916-r01\\pose_12\\pose_12-source-frame-diagnostic.blend",
+      "source_sha256": "82d7ad25b9ed996943c7f2219702aeeffb0655f6b3cd3deb5b9004cfac3a1d5a",
+      "animation": "Scene",
+      "fps": 25,
+      "frame_range": [
+        1,
+        258
+      ],
+      "contact_frames": [
+        32,
+        221
+      ],
+      "driver": "POSE_12_RightFoot_SourceDriver",
+      "preparation_frames": [
+        26,
+        215
+      ],
+      "playable_frame_end": 258,
+      "first_frame_time_s": 0.04,
+      "start_mode": "STEP_IN",
+      "support_depth": 0.087,
+      "target_control_height": 0.67,
+      "provenance": "assets/source-poses/pose_12-delivery.json",
+      "provenance_sha256": "f5b94cf52637cacf236e418a33cb458ab891b296048001bf42cc225cf298785a",
+      "motion_estimation": "MANUALLY_AUTHORED_FROM_REVIEWED_CURRENT_SOURCE_FRAMES_NOT_CALIBRATED_MOCAP",
+      "existing_motion_used": false,
+      "target_response": "S0_S3_SHARED_MATERIAL",
+      "target_posture": "STANDING_BRACED",
+      "target_height_m": 0.9,
+      "fixture": "STATIC_CYAN_POSTURE_GUIDE_NOT_CORRECTED_MALE_MODEL"
+    },
+    "POSE_13": {
+      "asset": "assets/pose-13.glb",
+      "sha256": "6109898f7c1f0f044fd6357a7128e0f8377ff91b1701dd088b42ea42f33bc90a",
+      "label_ko": "P13  낮게 무릎 꿇기 · 긴 보폭 킥",
+      "source_blend": "F:\\codex\\outputs\\impact-shift-blender-template-20260914\\is-tasm-v01\\requested-posture-motions-20260916-r01\\pose_13\\pose_13-source-frame-diagnostic.blend",
+      "source_sha256": "67148afe7e5f39252f8ddf52d2dfb757308146bdd54576c3b002436cd403adcc",
+      "animation": "Scene",
+      "fps": 25,
+      "frame_range": [
+        1,
+        217
+      ],
+      "contact_frames": [
+        32,
+        181
+      ],
+      "driver": "POSE_13_RightFoot_SourceDriver",
+      "preparation_frames": [
+        26,
+        175
+      ],
+      "playable_frame_end": 217,
+      "first_frame_time_s": 0.04,
+      "start_mode": "STEP_IN",
+      "support_depth": 0.087,
+      "target_control_height": 0.67,
+      "provenance": "assets/source-poses/pose_13-delivery.json",
+      "provenance_sha256": "793225f31edd1e206820e6b8bf0c1cd8ae3f5b89f1c93bc5c455d5f050400c26",
+      "motion_estimation": "MANUALLY_AUTHORED_FROM_REVIEWED_CURRENT_SOURCE_FRAMES_NOT_CALIBRATED_MOCAP",
+      "existing_motion_used": false,
+      "target_response": "S0_S3_SHARED_MATERIAL",
+      "target_posture": "KNEELING_LOW",
+      "target_height_m": 0.42,
+      "fixture": "STATIC_CYAN_POSTURE_GUIDE_NOT_CORRECTED_MALE_MODEL"
+    },
+    "POSE_16": {
+      "asset": "assets/pose-16.glb",
+      "sha256": "6ceddc25d80195d127db84304585d138ac2e5d261f1e700b5d5a749751a5f5f3",
+      "label_ko": "P16  ㄷ자 의자 · 앞쪽 짧은 올려차기",
+      "source_blend": "F:\\codex\\outputs\\impact-shift-blender-template-20260914\\is-tasm-v01\\requested-posture-motions-20260916-r01\\pose_16\\pose_16-source-frame-diagnostic.blend",
+      "source_sha256": "6bee271fc0d4b4ca85b74946a96f9b69e2bd5cecdf0f9523302c5bdcd41e2fb6",
+      "animation": "Scene",
+      "fps": 25,
+      "frame_range": [
+        1,
+        150
+      ],
+      "contact_frames": [
+        38,
+        112
+      ],
+      "driver": "POSE_16_RightFoot_SourceDriver",
+      "preparation_frames": [
+        30,
+        104
+      ],
+      "playable_frame_end": 150,
+      "first_frame_time_s": 0.04,
+      "start_mode": "STEP_IN",
+      "support_depth": 0.087,
+      "target_control_height": 0.67,
+      "provenance": "assets/source-poses/pose_16-delivery.json",
+      "provenance_sha256": "bb1ca92b5794f30b4dc9d30729a889646a1aa66e876fe59716ce44ee52d52629",
+      "motion_estimation": "NEWLY_AUTHORED_GAMEPLAY_PREVIEW_NO_SOURCE_VIDEO_CLAIM",
+      "existing_motion_used": false,
+      "target_response": "S0_S3_SHARED_MATERIAL",
+      "target_posture": "SEATED_APERTURE",
+      "target_height_m": 0.62,
+      "fixture": "STATIC_CYAN_POSTURE_GUIDE_NOT_CORRECTED_MALE_MODEL",
+      "audio_note": "Reused existing neutral contact audio; no source video or source performance audio claim"
+    }
+  },
+  "footwear_presets": [],
+  "_ten_hits_note": "Trimmed for the web build. Assets are preprocessed by scripts/prepare-models.mjs: the anatomical target subtree is removed because the game renders its target as abstract proxy spheres, and textures are downscaled to 1K WebP."
+}

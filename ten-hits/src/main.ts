@@ -9,6 +9,7 @@ import { createPointerController, type PointerController } from './input/pointer
 import { createHud, type HudSelection, type ToggleName } from './ui/hud';
 import { createQualityMonitor } from './performance/quality';
 import { loadPoseModels, type PoseModelLibrary } from './render/model-library';
+import { loadAttackClips, type AttackClipLibrary } from './render/attack-clips';
 import {
   defaultSave,
   loadSave,
@@ -126,6 +127,7 @@ export function mountGame(root: HTMLElement, options: MountOptions = {}): GameAp
   let qualityLevel = quality.level();
 
   let models: PoseModelLibrary | null = null;
+  let clips: AttackClipLibrary | null = null;
   let frames = 0;
   let running = true;
   let paused = false;
@@ -194,8 +196,11 @@ export function mountGame(root: HTMLElement, options: MountOptions = {}): GameAp
 
   /** Swaps the authored figure for the current pose in, when one exists. */
   function applyModels(): void {
-    if (!models) return;
-    rig.applyPoseModel(models.pose(selection.pose));
+    if (models) rig.applyPoseModel(models.pose(selection.pose));
+    if (clips) rig.applyAttackClip(clips.get(selection.pose));
+    // The procedural foot trail has nothing to follow once an authored rig
+    // takes over the attack, so it would draw to a phantom position.
+    animation.setTrailEnabled(!rig.usingAuthoredAttacker());
   }
 
   function recordResult(snapshot: GameSnapshot): void {
@@ -304,18 +309,22 @@ export function mountGame(root: HTMLElement, options: MountOptions = {}): GameAp
 
   // Art loads in the background: the game is already playable without it.
   if (options.loadModels !== false) {
-    void loadPoseModels({
-      baseUrl: options.modelBaseUrl ?? `${import.meta.env.BASE_URL}models/`
-    }).then((library) => {
+    const baseUrl = options.modelBaseUrl ?? `${import.meta.env.BASE_URL}models/`;
+    void loadPoseModels({ baseUrl }).then((library) => {
       if (!running) return;
       models = library;
+      applyModels();
+    });
+    void loadAttackClips({ baseUrl }).then((library) => {
+      if (!running) return;
+      clips = library;
       applyModels();
     });
   }
 
   return {
     snapshot: () => engine.snapshot(),
-    authoredModelCount: () => models?.count() ?? 0,
+    authoredModelCount: () => (models?.count() ?? 0) + (clips?.count() ?? 0),
     movePelvis: (input: Vec2) => engine.movePelvis(input),
     frameCount: () => frames,
     simulationTime: () => engine.simulationTime(),

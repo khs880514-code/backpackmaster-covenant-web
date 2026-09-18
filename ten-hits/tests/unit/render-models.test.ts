@@ -253,3 +253,86 @@ describe('authored model swapping', () => {
     expect(material.opacity).toBeLessThan(1);
   });
 });
+
+describe('authored attack clip playback', () => {
+  /** A clip that slides a named node along x, so scrubbing is observable. */
+  function clipScene(): { scene: THREE.Group; clip: THREE.AnimationClip } {
+    const scene = new THREE.Group();
+    const guide = new THREE.Mesh(new THREE.SphereGeometry(0.1));
+    guide.name = 'POSTURE_GUIDE_Pelvis';
+    scene.add(guide);
+
+    const foot = new THREE.Object3D();
+    foot.name = 'foot_R';
+    scene.add(foot);
+
+    const track = new THREE.VectorKeyframeTrack(
+      'foot_R.position',
+      [0, 10],
+      [0, 0, 0, 10, 0, 0]
+    );
+    return { scene, clip: new THREE.AnimationClip('Scene', 10, [track]) };
+  }
+
+  function rigWithClip() {
+    const rig = createCharacters('standing-front', 'pump');
+    const { scene, clip } = clipScene();
+    rig.applyAttackClip({
+      poseId: 'standing-front',
+      sourceId: 'POSE_12',
+      scene,
+      animation: clip,
+      timing: {
+        fps: 25,
+        telegraphSeconds: 1,
+        strikeSeconds: 0.24,
+        recoverySeconds: 2,
+        contactFrames: [50],
+        preparationFrames: [25],
+        startMode: 'STEP_IN'
+      }
+    });
+    return { rig, foot: scene.getObjectByName('foot_R')! };
+  }
+
+  it('reports that an authored attacker took over', () => {
+    const { rig } = rigWithClip();
+    expect(rig.usingAuthoredAttacker()).toBe(true);
+    expect(rig.attacker.visible).toBe(false);
+    expect(rig.attackingFoot.visible).toBe(false);
+  });
+
+  it('actually moves the rig when the clip is scrubbed', () => {
+    const { rig, foot } = rigWithClip();
+    rig.scrubAttackClip('telegraph', 0);
+    expect(foot.position.x).toBeCloseTo(0, 4);
+
+    rig.scrubAttackClip('telegraph', 1);
+    // Wind-up frame 25 at 25 fps is one second in, a tenth of a ten-second clip.
+    expect(foot.position.x).toBeCloseTo(1, 4);
+
+    rig.scrubAttackClip('strike', 1);
+    // Contact frame 50 is two seconds in.
+    expect(foot.position.x).toBeCloseTo(2, 4);
+  });
+
+  it('advances the pose monotonically through an attack', () => {
+    const { rig, foot } = rigWithClip();
+    let previous = -Infinity;
+    for (const phase of ['telegraph', 'strike', 'recovery'] as const) {
+      for (let i = 0; i <= 4; i += 1) {
+        rig.scrubAttackClip(phase, i / 4);
+        expect(foot.position.x).toBeGreaterThanOrEqual(previous - 1e-6);
+        previous = foot.position.x;
+      }
+    }
+    expect(previous).toBeGreaterThan(2);
+  });
+
+  it('puts the procedural attacker back when the clip is cleared', () => {
+    const { rig } = rigWithClip();
+    rig.applyAttackClip(null);
+    expect(rig.usingAuthoredAttacker()).toBe(false);
+    expect(rig.attacker.visible).toBe(true);
+  });
+});

@@ -15,10 +15,13 @@
     "three": "^0.180.0"
   },
   "devDependencies": {
+    "@gltf-transform/core": "^4.5.0",
+    "@gltf-transform/functions": "^4.5.0",
     "@playwright/test": "^1.55.0",
     "@types/node": "^26.6.1",
     "@types/three": "^0.180.0",
     "jsdom": "^26.1.0",
+    "sharp": "^0.35.4",
     "typescript": "^5.9.2",
     "vite": "^7.1.5",
     "vitest": "^3.2.4"

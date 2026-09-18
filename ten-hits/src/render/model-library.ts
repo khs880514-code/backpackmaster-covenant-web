@@ -1,6 +1,5 @@
 import * as THREE from 'three';
 import { POSE_IDS } from '../game/config';
-import { parseSelectionManifest, toPoseModelManifest } from './selection-manifest';
 import type { PoseId } from '../game/types';
 
 /**
@@ -38,8 +37,6 @@ export interface LoadOptions {
 }
 
 export const MANIFEST_FILE = 'manifest.json';
-/** The authoring pipeline's own file, preferred when it is present. */
-export const SELECTION_FILE = 'selection-manifest.json';
 export const DEFAULT_PLAYER_HEIGHT = 1.8;
 export const DEFAULT_ATTACKER_HEIGHT = 1.73;
 
@@ -114,30 +111,18 @@ export async function loadPoseModels(options: LoadOptions = {}): Promise<PoseMod
   const doFetch = options.fetchImpl ?? (typeof fetch === 'function' ? fetch : null);
   if (!doFetch) return EMPTY;
 
-  async function readJson(file: string): Promise<unknown> {
-    const response = await doFetch!(`${baseUrl}${file}`);
-    if (!response.ok) return null;
-    return response.json();
-  }
-
-  // Prefer the authoring pipeline's own manifest so nobody maintains a second
-  // mapping by hand; fall back to the loader's simple format.
-  let manifest: PoseModelManifest | null = null;
+  // Only this loader's own format. The authoring pipeline's selection manifest
+  // describes attacker clips, not player figures, and belongs to
+  // `loadAttackClips` — loading it here once put a second attacker on the field.
+  let manifest: PoseModelManifest;
   try {
-    const authored = parseSelectionManifest(await readJson(SELECTION_FILE));
-    if (authored) manifest = toPoseModelManifest(authored);
+    const response = await doFetch(`${baseUrl}${MANIFEST_FILE}`);
+    if (!response.ok) return EMPTY;
+    const parsed: unknown = await response.json();
+    if (!isManifest(parsed)) return EMPTY;
+    manifest = parsed;
   } catch {
-    manifest = null;
-  }
-
-  if (!manifest) {
-    try {
-      const parsed = await readJson(MANIFEST_FILE);
-      if (!isManifest(parsed)) return EMPTY;
-      manifest = parsed;
-    } catch {
-      return EMPTY;
-    }
+    return EMPTY;
   }
 
   const source = options.source ?? defaultSource();

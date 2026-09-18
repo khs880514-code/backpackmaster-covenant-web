@@ -8,6 +8,8 @@ export interface AnimationController {
   /** Extra camera offset produced by impact shake, in world units. */
   shake(): THREE.Vector3;
   setShakeEnabled(enabled: boolean): void;
+  /** Off while an authored attacker plays: its own motion shows the wind-up. */
+  setTrailEnabled(enabled: boolean): void;
   dispose(): void;
 }
 
@@ -38,6 +40,7 @@ export function createAnimation(rig: CharacterRig): AnimationController {
   const shakeOffset = new THREE.Vector3();
   let shakeStrength = 0;
   let shakeEnabled = true;
+  let trailEnabled = true;
   let popTimer = 0;
   let lastPhase: GameSnapshot['phase'] = 'setup';
 
@@ -57,7 +60,8 @@ export function createAnimation(rig: CharacterRig): AnimationController {
       }
       geometry.attributes.position!.needsUpdate = true;
 
-      const telegraphing = snapshot.phase === 'telegraph' || snapshot.phase === 'strike';
+      const telegraphing =
+        trailEnabled && (snapshot.phase === 'telegraph' || snapshot.phase === 'strike');
       const targetOpacity = telegraphing ? 0.55 : 0;
       material.opacity += (targetOpacity - material.opacity) * Math.min(1, delta * 8);
 
@@ -99,6 +103,15 @@ export function createAnimation(rig: CharacterRig): AnimationController {
     setShakeEnabled(enabled: boolean): void {
       shakeEnabled = enabled;
       if (!enabled) shakeOffset.set(0, 0, 0);
+    },
+    setTrailEnabled(enabled: boolean): void {
+      trailEnabled = enabled;
+      if (!enabled) {
+        material.opacity = 0;
+        trail.visible = false;
+      } else {
+        trail.visible = true;
+      }
     },
     dispose(): void {
       geometry.dispose();

@@ -164,11 +164,9 @@ describe('loadPoseModels', () => {
   });
 });
 
-describe('authoring manifest passthrough', () => {
-  it('prefers the authoring manifest when it is served', async () => {
-    const load = vi.fn().mockResolvedValue(
-      new THREE.Mesh(new THREE.BoxGeometry(1, 2, 1))
-    );
+describe('separation from the authoring manifest', () => {
+  it('ignores the authoring manifest, which describes attacker clips', async () => {
+    const load = vi.fn();
     const fetchImpl = vi.fn(async (url: string) => {
       if (url.endsWith('selection-manifest.json')) {
         return { ok: true, json: async () => selectionFixture };
@@ -177,23 +175,22 @@ describe('authoring manifest passthrough', () => {
     }) as unknown as typeof fetch;
 
     const library = await loadPoseModels({ fetchImpl, source: { load } });
-    expect(library.pose('standing-front')).toBeInstanceOf(THREE.Group);
-    expect(load).toHaveBeenCalledWith('models/assets/pose-12.glb');
-    expect(library.count()).toBe(4);
+    expect(library.count()).toBe(0);
+    expect(load).not.toHaveBeenCalled();
   });
 
-  it('falls back to the simple manifest when the authoring one is absent', async () => {
+  it('loads only its own manifest format', async () => {
     const load = vi.fn().mockResolvedValue(
       new THREE.Mesh(new THREE.BoxGeometry(1, 2, 1))
     );
     const fetchImpl = vi.fn(async (url: string) => {
-      if (url.endsWith('selection-manifest.json')) {
-        return { ok: false, json: async () => ({}) };
+      if (url.endsWith('manifest.json')) {
+        return {
+          ok: true,
+          json: async () => ({ version: 1, poses: { 'braced-back': 'b.glb' } })
+        };
       }
-      return {
-        ok: true,
-        json: async () => ({ version: 1, poses: { 'braced-back': 'b.glb' } })
-      };
+      return { ok: false, json: async () => ({}) };
     }) as unknown as typeof fetch;
 
     const library = await loadPoseModels({ fetchImpl, source: { load } });
