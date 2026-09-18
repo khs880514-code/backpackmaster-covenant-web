@@ -1,0 +1,1248 @@
+{
+  "schema": "impact-shift.godot-playable-selection.v1",
+  "project": "F:/codex/outputs/impact-shift-blender-template-20260914/godot-is-tasm-playable-v01",
+  "model_id": "IS-TASM-v1",
+  "status": "LOCAL_PLAYABLE_DIAGNOSTIC_REVIEW",
+  "coordinate_system": {
+    "unit": "metres",
+    "runtime_axes": "Godot Y-up; glTF importer converts Blender Z-up",
+    "planning_plane": "support/target values are two-axis pose-local metres",
+    "target_control": "Lateral/height offsets reprojected onto the actual external shell; support depth maps to Godot -Z"
+  },
+  "character": {
+    "id": "DARK_ELF_UNIFIED_V11",
+    "skeleton": "Rig_DarkElf_Deform/Skeleton3D",
+    "bones": 27,
+    "strike_chain": [
+      "thigh.R",
+      "shin.R",
+      "foot.R"
+    ],
+    "footwear": "FOOTWEAR_01",
+    "footwear_selection_note": "Five selected existing footwear sources; named skin binds map to the existing skeleton. No motion replacement."
+  },
+  "poses": {
+    "POSE_01": {
+      "asset": "assets/pose-01.glb",
+      "sha256": "b6b025378fb8e9b316295d7a51903f01fe17cf9e519a7c4c44dbb3264c7900f1",
+      "source_blend": "F:/codex/outputs/impact-shift-blender-template-20260914/power-motion-demo-v01/darkelf-p01-p1/darkelf-p01-p1-preview.blend",
+      "source_sha256": "6a1fae6416ee8d6f128e5536ce4a07ab052685815e656af9d58ee49da1176c18",
+      "animation": "Scene",
+      "fps": 25,
+      "frame_range": [
+        1,
+        235
+      ],
+      "contact_frames": [
+        28
+      ],
+      "driver": "P01_RightFoot_ContactDriver",
+      "preparation_frames": [
+        22
+      ],
+      "playable_frame_end": 62,
+      "first_frame_time_s": 0.04,
+      "source_current_sha256": "e9c053d8b8dfee83bba97004bb9d260d38e1fdf72b46bcfc386ac06c280c4cca",
+      "source_changed_after_export": true,
+      "start_mode": "RUN_IN",
+      "target_response": "S0_S3_SHARED_MATERIAL"
+    },
+    "POSE_04": {
+      "asset": "assets/pose-04.glb",
+      "sha256": "edb17eaa7bd141384787e36024113a27ac4cf532a1c30ceaa67dd7b768906705",
+      "source_blend": "F:/codex/outputs/impact-shift-blender-template-20260914/is-tasm-v01/pose-04/pose-04-preview.blend",
+      "source_sha256": "11108ef4d727f098c771343e2a12634745fa9bfa8b5cd5d09e1dd8c775c2735e",
+      "animation": "Scene",
+      "fps": 25,
+      "frame_range": [
+        1,
+        125
+      ],
+      "contact_frames": [
+        34,
+        87
+      ],
+      "driver": "P04_RightFoot_Source55_Driver",
+      "preparation_frames": [
+        23,
+        76
+      ],
+      "playable_frame_end": 125,
+      "first_frame_time_s": 0.04,
+      "source_current_sha256": "11108ef4d727f098c771343e2a12634745fa9bfa8b5cd5d09e1dd8c775c2735e",
+      "source_changed_after_export": false,
+      "start_mode": "STATIONARY",
+      "target_response": "S0_S3_SHARED_MATERIAL"
+    },
+    "POSE_05": {
+      "asset": "assets/pose-05.glb",
+      "sha256": "0db1182f89eb1d9d8c946738bf3db6fced51d3bf87c0be362ee30a92cfe4b7d2",
+      "label_ko": "보폭을 옮겨 낮게 차기",
+      "source_blend": "F:\\codex\\outputs\\impact-shift-blender-template-20260914\\is-tasm-v01\\remaining-poses-20260916-r01\\pose_05\\pose_05-source-frame-diagnostic.blend",
+      "source_sha256": "313ba1191ec55e2fa1186648731fc8c3337ed4456ac4c4641be58f527db6bb65",
+      "animation": "Scene",
+      "fps": 25,
+      "frame_range": [
+        1,
+        133
+      ],
+      "contact_frames": [
+        32,
+        96
+      ],
+      "driver": "POSE_05_RightFoot_SourceDriver",
+      "preparation_frames": [
+        27,
+        91
+      ],
+      "playable_frame_end": 133,
+      "first_frame_time_s": 0.04,
+      "start_mode": "STEP_IN",
+      "support_depth": 0.087,
+      "target_control_height": 0.67,
+      "provenance": "assets/source-poses/pose_05-delivery.json",
+      "provenance_sha256": "82ec4fe423acdb83afaab2e8e8fe1d413a4174f60b2217127296556da1f7a658",
+      "motion_estimation": "MANUALLY_AUTHORED_FROM_REVIEWED_CURRENT_SOURCE_FRAMES_NOT_CALIBRATED_MOCAP",
+      "existing_motion_used": false,
+      "target_response": "S0_S3_SHARED_MATERIAL"
+    },
+    "POSE_07": {
+      "asset": "assets/pose-07.glb",
+      "sha256": "c57e1bbe1e19353470cd368cc8ddbfd2f711e289d759ccdd7157769ac7d8ac3c",
+      "label_ko": "팔로 균형 잡고 차기",
+      "source_blend": "F:\\codex\\outputs\\impact-shift-blender-template-20260914\\is-tasm-v01\\remaining-poses-20260916-r01\\pose_07\\pose_07-source-frame-diagnostic.blend",
+      "source_sha256": "29cb832b2532777dbbf3f8024184c75a27a7a398e5262cde1024fef0795d00e0",
+      "animation": "Scene",
+      "fps": 25,
+      "frame_range": [
+        1,
+        185
+      ],
+      "contact_frames": [
+        32,
+        148
+      ],
+      "driver": "POSE_07_RightFoot_SourceDriver",
+      "preparation_frames": [
+        26,
+        142
+      ],
+      "playable_frame_end": 185,
+      "first_frame_time_s": 0.04,
+      "start_mode": "STEP_IN",
+      "support_depth": 0.087,
+      "target_control_height": 0.67,
+      "provenance": "assets/source-poses/pose_07-delivery.json",
+      "provenance_sha256": "f51489b81971ec3b8cd53e121f56dde0ec07139d523f509e968ddd5bb31b2071",
+      "motion_estimation": "MANUALLY_AUTHORED_FROM_REVIEWED_CURRENT_SOURCE_FRAMES_NOT_CALIBRATED_MOCAP",
+      "existing_motion_used": false,
+      "target_response": "S0_S3_SHARED_MATERIAL"
+    },
+    "POSE_10": {
+      "asset": "assets/pose-10.glb",
+      "sha256": "056dac33b540183f2f0745023586edd339f6f532db2d8f61a831ada2cbe601c7",
+      "label_ko": "제자리 짧은 킥",
+      "source_blend": "F:\\codex\\outputs\\impact-shift-blender-template-20260914\\is-tasm-v01\\remaining-poses-20260916-r01\\pose_10\\pose_10-source-frame-diagnostic.blend",
+      "source_sha256": "0bb8ce13769f823dc5878aae657bf4eb10352b992e4237128dbacb359a8a0ec6",
+      "animation": "Scene",
+      "fps": 25,
+      "frame_range": [
+        1,
+        184
+      ],
+      "contact_frames": [
+        32,
+        147
+      ],
+      "driver": "POSE_10_RightFoot_SourceDriver",
+      "preparation_frames": [
+        27,
+        142
+      ],
+      "playable_frame_end": 184,
+      "first_frame_time_s": 0.04,
+      "start_mode": "STATIONARY",
+      "support_depth": 0.087,
+      "target_control_height": 0.67,
+      "provenance": "assets/source-poses/pose_10-delivery.json",
+      "provenance_sha256": "83c2dcae9e7dae923b7836ee15e3111595454f2b4450ddd2be4606cbd534036e",
+      "motion_estimation": "MANUALLY_AUTHORED_FROM_REVIEWED_CURRENT_SOURCE_FRAMES_NOT_CALIBRATED_MOCAP",
+      "existing_motion_used": false,
+      "target_response": "S0_S3_SHARED_MATERIAL"
+    },
+    "POSE_11": {
+      "asset": "assets/pose-11.glb",
+      "sha256": "6a28761030b301b913a31105d0ea53771d8430913e9d2a87bf0cb7c90bba6c5a",
+      "label_ko": "P11  무릎 세우기 · 한 발 디딤 킥",
+      "source_blend": "F:\\codex\\outputs\\impact-shift-blender-template-20260914\\is-tasm-v01\\requested-posture-motions-20260916-r01\\pose_11\\pose_11-source-frame-diagnostic.blend",
+      "source_sha256": "59da1c595df5b1cd2a80292e766c51b2157d02096020b0771a9d89680b3eb16d",
+      "animation": "Scene",
+      "fps": 25,
+      "frame_range": [
+        1,
+        152
+      ],
+      "contact_frames": [
+        32,
+        116
+      ],
+      "driver": "POSE_11_RightFoot_SourceDriver",
+      "preparation_frames": [
+        26,
+        110
+      ],
+      "playable_frame_end": 152,
+      "first_frame_time_s": 0.04,
+      "start_mode": "STEP_IN",
+      "support_depth": 0.087,
+      "target_control_height": 0.67,
+      "provenance": "assets/source-poses/pose_11-delivery.json",
+      "provenance_sha256": "8aecd003411c6879dd72521071f6b47be0544d91764df1bbe8c06044f91723cc",
+      "motion_estimation": "MANUALLY_AUTHORED_FROM_REVIEWED_CURRENT_SOURCE_FRAMES_NOT_CALIBRATED_MOCAP",
+      "existing_motion_used": false,
+      "target_response": "S0_S3_SHARED_MATERIAL",
+      "target_posture": "UPRIGHT_KNEELING",
+      "target_height_m": 0.54,
+      "fixture": "STATIC_CYAN_POSTURE_GUIDE_NOT_CORRECTED_MALE_MODEL"
+    },
+    "POSE_12": {
+      "asset": "assets/pose-12.glb",
+      "sha256": "2943c48459b6b7c24ecdc4590c81c46167e4b379b8ce2c4c12383cbf77b38470",
+      "label_ko": "P12  서서 지지 · 무릎 들어 앞차기",
+      "source_blend": "F:\\codex\\outputs\\impact-shift-blender-template-20260914\\is-tasm-v01\\requested-posture-motions-20260916-r01\\pose_12\\pose_12-source-frame-diagnostic.blend",
+      "source_sha256": "82d7ad25b9ed996943c7f2219702aeeffb0655f6b3cd3deb5b9004cfac3a1d5a",
+      "animation": "Scene",
+      "fps": 25,
+      "frame_range": [
+        1,
+        258
+      ],
+      "contact_frames": [
+        32,
+        221
+      ],
+      "driver": "POSE_12_RightFoot_SourceDriver",
+      "preparation_frames": [
+        26,
+        215
+      ],
+      "playable_frame_end": 258,
+      "first_frame_time_s": 0.04,
+      "start_mode": "STEP_IN",
+      "support_depth": 0.087,
+      "target_control_height": 0.67,
+      "provenance": "assets/source-poses/pose_12-delivery.json",
+      "provenance_sha256": "f5b94cf52637cacf236e418a33cb458ab891b296048001bf42cc225cf298785a",
+      "motion_estimation": "MANUALLY_AUTHORED_FROM_REVIEWED_CURRENT_SOURCE_FRAMES_NOT_CALIBRATED_MOCAP",
+      "existing_motion_used": false,
+      "target_response": "S0_S3_SHARED_MATERIAL",
+      "target_posture": "STANDING_BRACED",
+      "target_height_m": 0.9,
+      "fixture": "STATIC_CYAN_POSTURE_GUIDE_NOT_CORRECTED_MALE_MODEL"
+    },
+    "POSE_13": {
+      "asset": "assets/pose-13.glb",
+      "sha256": "6109898f7c1f0f044fd6357a7128e0f8377ff91b1701dd088b42ea42f33bc90a",
+      "label_ko": "P13  낮게 무릎 꿇기 · 긴 보폭 킥",
+      "source_blend": "F:\\codex\\outputs\\impact-shift-blender-template-20260914\\is-tasm-v01\\requested-posture-motions-20260916-r01\\pose_13\\pose_13-source-frame-diagnostic.blend",
+      "source_sha256": "67148afe7e5f39252f8ddf52d2dfb757308146bdd54576c3b002436cd403adcc",
+      "animation": "Scene",
+      "fps": 25,
+      "frame_range": [
+        1,
+        217
+      ],
+      "contact_frames": [
+        32,
+        181
+      ],
+      "driver": "POSE_13_RightFoot_SourceDriver",
+      "preparation_frames": [
+        26,
+        175
+      ],
+      "playable_frame_end": 217,
+      "first_frame_time_s": 0.04,
+      "start_mode": "STEP_IN",
+      "support_depth": 0.087,
+      "target_control_height": 0.67,
+      "provenance": "assets/source-poses/pose_13-delivery.json",
+      "provenance_sha256": "793225f31edd1e206820e6b8bf0c1cd8ae3f5b89f1c93bc5c455d5f050400c26",
+      "motion_estimation": "MANUALLY_AUTHORED_FROM_REVIEWED_CURRENT_SOURCE_FRAMES_NOT_CALIBRATED_MOCAP",
+      "existing_motion_used": false,
+      "target_response": "S0_S3_SHARED_MATERIAL",
+      "target_posture": "KNEELING_LOW",
+      "target_height_m": 0.42,
+      "fixture": "STATIC_CYAN_POSTURE_GUIDE_NOT_CORRECTED_MALE_MODEL"
+    },
+    "POSE_14": {
+      "asset": "assets/pose-14.glb",
+      "sha256": "a6b13d45b1fa451019762dc1d7321a73ee23e5c737aedf196ba18bb4c44f0f33",
+      "label_ko": "P14  네발 지지 · 옆으로 접근 킥",
+      "source_blend": "F:\\codex\\outputs\\impact-shift-blender-template-20260914\\is-tasm-v01\\requested-posture-motions-20260916-r01\\pose_14\\pose_14-source-frame-diagnostic.blend",
+      "source_sha256": "c3f74cd6005490c473bacd70e7856c4ace83f8052c51273d58f023ed6e4cc789",
+      "animation": "Scene",
+      "fps": 25,
+      "frame_range": [
+        1,
+        300
+      ],
+      "contact_frames": [
+        32,
+        264
+      ],
+      "driver": "POSE_14_RightFoot_SourceDriver",
+      "preparation_frames": [
+        23,
+        255
+      ],
+      "playable_frame_end": 300,
+      "first_frame_time_s": 0.04,
+      "start_mode": "STEP_IN",
+      "support_depth": 0.087,
+      "target_control_height": 0.67,
+      "provenance": "assets/source-poses/pose_14-delivery.json",
+      "provenance_sha256": "899552c6796df04e2afa1a75e74d4a06af2107e37215c60ed6c8a78865eb1ec0",
+      "motion_estimation": "MANUALLY_AUTHORED_FROM_REVIEWED_CURRENT_SOURCE_FRAMES_NOT_CALIBRATED_MOCAP",
+      "existing_motion_used": false,
+      "target_response": "S0_S3_SHARED_MATERIAL",
+      "target_posture": "ALL_FOURS_LATERAL",
+      "target_height_m": 0.6,
+      "fixture": "STATIC_CYAN_POSTURE_GUIDE_NOT_CORRECTED_MALE_MODEL"
+    },
+    "POSE_15": {
+      "asset": "assets/pose-15.glb",
+      "sha256": "d0e3ade82b55f3d027de94e5634eefe0e09bea6cf1c1743d8821c371c9be9143",
+      "label_ko": "P15  상체 접은 무릎 자세 · 짧은 킥",
+      "source_blend": "F:\\codex\\outputs\\impact-shift-blender-template-20260914\\is-tasm-v01\\requested-posture-motions-20260916-r01\\pose_15\\pose_15-source-frame-diagnostic.blend",
+      "source_sha256": "347b4c8a754ccd6fbe6c1c652345c9ca42f78b5b57ddc71d48ccf250d24e16cc",
+      "animation": "Scene",
+      "fps": 25,
+      "frame_range": [
+        1,
+        289
+      ],
+      "contact_frames": [
+        29,
+        250
+      ],
+      "driver": "POSE_15_RightFoot_SourceDriver",
+      "preparation_frames": [
+        23,
+        244
+      ],
+      "playable_frame_end": 289,
+      "first_frame_time_s": 0.04,
+      "start_mode": "STATIONARY",
+      "support_depth": 0.087,
+      "target_control_height": 0.67,
+      "provenance": "assets/source-poses/pose_15-delivery.json",
+      "provenance_sha256": "297fe8f968ab03485e70abc9983fe9d91c470d65522d57e0db14547ee31ae28f",
+      "motion_estimation": "MANUALLY_AUTHORED_FROM_REVIEWED_CURRENT_SOURCE_FRAMES_NOT_CALIBRATED_MOCAP",
+      "existing_motion_used": false,
+      "target_response": "S0_S3_SHARED_MATERIAL",
+      "target_posture": "KNEELING_FOLDED",
+      "target_height_m": 0.34,
+      "fixture": "STATIC_CYAN_POSTURE_GUIDE_NOT_CORRECTED_MALE_MODEL"
+    },
+    "POSE_16": {
+      "asset": "assets/pose-16.glb",
+      "sha256": "6ceddc25d80195d127db84304585d138ac2e5d261f1e700b5d5a749751a5f5f3",
+      "label_ko": "P16  ㄷ자 의자 · 앞쪽 짧은 올려차기",
+      "source_blend": "F:\\codex\\outputs\\impact-shift-blender-template-20260914\\is-tasm-v01\\requested-posture-motions-20260916-r01\\pose_16\\pose_16-source-frame-diagnostic.blend",
+      "source_sha256": "6bee271fc0d4b4ca85b74946a96f9b69e2bd5cecdf0f9523302c5bdcd41e2fb6",
+      "animation": "Scene",
+      "fps": 25,
+      "frame_range": [
+        1,
+        150
+      ],
+      "contact_frames": [
+        38,
+        112
+      ],
+      "driver": "POSE_16_RightFoot_SourceDriver",
+      "preparation_frames": [
+        30,
+        104
+      ],
+      "playable_frame_end": 150,
+      "first_frame_time_s": 0.04,
+      "start_mode": "STEP_IN",
+      "support_depth": 0.087,
+      "target_control_height": 0.67,
+      "provenance": "assets/source-poses/pose_16-delivery.json",
+      "provenance_sha256": "bb1ca92b5794f30b4dc9d30729a889646a1aa66e876fe59716ce44ee52d52629",
+      "motion_estimation": "NEWLY_AUTHORED_GAMEPLAY_PREVIEW_NO_SOURCE_VIDEO_CLAIM",
+      "existing_motion_used": false,
+      "target_response": "S0_S3_SHARED_MATERIAL",
+      "target_posture": "SEATED_APERTURE",
+      "target_height_m": 0.62,
+      "fixture": "STATIC_CYAN_POSTURE_GUIDE_NOT_CORRECTED_MALE_MODEL",
+      "audio_note": "Reused existing neutral contact audio; no source video or source performance audio claim"
+    },
+    "POSE_17": {
+      "asset": "assets/pose-17.glb",
+      "sha256": "6384e343bb53de1a3eed5483ed1567c635c65d76c6a8d545da18ca98163c200b",
+      "label_ko": "P17  대자로 엎드리기 · 낮게 내려차기",
+      "source_blend": "F:\\codex\\outputs\\impact-shift-blender-template-20260914\\is-tasm-v01\\requested-posture-motions-20260916-r01\\pose_17\\pose_17-source-frame-diagnostic.blend",
+      "source_sha256": "da4e4920bbf4f9b08c180d311f14079f007d7919de0302f0171e44860292668f",
+      "animation": "Scene",
+      "fps": 25,
+      "frame_range": [
+        1,
+        150
+      ],
+      "contact_frames": [
+        38,
+        112
+      ],
+      "driver": "POSE_17_RightFoot_SourceDriver",
+      "preparation_frames": [
+        28,
+        102
+      ],
+      "playable_frame_end": 150,
+      "first_frame_time_s": 0.04,
+      "start_mode": "STATIONARY",
+      "support_depth": -0.03,
+      "target_control_height": 0.67,
+      "provenance": "assets/source-poses/pose_17-delivery.json",
+      "provenance_sha256": "889ded721b41ce25cc00ec30aee5edcf4dd43b9a601ec41d4c6a2fe278125d12",
+      "motion_estimation": "NEWLY_AUTHORED_GAMEPLAY_PREVIEW_NO_SOURCE_VIDEO_CLAIM",
+      "existing_motion_used": false,
+      "target_response": "S0_S3_SHARED_MATERIAL",
+      "target_posture": "PRONE_SPREAD",
+      "target_height_m": 0.2,
+      "fixture": "STATIC_CYAN_POSTURE_GUIDE_NOT_CORRECTED_MALE_MODEL",
+      "audio_note": "Reused existing neutral contact audio; no source video or source performance audio claim"
+    }
+  },
+  "controls": {
+    "runtime_authority": [
+      "pose_id",
+      "power_level",
+      "contact_surface",
+      "release_plan()"
+    ],
+    "aim_mode": "FINAL_POSE_DIRECT_PLACEMENT",
+    "support_foot": "DRAG_DROP_POSE_ZONE",
+    "power": "BACKSWING_PULL_DISTANCE_POWER_01_TO_POWER_10",
+    "direction": "FINAL_TWO_MOTION_FRAMES",
+    "contact": "SELECTED_SHOE_PATCH_POSITION_AND_NORMAL_ON_ACTUAL_TARGET_TRIANGLE",
+    "penetration": "FORCE_LIMITED_COLLISION_RESPONSE_NOT_PRESCRIBED",
+    "preparation": "AUTHORED_BASE_WITH_PULL_ENDPOINT_WARP",
+    "contact_dispatch": "ANIMATION_CLOCK_WITH_IMMUTABLE_RELEASE_PLAN_AND_EVENT_DEDUPLICATION",
+    "collision_response": "NON_PENETRATING_KINEMATIC_SURFACE_STOP_PENDING_MATERIAL_SOLVER_FEEDBACK",
+    "start": "WHOLE_CHARACTER_MOUSE_PICK_DROP_THEN_SOURCE_APPROACH_PAUSE",
+    "start_and_support_independent": true,
+    "target_regions": [
+      "CENTER",
+      "LEFT",
+      "RIGHT",
+      "ACTUAL_SURFACE_CLICK"
+    ],
+    "view": "MOUSE_WHEEL_ZOOM_RIGHT_DRAG_ORBIT_MIDDLE_DRAG_PAN_DURING_PLAYBACK",
+    "ui": "3D_PRIMARY_COLLAPSIBLE_AUXILIARY_AIM_BOARD",
+    "p4_approach": "SELECTED_PATCH_BELOW_TARGET_FINAL_TWO_FRAMES_UPWARD",
+    "p4_recovery": "CONTINUOUS_ENDPOINT_BLEND_CONTACT_PLUS_2_TO_PLUS_15"
+  },
+  "audio": {
+    "sync": "PCM clips begin at known 0.25s impact marker; dispatch on actual motion frame contact",
+    "POSE_01": [
+      {
+        "file": "ref-15-1816491506901155887-01.wav",
+        "sha256": "bf69e18973f8f5a4292fd7fc68c75a915232a2ed37dbe558304c7e9042946b31",
+        "contact_file": "pose_01-contact-01.wav",
+        "contact_sha256": "1c074cd64c61d713a80057359b6925acb9c9e81a747cf4314658339e754915a1",
+        "source_marker_seconds": 0.25,
+        "contact_marker_seconds": 0.0,
+        "trim_method": "PCM frame copy beginning at source impact_marker_seconds; no pitch/time alteration"
+      },
+      {
+        "file": "ref-15-1816491506901155887-02.wav",
+        "sha256": "41e1da55fd1dbad3cf5add776f9203222a826da89f33112e9b507077d816ec1d",
+        "contact_file": "pose_01-contact-02.wav",
+        "contact_sha256": "63134b1b95f8d77ec11891499f7e63339233c663a8d4853f2ab21d034cc58ad7",
+        "source_marker_seconds": 0.25,
+        "contact_marker_seconds": 0.0,
+        "trim_method": "PCM frame copy beginning at source impact_marker_seconds; no pitch/time alteration"
+      }
+    ],
+    "POSE_04": [
+      {
+        "file": "ref-55-2022833986070781988-01.wav",
+        "sha256": "d0cc9651e195f49b44b292bc263410c11d77c29d82ec08d6e7a5439e91f67d8f",
+        "contact_file": "pose_04-contact-01.wav",
+        "contact_sha256": "ddd5c3fac5c84ee36a306ce739619a6b18231654c9a59ab610e94e6aef0c33b4",
+        "source_marker_seconds": 0.25,
+        "contact_marker_seconds": 0.0,
+        "trim_method": "PCM frame copy beginning at source impact_marker_seconds; no pitch/time alteration"
+      },
+      {
+        "file": "ref-55-2022833986070781988-02.wav",
+        "sha256": "7844fbdfd90c8bd699298f6b70817e53938f8ea433b8a2c9294d019fcbCfa42d",
+        "contact_file": "pose_04-contact-02.wav",
+        "contact_sha256": "7fcd501db78755031c90fb56cc468f6bf5c1870092e0708ab1f649475893d323",
+        "source_marker_seconds": 0.25,
+        "contact_marker_seconds": 0.0,
+        "trim_method": "PCM frame copy beginning at source impact_marker_seconds; no pitch/time alteration"
+      }
+    ],
+    "POSE_05": [
+      {
+        "source_file": "F:\\codex\\downloads\\zhnyw711106-source-library\\catalog-site\\.worktrees\\power-motion-slider\\dist\\media\\audio-impact\\ref-60-2023075244941205938-01.wav",
+        "source_sha256": "e54a5c2f260089703424379acdf9d3b7781666ed48453224df77c8ba80fd5752",
+        "contact_file": "pose_05-contact-01.wav",
+        "contact_sha256": "e4557b761ab7bddfb2d681484bf8411d111cd10879d51e61c88112a51fc2cc8b",
+        "source_marker_seconds": 0.25,
+        "contact_marker_seconds": 0.0,
+        "source_time_seconds": 7.69,
+        "source_video_frame_time_seconds": 7.680000000000001,
+        "source_alignment_error_seconds": -0.009999999999999787,
+        "trim_method": "PCM frame copy beginning at source impact_marker_seconds; no resampling"
+      },
+      {
+        "source_file": "F:\\codex\\downloads\\zhnyw711106-source-library\\catalog-site\\.worktrees\\power-motion-slider\\dist\\media\\audio-impact\\ref-60-2023075244941205938-02.wav",
+        "source_sha256": "478a06de2a31751ca0c7dcba8ac8a63805176964b7bcbdcea9ce16716cf7c5d4",
+        "contact_file": "pose_05-contact-02.wav",
+        "contact_sha256": "012a05196fae905b3e1d395fbdaf10e50cd461c04ec7d6d2b4ad03b48945f581",
+        "source_marker_seconds": 0.25,
+        "contact_marker_seconds": 0.0,
+        "source_time_seconds": 10.24,
+        "source_video_frame_time_seconds": 10.24,
+        "source_alignment_error_seconds": 0.0,
+        "trim_method": "PCM frame copy beginning at source impact_marker_seconds; no resampling"
+      }
+    ],
+    "POSE_07": [
+      {
+        "source_file": "F:\\codex\\downloads\\zhnyw711106-source-library\\catalog-site\\.worktrees\\power-motion-slider\\dist\\media\\audio-impact\\ref-51-1975631495802069327-01.wav",
+        "source_sha256": "3598d866f31e6535f8b3e189e0bd001daeb79a38be338a74d0ef78abb966bdbb",
+        "contact_file": "pose_07-contact-01.wav",
+        "contact_sha256": "b97f0074bb0dba59b9662c21fc0ebf25cdf0c26fc8f5094e57534963e25df5b5",
+        "source_marker_seconds": 0.25,
+        "contact_marker_seconds": 0.0,
+        "source_time_seconds": 5.45,
+        "source_video_frame_time_seconds": 5.44,
+        "source_alignment_error_seconds": -0.009999999999999787,
+        "trim_method": "PCM frame copy beginning at source impact_marker_seconds; no resampling"
+      },
+      {
+        "source_file": "F:\\codex\\downloads\\zhnyw711106-source-library\\catalog-site\\.worktrees\\power-motion-slider\\dist\\media\\audio-impact\\ref-51-1975631495802069327-02.wav",
+        "source_sha256": "1618a33d75a7ce7976451d03d6a156d1ed5231fdc75bd042b148bea71ace47fd",
+        "contact_file": "pose_07-contact-02.wav",
+        "contact_sha256": "3e690c0fbd39afc0e441cbbdd24273eafe9c11c30a805eb15ade0c2ce8f034fd",
+        "source_marker_seconds": 0.25,
+        "contact_marker_seconds": 0.0,
+        "source_time_seconds": 10.09,
+        "source_video_frame_time_seconds": 10.08,
+        "source_alignment_error_seconds": -0.009999999999999787,
+        "trim_method": "PCM frame copy beginning at source impact_marker_seconds; no resampling"
+      }
+    ],
+    "POSE_10": [
+      {
+        "source_file": "F:\\codex\\downloads\\zhnyw711106-source-library\\catalog-site\\.worktrees\\power-motion-slider\\dist\\media\\audio-impact\\ref-22-1848006036470280277-01.wav",
+        "source_sha256": "15d1d766a4920c47817d4a15d59909a066cca1b38ce2c669ad85a8aaa7815858",
+        "contact_file": "pose_10-contact-01.wav",
+        "contact_sha256": "2bdf059fabd3c895840db930d57e65c379e722f1a954dbee024002d1da7fbec6",
+        "source_marker_seconds": 0.25,
+        "contact_marker_seconds": 0.0,
+        "source_time_seconds": 2.56,
+        "source_video_frame_time_seconds": 2.55,
+        "source_alignment_error_seconds": -0.010000000000000231,
+        "trim_method": "PCM frame copy beginning at source impact_marker_seconds; no resampling"
+      },
+      {
+        "source_file": "F:\\codex\\downloads\\zhnyw711106-source-library\\catalog-site\\.worktrees\\power-motion-slider\\dist\\media\\audio-impact\\ref-22-1848006036470280277-02.wav",
+        "source_sha256": "56586b7d7d9f94ddaa5b4553163a676f9855ea69647ca90a3597bbb644c5f22a",
+        "contact_file": "pose_10-contact-02.wav",
+        "contact_sha256": "5ee537321d26102b843f388d9ba3afee5f7d1e9c87b91a5930495eecffe6baa7",
+        "source_marker_seconds": 0.25,
+        "contact_marker_seconds": 0.0,
+        "source_time_seconds": 7.14,
+        "source_video_frame_time_seconds": 7.15,
+        "source_alignment_error_seconds": 0.010000000000000675,
+        "trim_method": "PCM frame copy beginning at source impact_marker_seconds; no resampling"
+      }
+    ],
+    "POSE_11": [
+      {
+        "source_file": "F:\\codex\\downloads\\zhnyw711106-source-library\\catalog-site\\dist\\media\\audio-impact\\ref-49-1947717013691883622-01.wav",
+        "source_sha256": "99bf2b521e3bd3da921c054292ecf12b2f90634c783828451089fbdfc5475230",
+        "contact_file": "pose_11-contact-01.wav",
+        "contact_sha256": "b662027b0247987575d97de816a64e9fa5bd2a0350225628647b493658f1ce20",
+        "source_marker_seconds": 0.25,
+        "contact_marker_seconds": 0.0,
+        "source_time_seconds": 35.71,
+        "source_video_frame_time_seconds": 35.7,
+        "source_alignment_error_seconds": -0.00999999999999801,
+        "trim_method": "PCM frame copy beginning at source impact_marker_seconds; no resampling"
+      },
+      {
+        "source_file": "F:\\codex\\downloads\\zhnyw711106-source-library\\catalog-site\\dist\\media\\audio-impact\\ref-49-1947717013691883622-02.wav",
+        "source_sha256": "a70ec5123b2a908dd9c1735049c41440aeaceec7c7967309f0ff78c46bdce206",
+        "contact_file": "pose_11-contact-02.wav",
+        "contact_sha256": "16eabf5fe68b6b7b47cb99c6fee645cf0c66b4858b86ca12f010d7ef17f0ba6d",
+        "source_marker_seconds": 0.25,
+        "contact_marker_seconds": 0.0,
+        "source_time_seconds": 39.06,
+        "source_video_frame_time_seconds": 39.06,
+        "source_alignment_error_seconds": 0.0,
+        "trim_method": "PCM frame copy beginning at source impact_marker_seconds; no resampling"
+      }
+    ],
+    "POSE_12": [
+      {
+        "source_file": "F:\\codex\\downloads\\zhnyw711106-source-library\\catalog-site\\dist\\media\\audio-impact\\ref-66-2033105161485472246-01.wav",
+        "source_sha256": "15a7561de5fd9a12fa2d106f757e4dba263d85e8cf0d1f943c2cbbf639911874",
+        "contact_file": "pose_12-contact-01.wav",
+        "contact_sha256": "eaae3da9ff3d3a534e89a9bf51e556c023d7d00b593ed7beafce8592b6844034",
+        "source_marker_seconds": 0.25,
+        "contact_marker_seconds": 0.0,
+        "source_time_seconds": 44.79,
+        "source_video_frame_time_seconds": 44.78,
+        "source_alignment_error_seconds": -0.00999999999999801,
+        "trim_method": "PCM frame copy beginning at source impact_marker_seconds; no resampling"
+      },
+      {
+        "source_file": "F:\\codex\\downloads\\zhnyw711106-source-library\\catalog-site\\dist\\media\\audio-impact\\ref-66-2033105161485472246-02.wav",
+        "source_sha256": "d88acf8dba162290ea1341c629ddd6127606d8a619b0d91b30075327f7fd5184",
+        "contact_file": "pose_12-contact-02.wav",
+        "contact_sha256": "b320efaff9f39a55df2510da154ea667fb8b2fcdcdc083c25cee8293872accb8",
+        "source_marker_seconds": 0.25,
+        "contact_marker_seconds": 0.0,
+        "source_time_seconds": 52.36,
+        "source_video_frame_time_seconds": 52.34,
+        "source_alignment_error_seconds": -0.01999999999999602,
+        "trim_method": "PCM frame copy beginning at source impact_marker_seconds; no resampling"
+      }
+    ],
+    "POSE_13": [
+      {
+        "source_file": "F:\\codex\\downloads\\zhnyw711106-source-library\\catalog-site\\dist\\media\\audio-impact\\ref-16-1816493475942256892-01.wav",
+        "source_sha256": "10559fd1175c05cf529a21e73621d8f8305f936b36741bd0d5e3bd79ac4d2e1d",
+        "contact_file": "pose_13-contact-01.wav",
+        "contact_sha256": "2c13553a28dd4a41033ea7d1a445c3cbb3d7d1988c6cb6f2b1195038e0a14a3b",
+        "source_marker_seconds": 0.25,
+        "contact_marker_seconds": 0.0,
+        "source_time_seconds": 3.43,
+        "source_video_frame_time_seconds": 3.42,
+        "source_alignment_error_seconds": -0.010000000000000231,
+        "trim_method": "PCM frame copy beginning at source impact_marker_seconds; no resampling"
+      },
+      {
+        "source_file": "F:\\codex\\downloads\\zhnyw711106-source-library\\catalog-site\\dist\\media\\audio-impact\\ref-16-1816493475942256892-02.wav",
+        "source_sha256": "d496dd6ebf23dd7320b538f918917f6699ccf50fbf932ab369f3810d3119cb6e",
+        "contact_file": "pose_13-contact-02.wav",
+        "contact_sha256": "36a1e188c2291babd680c73eeec7f4cb06c14a300102d8f1409423f6d566063e",
+        "source_marker_seconds": 0.25,
+        "contact_marker_seconds": 0.0,
+        "source_time_seconds": 9.39,
+        "source_video_frame_time_seconds": 9.38,
+        "source_alignment_error_seconds": -0.009999999999999787,
+        "trim_method": "PCM frame copy beginning at source impact_marker_seconds; no resampling"
+      }
+    ],
+    "POSE_14": [
+      {
+        "source_file": "F:\\codex\\downloads\\zhnyw711106-source-library\\catalog-site\\dist\\media\\audio-impact\\ref-13-1774926892531163321-01.wav",
+        "source_sha256": "079834885791593071e3c59be41adbabea1598caa6f7e3a662f80f062f673a71",
+        "contact_file": "pose_14-contact-01.wav",
+        "contact_sha256": "325124c4068f131c7513243fee192f25e60787da069a4d30ebe81dffbdcc8625",
+        "source_marker_seconds": 0.25,
+        "contact_marker_seconds": 0.0,
+        "source_time_seconds": 48.87,
+        "source_video_frame_time_seconds": 48.86,
+        "source_alignment_error_seconds": -0.00999999999999801,
+        "trim_method": "PCM frame copy beginning at source impact_marker_seconds; no resampling"
+      },
+      {
+        "source_file": "F:\\codex\\downloads\\zhnyw711106-source-library\\catalog-site\\dist\\media\\audio-impact\\ref-13-1774926892531163321-02.wav",
+        "source_sha256": "7a2b3e92301b72c477acc27d51aab529d71138f8b3556a1b4aca13521a6cd11a",
+        "contact_file": "pose_14-contact-02.wav",
+        "contact_sha256": "60a7aa1b9e84dd4b59adea82459de53263caa1bbe3cf6761311316d13ff0b353",
+        "source_marker_seconds": 0.25,
+        "contact_marker_seconds": 0.0,
+        "source_time_seconds": 58.15,
+        "source_video_frame_time_seconds": 58.14,
+        "source_alignment_error_seconds": -0.00999999999999801,
+        "trim_method": "PCM frame copy beginning at source impact_marker_seconds; no resampling"
+      }
+    ],
+    "POSE_15": [
+      {
+        "source_file": "F:\\codex\\downloads\\zhnyw711106-source-library\\catalog-site\\dist\\media\\audio-impact\\ref-65-2024230825269842093-01.wav",
+        "source_sha256": "56c2a30cc72f2eb2cfef8d71145071865ac837ccd4aae71a7285a92bfca6c6a1",
+        "contact_file": "pose_15-contact-01.wav",
+        "contact_sha256": "a6889a488d2fc9a5d885fc6e03b53966265e7a6b45f16de43a0bec11294fdaac",
+        "source_marker_seconds": 0.25,
+        "contact_marker_seconds": 0.0,
+        "source_time_seconds": 1.14,
+        "source_video_frame_time_seconds": 1.12,
+        "source_alignment_error_seconds": -0.019999999999999796,
+        "trim_method": "PCM frame copy beginning at source impact_marker_seconds; no resampling"
+      },
+      {
+        "source_file": "F:\\codex\\downloads\\zhnyw711106-source-library\\catalog-site\\dist\\media\\audio-impact\\ref-65-2024230825269842093-02.wav",
+        "source_sha256": "6f974e121561b81b2902d0a07a9a32c194039fc95236f1f8764967928dcf72a3",
+        "contact_file": "pose_15-contact-02.wav",
+        "contact_sha256": "423ff9d1c62dcf928de7266f52a803b762ca1a56145eb8aa9f84562dbe12529c",
+        "source_marker_seconds": 0.25,
+        "contact_marker_seconds": 0.0,
+        "source_time_seconds": 9.95,
+        "source_video_frame_time_seconds": 9.96,
+        "source_alignment_error_seconds": 0.010000000000001563,
+        "trim_method": "PCM frame copy beginning at source impact_marker_seconds; no resampling"
+      }
+    ],
+    "POSE_16": [
+      {
+        "file": "ref-55-2022833986070781988-01.wav",
+        "sha256": "d0cc9651e195f49b44b292bc263410c11d77c29d82ec08d6e7a5439e91f67d8f",
+        "contact_file": "pose_04-contact-01.wav",
+        "contact_sha256": "ddd5c3fac5c84ee36a306ce739619a6b18231654c9a59ab610e94e6aef0c33b4",
+        "source_marker_seconds": 0.25,
+        "contact_marker_seconds": 0.0,
+        "trim_method": "PCM frame copy beginning at source impact_marker_seconds; no pitch/time alteration"
+      },
+      {
+        "file": "ref-55-2022833986070781988-02.wav",
+        "sha256": "7844fbdfd90c8bd699298f6b70817e53938f8ea433b8a2c9294d019fcbCfa42d",
+        "contact_file": "pose_04-contact-02.wav",
+        "contact_sha256": "7fcd501db78755031c90fb56cc468f6bf5c1870092e0708ab1f649475893d323",
+        "source_marker_seconds": 0.25,
+        "contact_marker_seconds": 0.0,
+        "trim_method": "PCM frame copy beginning at source impact_marker_seconds; no pitch/time alteration"
+      }
+    ],
+    "POSE_17": [
+      {
+        "file": "ref-55-2022833986070781988-01.wav",
+        "sha256": "d0cc9651e195f49b44b292bc263410c11d77c29d82ec08d6e7a5439e91f67d8f",
+        "contact_file": "pose_04-contact-01.wav",
+        "contact_sha256": "ddd5c3fac5c84ee36a306ce739619a6b18231654c9a59ab610e94e6aef0c33b4",
+        "source_marker_seconds": 0.25,
+        "contact_marker_seconds": 0.0,
+        "trim_method": "PCM frame copy beginning at source impact_marker_seconds; no pitch/time alteration"
+      },
+      {
+        "file": "ref-55-2022833986070781988-02.wav",
+        "sha256": "7844fbdfd90c8bd699298f6b70817e53938f8ea433b8a2c9294d019fcbCfa42d",
+        "contact_file": "pose_04-contact-02.wav",
+        "contact_sha256": "7fcd501db78755031c90fb56cc468f6bf5c1870092e0708ab1f649475893d323",
+        "source_marker_seconds": 0.25,
+        "contact_marker_seconds": 0.0,
+        "trim_method": "PCM frame copy beginning at source impact_marker_seconds; no pitch/time alteration"
+      }
+    ]
+  },
+  "pending": [
+    "Pose-applied and containment-verified complete A/B/C male targets",
+    "POSE_01 source changed after original GLB export; retained hash-verified consumed GLB until source delivery is validated"
+  ],
+  "revision": "2026-09-16-common-material-footwear-r01",
+  "contact_anchors": {
+    "asset": "assets/p01-shoe-contact-anchors-v01.json",
+    "sha256": "ef66c44d75daa2484b2b593b00dd163fb29e79abc84aaa9d0ebe5533a01555d0"
+  },
+  "target_response": {
+    "mode": "S0_S3",
+    "material_solver_executed": true,
+    "body_damage_enabled": false,
+    "all_fours_body_flinch": "Existing 0.0025+power*0.0025m, 0.35+power*0.42deg curve",
+    "miss_response": "No shape channel or body flinch before a registered surface contact",
+    "target": "EXISTING_A_CORRECTED_CONTINUOUS_ENVELOPE_27",
+    "physical_force_calibrated": false,
+    "deformation_depth_multiplier": 1.12,
+    "states": [
+      "S0",
+      "S1",
+      "S2",
+      "S3"
+    ],
+    "independent_sides": true,
+    "persistent_across_modes": true,
+    "playback_rate_affects_damage": false,
+    "batch_contacts": 10,
+    "p1_batch": "10 releases with randomized CENTER/LEFT/RIGHT",
+    "p4_batch": "5 fixed-aim pairs, 10 contacts total",
+    "preview_uses_same_solver": true,
+    "notes": "Continuous vertex deformation and retained dents on existing surfaces; authored game material coefficients, no calibrated finite-element or human injury prediction; S3 remains collapsed without generated tear geometry."
+  },
+  "pose_aliases": {
+    "POSE_02": {
+      "canonical": "POSE_01",
+      "reason": "Same run-in/chamber action; camera variation"
+    },
+    "POSE_03": {
+      "canonical": "POSE_01",
+      "reason": "Duplicate action structure"
+    },
+    "POSE_06": {
+      "canonical": "POSE_05",
+      "reason": "Same rear step/low pendulum action"
+    },
+    "POSE_08": {
+      "canonical": "POSE_07",
+      "reason": "Same arm counterbalance step-in action"
+    },
+    "POSE_09": {
+      "canonical": "POSE_04",
+      "reason": "Source ref55 is the user-selected P4"
+    }
+  },
+  "power_trajectories": {
+    "asset": "assets/p1-p4-power-trajectories-v01.json",
+    "sha256": "766fb7b5fd55e1ef7663082429b1583b9c9d26b25e6955b72185b03113b26b07"
+  },
+  "male_presets": [
+    {
+      "id": "NEUTRAL_STANDING",
+      "label": "중립 서기",
+      "asset": "assets/male-presets/A-corrected/neutral_standing.glb",
+      "sha256": "30ede057740b70c9a61b8cf76e12f54a8ea31323f6e193a2b5748e7eb8f5c4bc",
+      "source_blend": "F:\\codex\\사진복구\\impact-shift-resume-v02\\review\\corrected-blends\\neutral_standing.blend",
+      "MED_components": 27,
+      "mode": "STATIC_POSE_REVIEW"
+    },
+    {
+      "id": "NEUTRAL_KNEELING",
+      "label": "무릎 꿇기",
+      "asset": "assets/male-presets/A-corrected/neutral_kneeling.glb",
+      "sha256": "07284fed9bbf65bf6db6f8d9b60696833251ba0e58e207dbafb3956d980cc81c",
+      "source_blend": "F:\\codex\\사진복구\\impact-shift-resume-v02\\review\\corrected-blends\\neutral_kneeling.blend",
+      "MED_components": 27,
+      "mode": "STATIC_POSE_REVIEW"
+    },
+    {
+      "id": "NEUTRAL_SEATED",
+      "label": "일반 의자",
+      "asset": "assets/male-presets/A-corrected/neutral_seated.glb",
+      "sha256": "24be32a72c6b7ce1ee0a9e756d0f171e39715b570e082eea0e14b63738820cae",
+      "source_blend": "F:\\codex\\사진복구\\impact-shift-resume-v02\\review\\corrected-blends\\neutral_seated.blend",
+      "MED_components": 27,
+      "mode": "STATIC_POSE_REVIEW"
+    },
+    {
+      "id": "NEUTRAL_QUADRUPED",
+      "label": "네발 지지",
+      "asset": "assets/male-presets/A-corrected/neutral_quadruped.glb",
+      "sha256": "cde6239bfc743ebbda5d5cb278855fae3806ca9b056d35f7972929e2a8f39ede",
+      "source_blend": "F:\\codex\\사진복구\\impact-shift-resume-v02\\review\\corrected-blends\\neutral_quadruped.blend",
+      "MED_components": 27,
+      "mode": "STATIC_POSE_REVIEW"
+    },
+    {
+      "id": "A_OPEN_CHAIR_SEATED",
+      "label": "ㄷ자 의자 · 다리 벌림",
+      "asset": "assets/male-presets/A-corrected/a_open_chair_seated.glb",
+      "sha256": "ef00de7fd073458ec1894f6f76b9b671e2afbe5a23feaed24dc5fcc22a3dbd02",
+      "source_blend": "F:\\codex\\사진복구\\impact-shift-resume-v02\\review\\corrected-blends\\a_open_chair_seated.blend",
+      "MED_components": 27,
+      "mode": "STATIC_POSE_REVIEW"
+    },
+    {
+      "id": "A_PRONE_SPREAD",
+      "label": "대자로 엎드리기 · 손발 바닥",
+      "asset": "assets/male-presets/neutral-support/a_prone_spread.glb",
+      "sha256": "91911744b9e83f6649aa0877e25b5521dde03d2029a5ca260dc045062a47b151",
+      "source_blend": "F:\\codex\\outputs\\impact-shift-blender-template-20260914\\is-tasm-v01\\neutral-support-poses-20260916-r01\\a_prone_spread.blend",
+      "source_sha256": "70f2c8ad1352c68125e4724d45e898f8ddd3e76a2c32854a8b22edd85a603ebc",
+      "MED_components": 27,
+      "mode": "STATIC_POSE_REVIEW",
+      "support_provenance": "assets/male-presets/neutral-support/a_prone_spread-support.json",
+      "support_provenance_sha256": "7cba30938b6350b328fcffe51145d342c62f4b851b5962d164ac703b0106cffb",
+      "authored_static_pose": true,
+      "source_video_motion_claim": false,
+      "preserved_legacy_asset": {
+        "asset": "assets/male-presets/A-corrected/a_prone_spread.glb",
+        "sha256": "4541c1110eae2cdd82b18584b51eca1efa2c4be30ad07092cb7c385ab4b5bda7",
+        "source_blend": "F:\\codex\\사진복구\\impact-shift-resume-v02\\review\\corrected-blends\\a_prone_spread.blend"
+      }
+    },
+    {
+      "id": "NEUTRAL_PLANK",
+      "label": "엎드려뻗쳐 · 손·발 지지",
+      "asset": "assets/male-presets/neutral-support/neutral_plank.glb",
+      "sha256": "a72e2552667532ec7829d6ae421f12b38253bbe528d3f9582118cfab837466a9",
+      "source_blend": "F:\\codex\\outputs\\impact-shift-blender-template-20260914\\is-tasm-v01\\neutral-support-poses-20260916-r01\\neutral_plank.blend",
+      "source_sha256": "cfe850cacf1e8d99585ee3d5bef075e5c38e7404ad762967f4ff276c25a7f99a",
+      "MED_components": 0,
+      "mode": "STATIC_POSE_REVIEW",
+      "support_provenance": "assets/male-presets/neutral-support/neutral_plank-support.json",
+      "support_provenance_sha256": "0c0530d91cb24c909b70a3866c981566abff92eee1b67aec5549f54e6a2238e3",
+      "authored_static_pose": true,
+      "source_video_motion_claim": false
+    },
+    {
+      "id": "NEUTRAL_TABLE_SUPPORTED",
+      "label": "탁자에 엎드리기 · 상체 지지",
+      "asset": "assets/male-presets/neutral-support/neutral_table_supported.glb",
+      "sha256": "1857803ef2093b51c4ecce15bc5eabded535220e5b28b42c5bd3baf63cb1d76c",
+      "source_blend": "F:\\codex\\outputs\\impact-shift-blender-template-20260914\\is-tasm-v01\\neutral-support-poses-20260916-r01\\neutral_table_supported.blend",
+      "source_sha256": "eceaf0f4f82ef36e2bd5f2ba29b15d62dbb1e23199567879bb77fcb510001a1e",
+      "MED_components": 0,
+      "mode": "STATIC_POSE_REVIEW",
+      "support_provenance": "assets/male-presets/neutral-support/neutral_table_supported-support.json",
+      "support_provenance_sha256": "052818e402ca8f80355061cf6347a86ab6e2703b67a141da50037883a38ed933",
+      "authored_static_pose": true,
+      "source_video_motion_claim": false
+    }
+  ],
+  "male_preset_review": {
+    "mode": "EXISTING_POSE_SHARED_A_MATERIAL",
+    "runtime_pose_replaced": false,
+    "material_solver_executed": true,
+    "automatic_strike_attachment": true,
+    "producer_manifest": "F:\\codex\\사진복구\\impact-shift-resume-v02\\selection-manifest.json",
+    "producer_manifest_sha256": "9ad9192dc56f9de4868c4b56e6b9243107f2b39d3132f830cb6be2c2b912c495",
+    "viewer_sha256": "f3123be2c98f996dc6821e5bb3bfee856924e9e9bba32d807e86aedd66dca488",
+    "ordinary_support_scope": "Existing body-only plank/table poses reuse the existing prone A components at recorded support heights, without regenerating GLBs.",
+    "source_photo_duplicates": [
+      {
+        "photo": "latest Photo 2",
+        "alias_of": "NEUTRAL_TABLE_SUPPORTED",
+        "reason": "Same posture as latest Photo 1, different camera"
+      }
+    ]
+  },
+  "requested_source_aliases": [
+    {
+      "requested_source": "impact-12-1774923059172147430",
+      "alias_of": "POSE_04",
+      "reason": "Same stationary all-fours kick action family"
+    },
+    {
+      "requested_source": "impact-05-1851743370366062892",
+      "alias_of": "POSE_04",
+      "reason": "Same stationary all-fours kick action family"
+    }
+  ],
+  "unresolved": [],
+  "ordinary_body_presets": [
+    {
+      "id": "NEUTRAL_STANDING",
+      "label": "중립 서기",
+      "asset": "assets/body-presets-r07/neutral_standing.glb",
+      "sha256": "e3108efe8484546cf69c8fa6549a86dd8d042d09ae0861beaca8e1697402a6eb",
+      "source_blend": "F:\\codex\\outputs\\impact-shift-blender-template-20260914\\godot-is-tasm-playable-v01\\review\\ordinary-r07\\source\\neutral_standing.blend",
+      "MED_components": 0,
+      "mode": "STATIC_BODY_ONLY",
+      "preserved_legacy_asset": {
+        "asset": "assets/male-presets/A-corrected/neutral_standing.glb",
+        "sha256": "30ede057740b70c9a61b8cf76e12f54a8ea31323f6e193a2b5748e7eb8f5c4bc",
+        "source_blend": "F:\\codex\\사진복구\\impact-shift-resume-v02\\review\\corrected-blends\\neutral_standing.blend"
+      },
+      "source_sha256": "6f42de859df7fca0af9dc18e3f8a484642ab8b16734ff3f2a7a8432b541ab7fe",
+      "body_provenance": "assets/body-presets-r07/neutral_standing-body.json",
+      "body_provenance_sha256": "d7741fd42e7c744b9c5b088413bcec8f6a49d6c0c405ae77ff6da5e1c86592c8",
+      "source_video_motion_claim": false
+    },
+    {
+      "id": "NEUTRAL_KNEELING",
+      "label": "무릎 꿇기",
+      "asset": "assets/body-presets-r07/neutral_kneeling.glb",
+      "sha256": "6d5d4082426d4bb7ae1b8608f9680cca1c3601bbe1d8ae16ccfeca450d269dfc",
+      "source_blend": "F:\\codex\\outputs\\impact-shift-blender-template-20260914\\godot-is-tasm-playable-v01\\review\\ordinary-r07\\source\\neutral_kneeling.blend",
+      "MED_components": 0,
+      "mode": "STATIC_BODY_ONLY",
+      "preserved_legacy_asset": {
+        "asset": "assets/male-presets/A-corrected/neutral_kneeling.glb",
+        "sha256": "07284fed9bbf65bf6db6f8d9b60696833251ba0e58e207dbafb3956d980cc81c",
+        "source_blend": "F:\\codex\\사진복구\\impact-shift-resume-v02\\review\\corrected-blends\\neutral_kneeling.blend"
+      },
+      "source_sha256": "98ccc818ef0a90a4171b5f56573bcf556d019d82b084847d1c4cc906451d3179",
+      "body_provenance": "assets/body-presets-r07/neutral_kneeling-body.json",
+      "body_provenance_sha256": "0721cbd6ed3bcc69ede5749fb1f0cffab7d3a7d2bd4d1838023ed57997c64e80",
+      "source_video_motion_claim": false
+    },
+    {
+      "id": "NEUTRAL_SEATED",
+      "label": "일반 의자",
+      "asset": "assets/body-presets-r07/neutral_seated.glb",
+      "sha256": "f0975c9938077b08d05809c852cb956b33c8f908fd22e16825c7c3d21cb941a6",
+      "source_blend": "F:\\codex\\outputs\\impact-shift-blender-template-20260914\\godot-is-tasm-playable-v01\\review\\ordinary-r07\\source\\neutral_seated.blend",
+      "MED_components": 0,
+      "mode": "STATIC_BODY_ONLY",
+      "preserved_legacy_asset": {
+        "asset": "assets/male-presets/A-corrected/neutral_seated.glb",
+        "sha256": "24be32a72c6b7ce1ee0a9e756d0f171e39715b570e082eea0e14b63738820cae",
+        "source_blend": "F:\\codex\\사진복구\\impact-shift-resume-v02\\review\\corrected-blends\\neutral_seated.blend"
+      },
+      "source_sha256": "04190a99be3ab4829fbe2d4f794d4183060255ec7b10691ed91f719e018c894e",
+      "body_provenance": "assets/body-presets-r07/neutral_seated-body.json",
+      "body_provenance_sha256": "4e4e6d1d43d7b64cd98a1317b9f189b577f2e2831dcd30a478864eb5564aa2e8",
+      "source_video_motion_claim": false
+    },
+    {
+      "id": "NEUTRAL_QUADRUPED",
+      "label": "네발 지지",
+      "asset": "assets/body-presets-r07/neutral_quadruped.glb",
+      "sha256": "3f82ded3be61c05d42c7e31fddfa010fedb736b6afbec7bc56a99c0931f8e101",
+      "source_blend": "F:\\codex\\outputs\\impact-shift-blender-template-20260914\\godot-is-tasm-playable-v01\\review\\ordinary-r07\\source\\neutral_quadruped.blend",
+      "MED_components": 0,
+      "mode": "STATIC_BODY_ONLY",
+      "preserved_legacy_asset": {
+        "asset": "assets/male-presets/A-corrected/neutral_quadruped.glb",
+        "sha256": "cde6239bfc743ebbda5d5cb278855fae3806ca9b056d35f7972929e2a8f39ede",
+        "source_blend": "F:\\codex\\사진복구\\impact-shift-resume-v02\\review\\corrected-blends\\neutral_quadruped.blend"
+      },
+      "source_sha256": "bbfb7dc5570ed442b3b0e6cc6f0228e309297460b10b9c80d7fbbdb966896b05",
+      "body_provenance": "assets/body-presets-r07/neutral_quadruped-body.json",
+      "body_provenance_sha256": "9428066f5bbd4676a9255c40bce1f6317965ba1234ecbbcf20a57dd4bc398520",
+      "source_video_motion_claim": false
+    },
+    {
+      "id": "A_OPEN_CHAIR_SEATED",
+      "label": "ㄷ자 의자 · 다리 벌림",
+      "asset": "assets/body-presets-r07/a_open_chair_seated.glb",
+      "sha256": "b4ceb64927b8ffc4adfe7c6d51ef253cbdfa5c33a2c41f6ede9f0f903842be1e",
+      "source_blend": "F:\\codex\\outputs\\impact-shift-blender-template-20260914\\godot-is-tasm-playable-v01\\review\\ordinary-r07\\source\\a_open_chair_seated.blend",
+      "MED_components": 0,
+      "mode": "STATIC_BODY_ONLY",
+      "preserved_legacy_asset": {
+        "asset": "assets/male-presets/A-corrected/a_open_chair_seated.glb",
+        "sha256": "ef00de7fd073458ec1894f6f76b9b671e2afbe5a23feaed24dc5fcc22a3dbd02",
+        "source_blend": "F:\\codex\\사진복구\\impact-shift-resume-v02\\review\\corrected-blends\\a_open_chair_seated.blend"
+      },
+      "source_sha256": "70b486c46117dbc0196bf567dbc17012c2bda79b7ae41d4d5654edf7e4b1c7eb",
+      "body_provenance": "assets/body-presets-r07/a_open_chair_seated-body.json",
+      "body_provenance_sha256": "3696631af14d64c494f87c2da3a1d33f1a8d4af37f66bd2c509daaa54b199cb0",
+      "source_video_motion_claim": false
+    },
+    {
+      "id": "A_PRONE_SPREAD",
+      "label": "대자로 엎드리기 · 손발 바닥",
+      "asset": "assets/body-presets-r09/a_prone_spread.glb",
+      "sha256": "1f3600629d0c1b60809d2f8a8bd0d41d72c141f114710af6545949a866d375c0",
+      "source_blend": "F:\\codex\\outputs\\impact-shift-blender-template-20260914\\godot-is-tasm-playable-v01\\review\\static-poses-r09\\a_prone_spread.blend",
+      "source_sha256": "e440af7d36dfce346ff8baca181c6e3fb99759d2d21bd1bd6d4b1ed04107c977",
+      "MED_components": 0,
+      "mode": "STATIC_BODY_ONLY",
+      "authored_static_pose": true,
+      "source_video_motion_claim": false,
+      "preserved_legacy_asset": {
+        "asset": "assets/male-presets/neutral-support/a_prone_spread.glb",
+        "sha256": "91911744b9e83f6649aa0877e25b5521dde03d2029a5ca260dc045062a47b151",
+        "source_blend": "F:\\codex\\outputs\\impact-shift-blender-template-20260914\\is-tasm-v01\\neutral-support-poses-20260916-r01\\a_prone_spread.blend"
+      },
+      "body_provenance": "assets/body-presets-r09/a_prone_spread-body.json",
+      "body_provenance_sha256": "bfbdf47e1093b8c14300ffbb56265cbc47363ecebbec7fa3191492d76e7ea97f",
+      "previous_body_asset": {
+        "asset": "assets/body-presets-r07/a_prone_spread.glb",
+        "sha256": "fa4c65b71aaea80992b970feacaf0a4ad0e0dd37b1093b698b52811e82583aa3",
+        "source_blend": "F:\\codex\\outputs\\impact-shift-blender-template-20260914\\godot-is-tasm-playable-v01\\review\\ordinary-r07\\source\\a_prone_spread.blend"
+      }
+    },
+    {
+      "id": "NEUTRAL_PLANK",
+      "label": "엎드려뻗쳐 · 손·발 지지",
+      "asset": "assets/body-presets-r07/neutral_plank.glb",
+      "sha256": "9b6c25cdc7059d828c8d667c783d4e06d60295990b8d625321ae53ccf8859d2b",
+      "source_blend": "F:\\codex\\outputs\\impact-shift-blender-template-20260914\\godot-is-tasm-playable-v01\\review\\ordinary-r07\\source\\neutral_plank.blend",
+      "source_sha256": "6857d5b513df9dd95199e1656a20a98aecf267ef72be671fc5fe1eb976007210",
+      "MED_components": 0,
+      "mode": "STATIC_BODY_ONLY",
+      "authored_static_pose": true,
+      "source_video_motion_claim": false,
+      "preserved_legacy_asset": {
+        "asset": "assets/male-presets/neutral-support/neutral_plank.glb",
+        "sha256": "a72e2552667532ec7829d6ae421f12b38253bbe528d3f9582118cfab837466a9",
+        "source_blend": "F:\\codex\\outputs\\impact-shift-blender-template-20260914\\is-tasm-v01\\neutral-support-poses-20260916-r01\\neutral_plank.blend"
+      },
+      "body_provenance": "assets/body-presets-r07/neutral_plank-body.json",
+      "body_provenance_sha256": "42c6f7df65032d8447a0e9edb7d63b5ea75e9e39771ca2b5c8e7abc3910245c0"
+    },
+    {
+      "id": "NEUTRAL_TABLE_SUPPORTED",
+      "label": "탁자에 엎드리기 · 상체 지지",
+      "asset": "assets/body-presets-r07/neutral_table_supported.glb",
+      "sha256": "b10e0ac767f8a4148019583c5a2559cbc66f84c43e23c357db654a0b6e534992",
+      "source_blend": "F:\\codex\\outputs\\impact-shift-blender-template-20260914\\godot-is-tasm-playable-v01\\review\\ordinary-r07\\source\\neutral_table_supported.blend",
+      "source_sha256": "2867b401d33f9d9d6498c70926b23622e1257623ee69534d6cd8e44e63267dcc",
+      "MED_components": 0,
+      "mode": "STATIC_BODY_ONLY",
+      "authored_static_pose": true,
+      "source_video_motion_claim": false,
+      "preserved_legacy_asset": {
+        "asset": "assets/male-presets/neutral-support/neutral_table_supported.glb",
+        "sha256": "1857803ef2093b51c4ecce15bc5eabded535220e5b28b42c5bd3baf63cb1d76c",
+        "source_blend": "F:\\codex\\outputs\\impact-shift-blender-template-20260914\\is-tasm-v01\\neutral-support-poses-20260916-r01\\neutral_table_supported.blend"
+      },
+      "body_provenance": "assets/body-presets-r07/neutral_table_supported-body.json",
+      "body_provenance_sha256": "90833e6b6a075e765510f00153f9cd4ad073139de0cd99d0a7258a6be6b7f581"
+    }
+  ],
+  "ordinary_revision": "2026-09-16-static-anatomy-r10",
+  "footwear_presets": [
+    {
+      "id": "FOOTWEAR_01",
+      "asset": "assets/footwear/FOOTWEAR_01.glb",
+      "sha256": "ceaab0ac01ba2f04ba238189f6ba495db20da9644dc511f17372eba666df76b5",
+      "source_reference_status": "COMPARISON_COMPLETE_CHANGES_REMAIN"
+    },
+    {
+      "id": "FOOTWEAR_02",
+      "asset": "assets/footwear/FOOTWEAR_02.glb",
+      "sha256": "2d73aee628f36ca992cd768303fc4ebc0d1e60654270e4df376b1d94cad394ce",
+      "source_reference_status": "PENDING_NEW_REFERENCE_REVIEW"
+    },
+    {
+      "id": "FOOTWEAR_04_WHITE",
+      "asset": "assets/footwear/FOOTWEAR_04_WHITE.glb",
+      "sha256": "047d9842909d6fac0b173cc674a79fbd7f2ec1058f060be2eaa8bc76f4d821a4",
+      "source_reference_status": "PENDING_NEW_REFERENCE_REVIEW"
+    },
+    {
+      "id": "FOOTWEAR_05",
+      "asset": "assets/footwear/FOOTWEAR_05.glb",
+      "sha256": "3c7c2dbf683f2e66184f81c9de7831df8f088c2e3205d1f5210d159800625ff1",
+      "source_reference_status": "PENDING_NEW_REFERENCE_REVIEW"
+    },
+    {
+      "id": "FOOTWEAR_07",
+      "asset": "assets/footwear/FOOTWEAR_07.glb",
+      "sha256": "d0b4872c1f5d5379e9dd7153d1989e4a1230001d110b2e4d7f5f665a69f6fcb4",
+      "source_reference_status": "PREVIOUS_FITTING_REVIEW"
+    }
+  ],
+  "runtime_artifact": {
+    "revision": "2026-09-16-common-material-footwear-r01",
+    "sha256": {
+      "main.gd": "498e67dd473aed88a9bf309881376a9d1808ad07895cf0cddff81ed6bc1fa42c",
+      "pose_runtime.gd": "bb342e9f0bc9451180d2a064706a9d35d4d4d5875ca6365e72df41ff7fdf11c2",
+      "preset_viewer.gd": "f3123be2c98f996dc6821e5bb3bfee856924e9e9bba32d807e86aedd66dca488",
+      "point_demo.gd": "9c99be71bcb2017570414a3585decbeba4c1723e4fcb68338fc3d4d408fd341e",
+      "point_demo_runtime.gd": "cfcfc9c461f981aa512c117d84f4a93ae9a70c76485595e0f6e5bc29695f099a",
+      "point-demo-support/main.gd": "39e35cb2a3d4341b7b76c6ecabf5d930077cfda7434ed73cc8caf95ff1723a84",
+      "point-demo-support/pose_runtime.gd": "a48039de5b4378cc8ca8aa5fc70efc988123e36907f334423f3a9ea1df82de5e",
+      "point-demo-support/aim_model.gd": "c0bb48508b24bb3b9ff1636e077e150fa89f8e23756762b558def1616edd99fe"
+    }
+  },
+  "anatomical_pose_presets": [
+    {
+      "id": "NEUTRAL_STANDING",
+      "label": "중립 서기",
+      "asset": "assets/anatomical-presets-r10/neutral_standing.glb",
+      "sha256": "7f66cfd9174ee7cbf4110ae1cbc3256d0fb0de533f7c608bf095daafa93f3daf",
+      "source_blend": "F:\\codex\\outputs\\impact-shift-blender-template-20260914\\godot-is-tasm-playable-v01\\review\\static-anatomy-r10\\neutral_standing.blend",
+      "source_sha256": "6ecf95734f6d0e72e0741787805f56112a5f83fda0f7a1c401800d85025b941d",
+      "MED_components": 27,
+      "mode": "STATIC_ANATOMICAL_PRESET",
+      "anatomy_provenance": "assets/anatomical-presets-r10/neutral_standing-anatomy.json",
+      "anatomy_provenance_sha256": "76ab7943ee522a6e2ed91e3a16205f6c4c411d3eab3976d945f3c524b4c32a9b",
+      "static_preset_only": true,
+      "automatic_strike_attachment": false
+    },
+    {
+      "id": "NEUTRAL_KNEELING",
+      "label": "무릎 꿇기",
+      "asset": "assets/anatomical-presets-r10/neutral_kneeling.glb",
+      "sha256": "b0f335e4cb2f9084253016c40346cb91033aa1330b634fb6cbdb1a4c086c5874",
+      "source_blend": "F:\\codex\\outputs\\impact-shift-blender-template-20260914\\godot-is-tasm-playable-v01\\review\\static-anatomy-r10\\neutral_kneeling.blend",
+      "source_sha256": "6b87a6e84ab2e03ca2abdf35527ee4a592e36965e3df68df7e2ab9a1cb527958",
+      "MED_components": 27,
+      "mode": "STATIC_ANATOMICAL_PRESET",
+      "anatomy_provenance": "assets/anatomical-presets-r10/neutral_kneeling-anatomy.json",
+      "anatomy_provenance_sha256": "530db417e5c33f4df7212a48f41ca87ad7dbef4dcfc2d7319e6d49bf8a4b8c96",
+      "static_preset_only": true,
+      "automatic_strike_attachment": false
+    },
+    {
+      "id": "NEUTRAL_SEATED",
+      "label": "일반 의자",
+      "asset": "assets/anatomical-presets-r10/neutral_seated.glb",
+      "sha256": "c317c644dbf23a3f5cffa3a16d6f5df007a48b735e58de2ab3712b95e7fc5511",
+      "source_blend": "F:\\codex\\outputs\\impact-shift-blender-template-20260914\\godot-is-tasm-playable-v01\\review\\static-anatomy-r10\\neutral_seated.blend",
+      "source_sha256": "7adfe40b2cf65101030934fc1987679bf9d8718f9fbda38629ffc1b8c2b81679",
+      "MED_components": 27,
+      "mode": "STATIC_ANATOMICAL_PRESET",
+      "anatomy_provenance": "assets/anatomical-presets-r10/neutral_seated-anatomy.json",
+      "anatomy_provenance_sha256": "e19e2f20f99da98218d22b202536ff317615e38f4cc13024a3d665dab3530a9c",
+      "static_preset_only": true,
+      "automatic_strike_attachment": false
+    },
+    {
+      "id": "NEUTRAL_QUADRUPED",
+      "label": "네발 지지",
+      "asset": "assets/anatomical-presets-r10/neutral_quadruped.glb",
+      "sha256": "3b8c827e1a23e0ca234f87ca94be948633b712e935e6aec71291e56f408743ee",
+      "source_blend": "F:\\codex\\outputs\\impact-shift-blender-template-20260914\\godot-is-tasm-playable-v01\\review\\static-anatomy-r10\\neutral_quadruped.blend",
+      "source_sha256": "a06543b8edb233bc024c71c451bc79deaa18a27868fc6f8926629046776bc3e2",
+      "MED_components": 27,
+      "mode": "STATIC_ANATOMICAL_PRESET",
+      "anatomy_provenance": "assets/anatomical-presets-r10/neutral_quadruped-anatomy.json",
+      "anatomy_provenance_sha256": "c915b85d297e1861b12d8e5e1b4183d8617924875d7da9c0e5dec98203474471",
+      "static_preset_only": true,
+      "automatic_strike_attachment": false
+    },
+    {
+      "id": "A_OPEN_CHAIR_SEATED",
+      "label": "ㄷ자 의자 · 다리 벌림",
+      "asset": "assets/anatomical-presets-r10/a_open_chair_seated.glb",
+      "sha256": "983ac46fd08e17ab7bc7c2e9a7e2409eebc95dccdbba6a0fd3a8acffb016538a",
+      "source_blend": "F:\\codex\\outputs\\impact-shift-blender-template-20260914\\godot-is-tasm-playable-v01\\review\\static-anatomy-r10\\a_open_chair_seated.blend",
+      "source_sha256": "f3f35efc3a052242c9b1677e2cde9e03d647abd5b80b2380078cdd54af551e76",
+      "MED_components": 27,
+      "mode": "STATIC_ANATOMICAL_PRESET",
+      "anatomy_provenance": "assets/anatomical-presets-r10/a_open_chair_seated-anatomy.json",
+      "anatomy_provenance_sha256": "4f35157a137290a14be0795031082cae0f2d5aed25873ff962d70a0147cd6b4d",
+      "static_preset_only": true,
+      "automatic_strike_attachment": false
+    },
+    {
+      "id": "A_PRONE_SPREAD",
+      "label": "대자로 엎드리기 · 손발 바닥",
+      "asset": "assets/anatomical-presets-r10/a_prone_spread.glb",
+      "sha256": "74fae333a5eeb91531f11a9e917604c82b1160c5cfbfde873f2f8c8a90e25dbc",
+      "source_blend": "F:\\codex\\outputs\\impact-shift-blender-template-20260914\\godot-is-tasm-playable-v01\\review\\static-anatomy-r10\\a_prone_spread.blend",
+      "source_sha256": "db23141556f7d9a0c004a81809013a4a6f1e6ab52222a7912b1c93efcdaa96e5",
+      "MED_components": 27,
+      "mode": "STATIC_ANATOMICAL_PRESET",
+      "anatomy_provenance": "assets/anatomical-presets-r10/a_prone_spread-anatomy.json",
+      "anatomy_provenance_sha256": "1b6cde8380d4de1414ef194f7e6c3fdd974765b9b5938482baf2b26600c0e5b8",
+      "static_preset_only": true,
+      "automatic_strike_attachment": false
+    },
+    {
+      "id": "NEUTRAL_PLANK",
+      "label": "엎드려뻗쳐 · 손·발 지지",
+      "asset": "assets/anatomical-presets-r10/neutral_plank.glb",
+      "sha256": "787126b99dab54c6876343ccabfdc8b809a6a6ad20b551f76939c7fe4f824668",
+      "source_blend": "F:\\codex\\outputs\\impact-shift-blender-template-20260914\\godot-is-tasm-playable-v01\\review\\static-anatomy-r10\\neutral_plank.blend",
+      "source_sha256": "19ed52c31134d2a3f1e37ff35f1eab213ca3d7c510727a9955cf3df4a9c710a0",
+      "MED_components": 27,
+      "mode": "STATIC_ANATOMICAL_PRESET",
+      "anatomy_provenance": "assets/anatomical-presets-r10/neutral_plank-anatomy.json",
+      "anatomy_provenance_sha256": "1342ce020fe106dc8c99c2b7828837bb4c0805ad469b769fd28b6592dac956cf",
+      "static_preset_only": true,
+      "automatic_strike_attachment": false
+    },
+    {
+      "id": "NEUTRAL_TABLE_SUPPORTED",
+      "label": "탁자에 엎드리기 · 상체 지지",
+      "asset": "assets/anatomical-presets-r10/neutral_table_supported.glb",
+      "sha256": "323ede308d85cb8f482086446b64afa51b85fe2bec1d5c46741b864f76acf6d8",
+      "source_blend": "F:\\codex\\outputs\\impact-shift-blender-template-20260914\\godot-is-tasm-playable-v01\\review\\static-anatomy-r10\\neutral_table_supported.blend",
+      "source_sha256": "f07e9bde5ca4ab3413d19548c7db5901b2a3524aac74adcace3a84913dcfd44b",
+      "MED_components": 27,
+      "mode": "STATIC_ANATOMICAL_PRESET",
+      "anatomy_provenance": "assets/anatomical-presets-r10/neutral_table_supported-anatomy.json",
+      "anatomy_provenance_sha256": "8437ba21e33b422011bae7fa8f81ba4b92f987ae5c1bfccfb198b0c1f268730d",
+      "static_preset_only": true,
+      "automatic_strike_attachment": false
+    }
+  ],
+  "anatomical_pose_review": {
+    "mode": "STATIC_ANATOMICAL_PRESET_REVIEW",
+    "scene": "res://body_presets.tscn",
+    "source_model_scale_preserved": true,
+    "MED_components_per_preset": 27,
+    "continuous_envelope_per_preset": 1,
+    "automatic_strike_attachment": false,
+    "material_solver_executed": false,
+    "fabrication_dimension_validation": false
+  }
+}

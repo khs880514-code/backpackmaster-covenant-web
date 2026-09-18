@@ -1,0 +1,115 @@
+import { describe, expect, it } from 'vitest';
+import fixture from '../fixtures/selection-manifest.json';
+import {
+  parseSelectionManifest,
+  toPoseModelManifest,
+  SELECTION_SCHEMA
+} from '../../src/render/selection-manifest';
+import { POSES } from '../../src/game/config';
+
+/** The real authoring manifest, so the adapter is proven against actual data. */
+const imported = parseSelectionManifest(fixture)!;
+
+describe('parseSelectionManifest', () => {
+  it('accepts the authoring pipeline manifest', () => {
+    expect(fixture.schema).toBe(SELECTION_SCHEMA);
+    expect(imported).not.toBeNull();
+    expect(imported.revision).toBe('2026-09-16-common-material-footwear-r01');
+  });
+
+  it('reads the attacker rig and its strike chain', () => {
+    expect(imported.character.id).toBe('DARK_ELF_UNIFIED_V11');
+    expect(imported.character.bones).toBe(27);
+    expect(imported.character.strikeChain).toEqual(['thigh.R', 'shin.R', 'foot.R']);
+  });
+
+  it('maps the four target postures that match a game pose', () => {
+    expect(Object.keys(imported.poses).sort()).toEqual([
+      'crouch-front',
+      'kneeling-front',
+      'seated-chair',
+      'standing-front'
+    ]);
+    expect(imported.poses['standing-front']?.sourceId).toBe('POSE_12');
+    expect(imported.poses['seated-chair']?.sourceId).toBe('POSE_16');
+    expect(imported.poses['kneeling-front']?.sourceId).toBe('POSE_11');
+    expect(imported.poses['crouch-front']?.sourceId).toBe('POSE_13');
+  });
+
+  it('keeps every mapped clip close to the game pose anchor height', () => {
+    for (const [id, pose] of Object.entries(imported.poses)) {
+      const anchor = POSES[id as keyof typeof POSES].anchorHeight;
+      expect(Math.abs((pose!.targetHeightM ?? 0) - anchor)).toBeLessThan(0.06);
+    }
+  });
+
+  it('reports the postures that have no game pose yet', () => {
+    expect(imported.unmapped.map((p) => p.targetPosture).sort()).toEqual([
+      'ALL_FOURS_LATERAL',
+      'KNEELING_FOLDED',
+      'PRONE_SPREAD'
+    ]);
+  });
+
+  it('splits an authored clip into telegraph, strike, and recovery', () => {
+    const standing = imported.poses['standing-front']!;
+    expect(standing.timing.fps).toBe(25);
+    expect(standing.timing.preparationFrames[0]).toBe(26);
+    expect(standing.timing.contactFrames[0]).toBe(32);
+    // 26 frames of wind-up, 6 frames to contact, then the rest is recovery.
+    expect(standing.timing.telegraphSeconds).toBeCloseTo(1, 5);
+    expect(standing.timing.strikeSeconds).toBeCloseTo(0.24, 5);
+    expect(standing.timing.recoverySeconds).toBeCloseTo((258 - 32) / 25, 5);
+  });
+
+  it('gives every mapped pose usable positive phase durations', () => {
+    for (const pose of Object.values(imported.poses)) {
+      expect(pose!.timing.strikeSeconds).toBeGreaterThan(0);
+      expect(pose!.timing.telegraphSeconds).toBeGreaterThan(0);
+      expect(pose!.timing.recoverySeconds).toBeGreaterThan(0);
+    }
+  });
+
+  it('collects the five footwear sources', () => {
+    expect(imported.footwear).toHaveLength(5);
+    expect(imported.footwear.map((f) => f.id)).toContain('FOOTWEAR_01');
+    for (const shoe of imported.footwear) {
+      expect(shoe.asset.startsWith('assets/footwear/')).toBe(true);
+      expect(shoe.sha256).toHaveLength(64);
+    }
+  });
+
+  it('surfaces the stale-export warning the pipeline recorded', () => {
+    expect(imported.warnings).toContain(
+      'POSE_01: source changed after the glTF was exported'
+    );
+  });
+
+  it('rejects a payload from a different schema', () => {
+    expect(parseSelectionManifest({ schema: 'something-else', poses: {} })).toBeNull();
+    expect(parseSelectionManifest(null)).toBeNull();
+    expect(parseSelectionManifest('nope')).toBeNull();
+  });
+
+  it('refuses an asset path that escapes the project folder', () => {
+    const hostile = parseSelectionManifest({
+      schema: SELECTION_SCHEMA,
+      poses: {
+        POSE_99: { asset: '../../etc/passwd', target_posture: 'STANDING_BRACED' }
+      },
+      footwear_presets: [{ id: 'X', asset: '/etc/passwd' }]
+    })!;
+    expect(hostile.poses['standing-front']).toBeUndefined();
+    expect(hostile.footwear).toHaveLength(0);
+  });
+});
+
+describe('toPoseModelManifest', () => {
+  it('projects the import onto the loader manifest shape', () => {
+    const manifest = toPoseModelManifest(imported);
+    expect(manifest.version).toBe(1);
+    expect(manifest.poses?.['standing-front']).toBe('assets/pose-12.glb');
+    expect(manifest.poses?.['seated-chair']).toBe('assets/pose-16.glb');
+    expect(Object.keys(manifest.poses ?? {})).toHaveLength(4);
+  });
+});

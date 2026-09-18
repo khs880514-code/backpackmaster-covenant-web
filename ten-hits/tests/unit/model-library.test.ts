@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import * as THREE from 'three';
 import { fitModel, loadPoseModels, type GltfSource } from '../../src/render/model-library';
+import selectionFixture from '../fixtures/selection-manifest.json';
 
 function boxOf(object: THREE.Object3D): THREE.Box3 {
   return new THREE.Box3().setFromObject(object);
@@ -160,5 +161,43 @@ describe('loadPoseModels', () => {
       source: { load }
     });
     expect(load).toHaveBeenCalledWith('assets/models/pose-01.glb');
+  });
+});
+
+describe('authoring manifest passthrough', () => {
+  it('prefers the authoring manifest when it is served', async () => {
+    const load = vi.fn().mockResolvedValue(
+      new THREE.Mesh(new THREE.BoxGeometry(1, 2, 1))
+    );
+    const fetchImpl = vi.fn(async (url: string) => {
+      if (url.endsWith('selection-manifest.json')) {
+        return { ok: true, json: async () => selectionFixture };
+      }
+      return { ok: false, json: async () => ({}) };
+    }) as unknown as typeof fetch;
+
+    const library = await loadPoseModels({ fetchImpl, source: { load } });
+    expect(library.pose('standing-front')).toBeInstanceOf(THREE.Group);
+    expect(load).toHaveBeenCalledWith('models/assets/pose-12.glb');
+    expect(library.count()).toBe(4);
+  });
+
+  it('falls back to the simple manifest when the authoring one is absent', async () => {
+    const load = vi.fn().mockResolvedValue(
+      new THREE.Mesh(new THREE.BoxGeometry(1, 2, 1))
+    );
+    const fetchImpl = vi.fn(async (url: string) => {
+      if (url.endsWith('selection-manifest.json')) {
+        return { ok: false, json: async () => ({}) };
+      }
+      return {
+        ok: true,
+        json: async () => ({ version: 1, poses: { 'braced-back': 'b.glb' } })
+      };
+    }) as unknown as typeof fetch;
+
+    const library = await loadPoseModels({ fetchImpl, source: { load } });
+    expect(library.pose('braced-back')).toBeInstanceOf(THREE.Group);
+    expect(load).toHaveBeenCalledWith('models/b.glb');
   });
 });
