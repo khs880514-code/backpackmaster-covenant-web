@@ -43,7 +43,8 @@ describe('game configuration', () => {
       expect(pose.lateralLimit).toBeLessThanOrEqual(1);
       expect(pose.depthLimit).toBeGreaterThan(0);
       expect(pose.telegraphMultiplier).toBeGreaterThan(0.5);
-      expect(pose.anchorHeight).toBeGreaterThan(0.2);
+      // The prone pose sits at 0.20m; anything at or below the floor is a bug.
+      expect(pose.anchorHeight).toBeGreaterThan(0.1);
       expect(pose.anchorHeight).toBeLessThan(1.2);
     }
   });

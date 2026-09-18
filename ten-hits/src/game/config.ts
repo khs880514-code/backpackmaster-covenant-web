@@ -37,12 +37,16 @@ export const POSES: Record<PoseId, PoseProfile> = {
   // attack, so it stays winnable through timing rather than through dodging.
   'spread-standing': {
     id: 'spread-standing',
-    lateralLimit: 0.3,
-    depthLimit: 0.35,
-    rotationLimit: 0.28,
-    telegraphMultiplier: 1.18,
-    // A braced stance parts the thighs, so the pair hangs lower and freer.
-    anchorHeight: 0.83
+    // Face down and spread: almost nothing can be moved out of the way, and
+    // there is no standing up out of it either.
+    lateralLimit: 0.34,
+    depthLimit: 0.22,
+    rotationLimit: 0.2,
+    telegraphMultiplier: 1.08,
+    // The authored clip for this posture aims at 0.20m, and the figure that
+    // goes with it is 0.33m tall. It was set for a standing stance, which left
+    // the attacker kicking at the floor while the player stood over it.
+    anchorHeight: 0.2
   },
   // Lowest target and the shortest warning: fast hands, no time to think.
   'crouch-front': {

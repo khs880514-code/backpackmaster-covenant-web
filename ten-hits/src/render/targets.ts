@@ -38,8 +38,24 @@ const PROXY_DEPTH_RATIO = 0.97;
 
 /** The core sits inside the shell and shows through it as the shell thins. */
 const CORE_SCALE = 0.62;
-/** How far into the proxy the striking surface can press, as a fraction of its radius. */
-const IMPRINT_DEPTH = 0.62;
+/**
+ * How far into the proxy the striking surface presses, per unit of depth.
+ *
+ * Over 1 because the depths that actually occur are not: a direct compression
+ * reports about 0.45, and at the old 0.62 that was a 7mm dimple on a 28mm
+ * radius — which read as nothing, and left the colour change doing all the
+ * work. Clamped below so the surface can crater deeply without passing through
+ * the middle and turning itself inside out.
+ */
+const IMPRINT_DEPTH = 1.15;
+/** The deepest the pit may go, as a fraction of the radius. */
+const IMPRINT_LIMIT = 0.8;
+/**
+ * How much deeper the narrowest shoe drives than the broadest: the narrowest
+ * gets this multiplier and the broadest its reciprocal-ish counterpart, so the
+ * middle of the range is left as authored.
+ */
+const IMPRINT_SPREAD_GAIN = 1.4;
 const CORE_COLORS: Record<ColorStage, number> = {
   0: 0x8f7d74,
   1: 0x7c675f,
@@ -112,9 +128,20 @@ export function pressImprint(
   const dy = imprint.y / length;
   const dz = imprint.z / length;
 
+  const width = Math.min(1, Math.max(0, imprint.width));
   // A narrow cap concentrates the dent; a broad sole spreads it.
-  const sharpness = 1.4 + (1 - Math.min(1, Math.max(0, imprint.width))) * 9;
-  const reach = radius * IMPRINT_DEPTH * Math.min(1, Math.max(0, imprint.depth));
+  const sharpness = 1.4 + (1 - width) * 9;
+  // And it goes in further for it: the same force through a smaller contact
+  // patch penetrates more. Without this the stiletto and the platform left
+  // dents of the same depth and only differed in how far the edges fell away,
+  // which on a body this small was not a difference anyone could see.
+  const concentration = IMPRINT_SPREAD_GAIN - (IMPRINT_SPREAD_GAIN - 1) * 2 * width;
+  const reach =
+    radius *
+    Math.min(
+      IMPRINT_LIMIT,
+      IMPRINT_DEPTH * concentration * Math.min(1, Math.max(0, imprint.depth))
+    );
 
   for (let i = 0; i < rest.length; i += 3) {
     const x = rest[i]!;

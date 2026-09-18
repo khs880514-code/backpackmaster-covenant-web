@@ -20,7 +20,8 @@ const PRESETS: Record<PoseId, PosePreset> = {
   'standing-front': { targetY: 0.96, targetZ: 0.66, distance: 3.9, pitch: 0.11, yaw: -2.15 },
   'kneeling-front': { targetY: 0.66, targetZ: 0.6, distance: 3.5, pitch: 0.09, yaw: -2.15 },
   'seated-chair': { targetY: 0.72, targetZ: 0.6, distance: 3.6, pitch: 0.1, yaw: -2.15 },
-  'spread-standing': { targetY: 0.92, targetZ: 0.66, distance: 4.1, pitch: 0.12, yaw: -2.15 },
+  // Low and close: the target is on the floor for this one.
+  'spread-standing': { targetY: 0.34, targetZ: 0.58, distance: 3.0, pitch: 0.2, yaw: -2.15 },
   'crouch-front': { targetY: 0.54, targetZ: 0.56, distance: 3.3, pitch: 0.08, yaw: -2.15 },
   'braced-back': { targetY: 0.84, targetZ: 0.62, distance: 3.8, pitch: 0.1, yaw: -2.15 }
 };

@@ -30,7 +30,8 @@ export const CLIP_FILE: Record<string, string> = {
  */
 export const CLIP_BY_POSE: Record<PoseId, string> = {
   'standing-front': 'pose_12',
-  'spread-standing': 'pose_12',
+  // Prone, aimed at 0.20m: the low kneeling take is the nearest recorded.
+  'spread-standing': 'pose_13',
   'braced-back': 'pose_16',
   'seated-chair': 'pose_16',
   'kneeling-front': 'pose_11',

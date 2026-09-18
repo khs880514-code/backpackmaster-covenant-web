@@ -75,17 +75,18 @@ describe('pressImprint', () => {
   it('gives a narrow shoe a tighter, deeper pit than a broad one', () => {
     const { geometry, rest } = sphere();
 
-    pressImprint(geometry, rest, from(0, 1), RADIUS);
+    // Half depth, so neither is at the limit and both can still be told apart.
+    pressImprint(geometry, rest, from(0, 0.5), RADIUS);
     const narrowSpread = displaced(geometry, rest);
     const narrowPit = deepest(geometry, rest);
 
-    pressImprint(geometry, rest, from(1, 1), RADIUS);
+    pressImprint(geometry, rest, from(1, 0.5), RADIUS);
     const broadSpread = displaced(geometry, rest);
     const broadPit = deepest(geometry, rest);
 
-    // Same peak depth — the shoes differ in how far the dent reaches, not in
-    // how hard they can press.
-    expect(narrowPit).toBeCloseTo(broadPit, 5);
+    // The narrow cap drives in further through a smaller patch; the broad sole
+    // spreads the same contact across much more of the facing surface.
+    expect(narrowPit).toBeGreaterThan(broadPit * 1.25);
     expect(broadSpread).toBeGreaterThan(narrowSpread * 1.5);
   });
 

@@ -341,3 +341,68 @@ function winsWith(seed: number, offset: number, shoe: ShoeId): boolean {
   }
   return snapshot.phase === 'won';
 }
+
+describe('the hit that ends the run', () => {
+  /** Plays without dodging at full power until the run settles. */
+  function playToEnd(seed: number) {
+    const engine = createGameEngine({
+      pose: 'standing-front',
+      shoe: 'stiletto',
+      power: 10,
+      seed
+    });
+    engine.start();
+
+    let impactFrames = 0;
+    let sawContact = false;
+    let snapshot = engine.snapshot();
+    for (let i = 0; i < 60 * 300; i += 1) {
+      snapshot = engine.update(1 / 60);
+      if (snapshot.phase === 'won' || snapshot.phase === 'lost') break;
+      impactFrames = snapshot.phase === 'impact' ? impactFrames + 1 : 0;
+      if (snapshot.phase === 'impact' && snapshot.contact) sawContact = true;
+    }
+    return { phase: snapshot.phase, impactFrames, sawContact };
+  }
+
+  it('is reviewed before the result screen, not skipped past it', () => {
+    for (const seed of [1, 5, 12]) {
+      const run = playToEnd(seed);
+      expect(['won', 'lost']).toContain(run.phase);
+      // The deciding contact used to go straight to the result, giving the one
+      // hit worth understanding no review at all. It now holds the longest.
+      expect(run.impactFrames / 60).toBeGreaterThan(2);
+      expect(run.sawContact).toBe(true);
+    }
+  });
+
+  it('holds the deciding hit longer than an ordinary one', () => {
+    const engine = createGameEngine({
+      pose: 'standing-front',
+      shoe: 'stiletto',
+      power: 10,
+      seed: 5
+    });
+    engine.start();
+
+    const holds: number[] = [];
+    let frames = 0;
+    let previous = engine.snapshot().phase;
+    for (let i = 0; i < 60 * 300; i += 1) {
+      const snapshot = engine.update(1 / 60);
+      if (snapshot.phase === 'impact') frames += 1;
+      else if (previous === 'impact') {
+        holds.push(frames / 60);
+        frames = 0;
+      }
+      previous = snapshot.phase;
+      if (snapshot.phase === 'won' || snapshot.phase === 'lost') {
+        if (frames > 0) holds.push(frames / 60);
+        break;
+      }
+    }
+    expect(holds.length).toBeGreaterThan(1);
+    const last = holds.at(-1)!;
+    for (const hold of holds.slice(0, -1)) expect(last).toBeGreaterThan(hold);
+  });
+});

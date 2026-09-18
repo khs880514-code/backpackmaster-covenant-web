@@ -74,6 +74,12 @@ export interface GameEngine {
   simulationTime(): number;
 }
 
+/**
+ * How far an off-centre contact tilts the dent away from the travel direction.
+ * Small: the shoe's motion decides where it presses, its position only leans it.
+ */
+const OFFSET_LEAN = 0.35;
+
 const IMPACT_HOLD = 0.25;
 
 /**
@@ -93,7 +99,17 @@ const REVIEW_HOLD: Record<ImpactGrade, number> = {
   'center-compression': 1.6
 };
 
-function impactHold(grade: ImpactGrade | null): number {
+/**
+ * The hit that ends the run gets the longest look of all.
+ *
+ * It used to get none: a contact that won or lost skipped the impact phase
+ * entirely and went straight to the result screen, so the one hit a player
+ * most wants to understand was the one they never saw.
+ */
+const DECIDING_HOLD = 2.4;
+
+function impactHold(grade: ImpactGrade | null, deciding: boolean): number {
+  if (deciding) return DECIDING_HOLD;
   return grade === null ? IMPACT_HOLD : REVIEW_HOLD[grade];
 }
 const TARGET_RADIUS = 0.028;
@@ -233,6 +249,8 @@ export function createGameEngine(options: EngineOptions): GameEngine {
 
   let requestedPelvis: Vec2 = { x: 0, y: 0 };
   let contactPoint: ContactPoint | null = null;
+  /** A won or lost outcome, held until its impact has been reviewed. */
+  let pendingResult: GamePhase | null = null;
   /**
    * The lasting shape of what hit each side. Kept here rather than in
    * `TargetState` so the damage model stays a pure function of the grade.
@@ -302,7 +320,7 @@ export function createGameEngine(options: EngineOptions): GameEngine {
       case 'strike':
         return plan.strikeDuration;
       case 'impact':
-        return impactHold(lastGrade);
+        return impactHold(lastGrade, pendingResult !== null);
       case 'recovery':
         return plan.recoveryDuration;
       default:
@@ -335,17 +353,40 @@ export function createGameEngine(options: EngineOptions): GameEngine {
     return Math.min(1, Math.max(0, t));
   }
 
-  /** Stores which way the shoe pressed into one side, as a unit direction. */
-  function recordImprint(side: TargetSide, target: Vec3): void {
-    const dx = target.x - footWorld.x;
-    const dy = target.y - footWorld.y;
-    const dz = target.z - footWorld.z;
-    const length = Math.hypot(dx, dy, dz);
-    if (length < 1e-6) return;
+  /**
+   * Stores which way the shoe pressed into one side, as a unit direction.
+   *
+   * It is the direction the foot was *travelling*, not the offset from the
+   * foot to the target. At the instant of contact those two are in the same
+   * place, so the offset is a few millimetres of leftover aim error pointing
+   * essentially sideways — which dented the pair edge-on to the camera, where
+   * nothing could be seen of it. The travel direction is the one that presses.
+   */
+  function recordImprint(side: TargetSide, target: Vec3, currentPlan: AttackPlan): void {
+    const [, , approach, end] = currentPlan.path;
+    const tx = end.x - approach.x;
+    const ty = end.y - approach.y;
+    const tz = end.z - approach.z;
+    const travel = Math.hypot(tx, ty, tz);
+    if (travel < 1e-6) return;
+
+    // Where the shoe sat relative to the target leans the dent off-centre, so
+    // a contact on the edge is not marked as squarely as one through the middle.
+    const ox = target.x - footWorld.x;
+    const oy = target.y - footWorld.y;
+    const oz = target.z - footWorld.z;
+    const offset = Math.hypot(ox, oy, oz);
+    const lean = offset > 1e-6 ? OFFSET_LEAN / offset : 0;
+
+    const x = tx / travel + ox * lean;
+    const y = ty / travel + oy * lean;
+    const z = tz / travel + oz * lean;
+    const length = Math.hypot(x, y, z) || 1;
+
     imprints[side] = {
-      x: dx / length,
-      y: dy / length,
-      z: dz / length,
+      x: x / length,
+      y: y / length,
+      z: z / length,
       width: contactBreadth()
     };
   }
@@ -395,10 +436,10 @@ export function createGameEngine(options: EngineOptions): GameEngine {
     // rather than the body's midline.
     const struck = targetWorld(outcome.contacted);
     if (outcome.grade !== 'miss') {
-      recordImprint(outcome.contacted, struck);
+      recordImprint(outcome.contacted, struck, plan);
       if (outcome.grade === 'center-compression') {
         const other = outcome.contacted === 'left' ? 'right' : 'left';
-        recordImprint(other, targetWorld(other));
+        recordImprint(other, targetWorld(other), plan);
       }
     }
     contactPoint =
@@ -426,14 +467,16 @@ export function createGameEngine(options: EngineOptions): GameEngine {
         break;
       case 'strike': {
         const settled = resolveNow();
-        if (settled !== 'won' && settled !== 'lost') {
-          run = { ...run, phase: 'impact' };
-        }
+        // Every contact is reviewed, including the one that ends the run. The
+        // result is held back until that review has played out.
+        if (settled === 'won' || settled === 'lost') pendingResult = settled;
+        run = { ...run, phase: 'impact' };
         phaseTime = 0;
         break;
       }
       case 'impact':
-        run = { ...run, phase: 'recovery' };
+        run = { ...run, phase: pendingResult ?? 'recovery' };
+        pendingResult = null;
         phaseTime = 0;
         lastGrade = null;
         contactPoint = null;
@@ -477,7 +520,7 @@ export function createGameEngine(options: EngineOptions): GameEngine {
       right = recoverTarget(right, dt);
       if (run.phase === 'impact' && plan) {
         // Carry the shoe through the contact rather than parking it there.
-        const drive = Math.min(1, phaseTime / impactHold(lastGrade));
+        const drive = Math.min(1, phaseTime / impactHold(lastGrade, pendingResult !== null));
         const end = sampleFootPath(plan, 1);
         footWorld = {
           x: end.x,

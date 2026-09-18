@@ -1,14 +1,17 @@
 {
   "version": 1,
   "normalize": false,
-  "_note": "Authored player figures, already metric with feet at y=0. Attacker clips live in selection-manifest.json. Every pose must name a file — an unmapped pose falls back to the blocky procedural figure, which is a placeholder and not a look. `turn` is degrees about Y for a figure authored facing the wrong way.",
-  "_measured": "standing 1.79m tall | kneeling 1.34 | seated 1.37 | table-supported 0.99 tall x 1.61 deep. assets/body/a_prone_spread.glb (0.33 tall) and assets/body/neutral_plank.glb (0.70) are lying figures that fit no current pose profile; they are waiting on pose slots of their own.",
+  "_note": "Authored player figures, already metric with feet at y=0. Attacker clips live in selection-manifest.json. Every pose must name a file \u2014 an unmapped pose falls back to the blocky procedural figure, which is a placeholder and not a look. `turn` is degrees about Y for a figure authored facing the wrong way.",
+  "_measured": "standing 1.79m tall | kneeling 1.34 | seated 1.37 | table-supported 0.99 tall x 1.61 deep | prone-spread 0.33 tall, which is the figure POSE_17 was authored against. assets/body/neutral_plank.glb (0.70) is still waiting on a pose slot of its own.",
   "poses": {
     "standing-front": "assets/body/neutral_standing.glb",
-    "spread-standing": "assets/body/neutral_standing.glb",
+    "spread-standing": "assets/body/a_prone_spread.glb",
     "kneeling-front": "assets/body/neutral_kneeling.glb",
     "crouch-front": "assets/body/neutral_kneeling.glb",
     "seated-chair": "assets/body/a_open_chair_seated.glb",
-    "braced-back": { "file": "assets/body/neutral_table_supported.glb", "turn": 180 }
+    "braced-back": {
+      "file": "assets/body/neutral_table_supported.glb",
+      "turn": 180
+    }
   }
 }
