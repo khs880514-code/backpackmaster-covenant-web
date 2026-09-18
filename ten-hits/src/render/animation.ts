@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { flinchImpulse } from '../game/impact';
 import type { CharacterRig } from './characters';
 import type { GameSnapshot } from '../game/types';
 
@@ -14,6 +15,8 @@ export interface AnimationController {
 }
 
 const TRAIL_POINTS = 14;
+/** How long the figure takes to settle back after a contact, in seconds. */
+const FLINCH_SECONDS = 0.45;
 
 /**
  * Presentation-only motion: a telegraph trail behind the foot, a short proxy
@@ -42,6 +45,9 @@ export function createAnimation(rig: CharacterRig): AnimationController {
   let shakeEnabled = true;
   let trailEnabled = true;
   let popTimer = 0;
+  let flinchTimer = 0;
+  let flinchOffset = 0;
+  let flinchFold = 0;
   let lastPhase: GameSnapshot['phase'] = 'setup';
 
   return {
@@ -66,6 +72,11 @@ export function createAnimation(rig: CharacterRig): AnimationController {
       material.opacity += (targetOpacity - material.opacity) * Math.min(1, delta * 8);
 
       if (snapshot.phase === 'impact' && lastPhase !== 'impact') {
+        // The authored curve says nothing moves until a contact registers.
+        const impulse = flinchImpulse(snapshot.lastGrade ?? 'miss', snapshot.power);
+        flinchOffset = impulse.offset;
+        flinchFold = impulse.fold;
+        flinchTimer = impulse.offset > 0 ? FLINCH_SECONDS : 0;
         popTimer = 0.5;
         shakeStrength =
           snapshot.lastGrade === 'center-compression'
@@ -84,6 +95,18 @@ export function createAnimation(rig: CharacterRig): AnimationController {
         const pop = 1 + Math.sin((popTimer / 0.5) * Math.PI) * 0.18;
         rig.leftTarget.scale.multiplyScalar(pop);
         rig.rightTarget.scale.multiplyScalar(pop);
+      }
+
+      // The whole figure takes the hit and settles back; nothing about the
+      // proxy's own shape is involved here.
+      if (flinchTimer > 0) {
+        flinchTimer = Math.max(0, flinchTimer - delta);
+        const settle = flinchTimer / FLINCH_SECONDS;
+        const eased = settle * settle;
+        rig.player.position.z -= flinchOffset * eased;
+        rig.player.rotation.x = flinchFold * eased;
+      } else if (rig.player.rotation.x !== 0) {
+        rig.player.rotation.x = 0;
       }
 
       shakeStrength = Math.max(0, shakeStrength - delta * 0.18);

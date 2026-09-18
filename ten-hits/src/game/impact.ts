@@ -54,6 +54,44 @@ const GRADE_RULES: Record<Exclude<ImpactGrade, 'miss'>, GradeRule> = {
 };
 
 const COLOR_THRESHOLDS = [0.12, 0.32, 0.58];
+
+/**
+ * Authoring pipeline's `deformation_depth_multiplier`. Adopted as a number so
+ * the proxies dent as deeply as the authored material does, without importing
+ * any of the geometry that number was written against.
+ */
+const DEFORMATION_DEPTH = 1.12;
+
+/**
+ * Authoring pipeline's body-flinch curve: `0.0025 + power*0.0025` metres of
+ * displacement and `0.35 + power*0.42` degrees of fold, per registered
+ * contact. The authored spec records no flinch at all before a contact lands,
+ * so a miss returns zero.
+ */
+const FLINCH_GRADE_SCALE: Record<ImpactGrade, number> = {
+  miss: 0,
+  graze: 0.35,
+  'single-compression': 0.7,
+  'center-compression': 1
+};
+
+export interface FlinchImpulse {
+  /** How far the whole figure is driven back, in world metres. */
+  offset: number;
+  /** How far it folds, in radians. */
+  fold: number;
+}
+
+export function flinchImpulse(grade: ImpactGrade, powerLevel: number): FlinchImpulse {
+  const scale = FLINCH_GRADE_SCALE[grade] ?? 0;
+  if (scale === 0) return { offset: 0, fold: 0 };
+  const power = Math.min(10, Math.max(1, powerLevel));
+  const degrees = (0.35 + power * 0.42) * scale;
+  return {
+    offset: (0.0025 + power * 0.0025) * scale,
+    fold: (degrees * Math.PI) / 180
+  };
+}
 const PROXY_STAGES: ProxyStage[] = [
   'normal',
   'initial',
@@ -206,7 +244,7 @@ export function recoverTarget(target: TargetState, seconds: number): TargetState
 /** 0..1 squash used by the renderer, combining recoverable and lasting damage. */
 export function squashFactor(target: TargetState): number {
   if (target.ruptured) return 1;
-  return clamp01(target.permanent * 0.7 + target.reversible * 0.3);
+  return clamp01((target.permanent * 0.7 + target.reversible * 0.3) * DEFORMATION_DEPTH);
 }
 
 export function crackingFactor(target: TargetState): number {

@@ -53,3 +53,26 @@ Together these take a pose export from about 10 MB to about 2 MB.
   each phase lasts, and `clipTimeForPhase` resamples the clip onto that
   schedule so the telegraph still ends on the authored wind-up frame and the
   strike still lands on the authored contact frame.
+
+## Damage response
+
+The authoring pipeline's `target_response` block is a set of numbers and rules,
+not geometry, so it transfers to the game's abstract proxies directly. What the
+game already did, and what was adopted from it:
+
+| authored rule | in the game |
+| --- | --- |
+| `states: [S0, S1, S2, S3]` | five colour stages, the last being a collapsed proxy |
+| `independent_sides: true` | left and right proxies carry separate state |
+| `persistent_across_modes: true` | damage persists for the whole run |
+| `playback_rate_affects_damage: false` | fixed timestep; damage comes from the grade, never from frame time |
+| `miss_response`: nothing moves before a contact registers | a miss returns both proxies unchanged and produces no flinch |
+| retained dents | `permanent` never recovers; only `reversible` springs back |
+| `S3` stays collapsed, no tear geometry | the ruptured stage desaturates and shrinks; nothing is torn |
+| `body_damage_enabled: false` | only the proxies ever take damage |
+| `deformation_depth_multiplier: 1.12` | **adopted** in `squashFactor` |
+| `all_fours_body_flinch` curve | **adopted** in `flinchImpulse`, applied to the whole figure |
+
+Nothing from `anatomical_pose_presets`, `LATEST_MEDICAL_*_ROOT` or the
+`medical_phantom_*` materials is used. The target the player sees and the target
+the contact test measures are both the abstract proxy pair.

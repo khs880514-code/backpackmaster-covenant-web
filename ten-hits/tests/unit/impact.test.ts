@@ -3,6 +3,7 @@ import { SHOES, powerProfile } from '../../src/game/config';
 import {
   createTargetState,
   deriveColorStage,
+  flinchImpulse,
   proxyStage,
   resolveImpact,
   type ImpactInput
@@ -115,5 +116,49 @@ describe('deriveColorStage', () => {
   it('maps stages onto categorical proxy names with no numbers', () => {
     expect(proxyStage({ ...createTargetState(), ruptured: true })).toBe('ruptured');
     expect(proxyStage(createTargetState())).toBe('normal');
+  });
+});
+
+describe('flinchImpulse', () => {
+  it('stays still until a contact registers', () => {
+    expect(flinchImpulse('miss', 10)).toEqual({ offset: 0, fold: 0 });
+  });
+
+  it('matches the authored curve at full power on a centre contact', () => {
+    const impulse = flinchImpulse('center-compression', 10);
+    // 0.0025 + power * 0.0025 metres, 0.35 + power * 0.42 degrees.
+    expect(impulse.offset).toBeCloseTo(0.0275, 6);
+    expect((impulse.fold * 180) / Math.PI).toBeCloseTo(4.55, 4);
+  });
+
+  it('grows with power', () => {
+    for (let level = 2; level <= 10; level += 1) {
+      expect(flinchImpulse('single-compression', level).offset).toBeGreaterThan(
+        flinchImpulse('single-compression', level - 1).offset
+      );
+    }
+  });
+
+  it('scales with how hard the contact was', () => {
+    const graze = flinchImpulse('graze', 5).offset;
+    const single = flinchImpulse('single-compression', 5).offset;
+    const centre = flinchImpulse('center-compression', 5).offset;
+    expect(graze).toBeLessThan(single);
+    expect(single).toBeLessThan(centre);
+  });
+
+  it('clamps a power level from outside the allowed range', () => {
+    expect(flinchImpulse('graze', 99).offset).toBeCloseTo(
+      flinchImpulse('graze', 10).offset,
+      9
+    );
+    expect(flinchImpulse('graze', -3).offset).toBeCloseTo(
+      flinchImpulse('graze', 1).offset,
+      9
+    );
+  });
+
+  it('keeps the flinch small enough to read as a reaction, not a knockback', () => {
+    expect(flinchImpulse('center-compression', 10).offset).toBeLessThan(0.05);
   });
 });
