@@ -63,12 +63,38 @@ export interface GameEngine {
 }
 
 const IMPACT_HOLD = 0.25;
-const TARGET_RADIUS = 0.085;
-const DEPTH_TO_Z = 0.3;
+const TARGET_RADIUS = 0.028;
+const DEPTH_TO_Z = 0.12;
+/**
+ * How far the pelvis actually travels, in world metres, at full pose range.
+ * Pose profiles stay normalized 0..1 so they read as ratios; this is what
+ * turns one of those ratios into a distance the shoe can miss by.
+ */
+const PELVIS_RANGE = 0.45;
 
 /** Default geometric contact test, replaced by an adapter in unit tests. */
+export { PELVIS_RANGE, TARGET_RADIUS };
+
+export interface ContactBands {
+  /** Inside this of a proxy centre is a direct compression. */
+  compression: number;
+  /** Out to this is a grazing contact; past it the shoe misses cleanly. */
+  graze: number;
+}
+
+/**
+ * The same numbers the contact test uses, exposed so the renderer can draw
+ * the bands instead of guessing at them. A proxy sized honestly is small, so
+ * the player reads the danger from these rings rather than from a bloated
+ * hitbox.
+ */
+export function contactBands(shoe: ShoeProfile): ContactBands {
+  const reach = TARGET_RADIUS * shoe.contactWidth + 0.022;
+  return { compression: reach * 0.56, graze: reach * 1.8 };
+}
+
 export const geometricContact: ContactResolver = ({ foot, left, right, shoe }) => {
-  const reach = TARGET_RADIUS * shoe.contactWidth + 0.055;
+  const reach = TARGET_RADIUS * shoe.contactWidth + 0.022;
   const distance = (t: Vec3): number =>
     Math.hypot(foot.x - t.x, foot.y - t.y, (foot.z - t.z) * 0.6);
   const dl = distance(left);
@@ -76,11 +102,15 @@ export const geometricContact: ContactResolver = ({ foot, left, right, shoe }) =
   const contacted: TargetSide = dl <= dr ? 'left' : 'right';
   const near = Math.min(dl, dr);
 
-  if (near > reach * 2.4) return { grade: 'miss', contacted };
-  if (dl <= reach * 1.05 && dr <= reach * 1.05) {
+  // The bands are anchored to the proxy itself, not to a vague blob around it:
+  // inside the proxy is a compression, brushing its surface is a graze, and
+  // anything past roughly two proxy widths is a clean miss. That makes a
+  // two-centimetre shift the difference between taking it and slipping it.
+  if (near > reach * 1.8) return { grade: 'miss', contacted };
+  if (dl <= reach * 0.9 && dr <= reach * 0.9) {
     return { grade: 'center-compression', contacted };
   }
-  if (near <= reach * 0.8) return { grade: 'single-compression', contacted };
+  if (near <= reach * 0.56) return { grade: 'single-compression', contacted };
   return { grade: 'graze', contacted };
 };
 
@@ -115,12 +145,12 @@ export function createGameEngine(options: EngineOptions): GameEngine {
     };
   }
 
-  function predictTarget(lookahead: number): Vec2 {
+  function predictTarget(lookahead: number): Vec3 {
     const cx = (pair.left.position.x + pair.right.position.x) / 2;
     const cy = (pair.left.position.y + pair.right.position.y) / 2;
     const vx = (pair.left.velocity.x + pair.right.velocity.x) / 2;
     const vy = (pair.left.velocity.y + pair.right.velocity.y) / 2;
-    return { x: cx + vx * lookahead, y: cy + vy * lookahead };
+    return { x: cx + vx * lookahead, y: cy + vy * lookahead, z: pelvis.y * DEPTH_TO_Z };
   }
 
   function buildPlan(): AttackPlan {
@@ -231,7 +261,7 @@ export function createGameEngine(options: EngineOptions): GameEngine {
       y: before.y * 0.97 + (requestedPelvis.y - pelvis.y) * 0.6
     };
 
-    pair = stepPendulum(pair, { x: pelvis.x, y: 0 }, dt);
+    pair = stepPendulum(pair, { x: pelvis.x * PELVIS_RANGE, y: 0 }, dt);
 
     if (run.phase === 'setup' || run.phase === 'won' || run.phase === 'lost') return;
 

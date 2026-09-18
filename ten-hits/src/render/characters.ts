@@ -2,7 +2,12 @@ import * as THREE from 'three';
 import { POSES } from '../game/config';
 import { clipTimeForPhase, type AttackClip } from './attack-clips';
 import { createShoe } from './shoes';
-import { createTargetOverlay, type TargetOverlay } from './targets';
+import {
+  createContactBands,
+  createTargetOverlay,
+  type ContactBandRings,
+  type TargetOverlay
+} from './targets';
 import type { GameSnapshot, PoseId, ShoeId } from '../game/types';
 
 interface PoseShape {
@@ -32,7 +37,9 @@ const THIGH_LENGTH = 0.46;
 const SHIN_LENGTH = 0.46;
 const PLAYER_HEIGHT = 1.8;
 const ATTACKER_HEIGHT = 1.73;
-const DEPTH_TO_Z = 0.3;
+const DEPTH_TO_Z = 0.12;
+/** Must match the engine's own pelvis range so art and physics agree. */
+const PELVIS_RANGE = 0.45;
 
 /** Shared materials keep the whole arena under a dozen draw-call groups. */
 interface Palette {
@@ -200,6 +207,7 @@ export interface CharacterRig {
   leftTarget: THREE.Group;
   rightTarget: THREE.Group;
   overlays: { left: TargetOverlay; right: TargetOverlay };
+  bands: ContactBandRings;
   attackerThigh: THREE.Mesh;
   attackerShin: THREE.Mesh;
   poseId: PoseId;
@@ -303,6 +311,9 @@ export function createCharacters(poseId: PoseId, shoeId: ShoeId): CharacterRig {
   targetAnchor.position.set(0, pose.anchorHeight, 0);
   root.add(targetAnchor);
 
+  const bands = createContactBands(shoeId);
+  targetAnchor.add(bands.group);
+
   const leftOverlay = createTargetOverlay();
   leftOverlay.group.name = 'leftTarget';
   const rightOverlay = createTargetOverlay();
@@ -401,6 +412,7 @@ export function createCharacters(poseId: PoseId, shoeId: ShoeId): CharacterRig {
     leftTarget: leftOverlay.group,
     rightTarget: rightOverlay.group,
     overlays: { left: leftOverlay, right: rightOverlay },
+    bands,
     attackerThigh,
     attackerShin,
     poseId,
@@ -419,6 +431,7 @@ export function createCharacters(poseId: PoseId, shoeId: ShoeId): CharacterRig {
     setInspect,
     inspecting: () => inspect,
     dispose(): void {
+      bands.dispose();
       leftOverlay.dispose();
       rightOverlay.dispose();
       root.traverse((node) => {
@@ -480,11 +493,16 @@ function solveKnee(hip: THREE.Vector3, foot: THREE.Vector3): THREE.Vector3 {
 /** Copies one immutable snapshot onto the rig. Pure presentation, no logic. */
 export function applySnapshot(rig: CharacterRig, snapshot: GameSnapshot): void {
   const depth = snapshot.anchor.y * DEPTH_TO_Z;
-  rig.player.position.set(snapshot.anchor.x, 0, depth);
+  rig.player.position.set(snapshot.anchor.x * PELVIS_RANGE, 0, depth);
   rig.targetAnchor.position.set(0, POSES[rig.poseId].anchorHeight, depth);
 
   rig.overlays.left.apply(snapshot.proxies[0]);
   rig.overlays.right.apply(snapshot.proxies[1]);
+
+  // The bands only matter while a strike is inbound, so they fade in with it.
+  const incoming =
+    snapshot.phase === 'telegraph' || snapshot.phase === 'strike' || snapshot.phase === 'impact';
+  rig.bands.setStrength(incoming ? 1 : rig.inspecting() ? 0.8 : 0);
 
   if (rig.usingAuthoredAttacker()) {
     rig.scrubAttackClip(snapshot.phase, snapshot.phaseProgress);

@@ -11,7 +11,7 @@ function ctx(overrides: Partial<AttackContext> = {}): AttackContext {
     pose: POSES['standing-front'],
     shoe: SHOES.pump,
     power: powerProfile(5),
-    predictedTarget: { x: 0, y: 0 },
+    predictedTarget: { x: 0, y: 0, z: 0 },
     recentPlayerDrift: { x: 0, y: 0 },
     leftDamage: 0,
     rightDamage: 0,

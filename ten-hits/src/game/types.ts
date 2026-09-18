@@ -133,7 +133,8 @@ export interface AttackContext {
   pose: PoseProfile;
   shoe: ShoeProfile;
   power: PowerProfile;
-  predictedTarget: Vec2;
+  /** Where the pair is expected to be when the shoe arrives, in world metres. */
+  predictedTarget: Vec3;
   recentPlayerDrift: Vec2;
   leftDamage: number;
   rightDamage: number;

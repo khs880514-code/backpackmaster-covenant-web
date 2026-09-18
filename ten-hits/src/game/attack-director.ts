@@ -86,13 +86,16 @@ export function selectAttack(context: AttackContext): AttackPlan {
 
   // Aim tracks the predicted target only as far as precision allows, so a calm
   // attacker in an early band leaves obvious room to slip aside.
-  const jitter = (random() - 0.5) * (1 - precision) * 0.42;
-  const aimX = context.predictedTarget.x * precision + jitter + sideSign * 0.07;
-  const aimY = context.pose.anchorHeight + context.predictedTarget.y * precision * 0.35;
-  const aimZ = -0.08;
+  const jitter = (random() - 0.5) * (1 - precision) * 0.09;
+  // Lateral tracking is the only axis precision governs: sideways is where the
+  // player dodges. Height and depth aim straight at the predicted point, so a
+  // centred strike is a real hit instead of an unavoidable near-miss.
+  const aimX = context.predictedTarget.x * precision + jitter + sideSign * 0.03;
+  const aimY = context.pose.anchorHeight + context.predictedTarget.y;
+  const aimZ = context.predictedTarget.z;
 
   const lift = kind === 'feint' ? 0.46 : 0.3;
-  const swayX = kind === 'feint' ? -sideSign * 0.34 : sideSign * 0.16;
+  const swayX = kind === 'feint' ? -sideSign * 0.16 : sideSign * 0.07;
 
   const path: [Vec3, Vec3, Vec3, Vec3] = [
     { x: FOOT_REST.x * sideSign, y: FOOT_REST.y, z: FOOT_REST.z },

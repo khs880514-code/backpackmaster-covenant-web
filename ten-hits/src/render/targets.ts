@@ -1,5 +1,7 @@
 import * as THREE from 'three';
-import type { ColorStage, ProxySnapshot } from '../game/types';
+import { contactBands } from '../game/engine';
+import type { ColorStage, ProxySnapshot, ShoeId } from '../game/types';
+import { SHOES } from '../game/config';
 
 /**
  * Five accessible presets. The proxy is a rubber-ball stand-in, so damage reads
@@ -34,7 +36,7 @@ const INSPECT_OPACITY = 0.95;
 
 export function createTargetOverlay(): TargetOverlay {
   const group = new THREE.Group();
-  const geometry = new THREE.SphereGeometry(0.085, 20, 16);
+  const geometry = new THREE.SphereGeometry(0.028, 20, 16);
   const material = new THREE.MeshStandardMaterial({
     color: STAGE_COLORS[0],
     emissive: STAGE_EMISSIVE[0],
@@ -86,3 +88,58 @@ export function createTargetOverlay(): TargetOverlay {
 }
 
 export { STAGE_COLORS };
+
+
+export interface ContactBandRings {
+  group: THREE.Group;
+  /** 0 hides the rings; 1 shows them at full strength. */
+  setStrength(strength: number): void;
+  dispose(): void;
+}
+
+/**
+ * Two flat rings centred on the target pair: the inner one is where a contact
+ * becomes a direct compression, the outer one is the edge of a graze. They
+ * make the judgement readable without inflating what the shoe actually hits.
+ */
+export function createContactBands(shoeId: ShoeId): ContactBandRings {
+  const bands = contactBands(SHOES[shoeId]);
+  const group = new THREE.Group();
+  group.name = 'contactBands';
+
+  const make = (inner: number, outer: number, color: number, opacity: number) => {
+    const geometry = new THREE.RingGeometry(inner, outer, 48);
+    const material = new THREE.MeshBasicMaterial({
+      color,
+      transparent: true,
+      opacity: 0,
+      side: THREE.DoubleSide,
+      depthWrite: false,
+      depthTest: false
+    });
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.renderOrder = 9;
+    group.add(mesh);
+    return { geometry, material, base: opacity };
+  };
+
+  const parts = [
+    make(bands.compression * 0.74, bands.compression, 0xff6b6b, 0.95),
+    make(bands.graze * 0.9, bands.graze, 0x9ad7ff, 0.7)
+  ];
+
+  return {
+    group,
+    setStrength(strength: number): void {
+      const clamped = Math.min(1, Math.max(0, strength));
+      for (const part of parts) part.material.opacity = part.base * clamped;
+      group.visible = clamped > 0.01;
+    },
+    dispose(): void {
+      for (const part of parts) {
+        part.geometry.dispose();
+        part.material.dispose();
+      }
+    }
+  };
+}

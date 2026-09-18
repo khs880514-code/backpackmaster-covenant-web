@@ -4,9 +4,11 @@ import type { PendulumBody, PendulumPair, Vec2 } from './types';
 const STIFFNESS = 34;
 const DAMPING = 7.5;
 const GRAVITY_BIAS = 0.32;
-const TETHER_RADIUS = 0.55;
-const REST_SPREAD = 0.13;
-const REST_DROP = -0.04;
+// World metres. The pair is a small cluster, not a pair of beach balls: a
+// two-centimetre shift has to be able to change what the shoe hits.
+const TETHER_RADIUS = 0.11;
+const REST_SPREAD = 0.042;
+const REST_DROP = -0.015;
 
 function createBody(restOffset: Vec2): PendulumBody {
   return {
