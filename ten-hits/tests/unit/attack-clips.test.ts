@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import * as THREE from 'three';
 import fixture from '../fixtures/selection-manifest.json';
 import {
+  alignToStrikeContact,
   alignToTargetGuide,
   clipTimeForPhase,
   hidePostureGuides,
@@ -181,5 +182,102 @@ describe('clip follow-through', () => {
     const after = clipTimeForPhase(timing, 'recovery', 0, 0.2);
     expect(during).toBeGreaterThanOrEqual(before);
     expect(after).toBeGreaterThanOrEqual(during);
+  });
+});
+
+describe('clips staged without a target guide', () => {
+  /** A rig with the strike bone and the studio props, but no posture guide. */
+  function ungiuded(): THREE.Group {
+    const scene = new THREE.Group();
+    const hips = new THREE.Bone();
+    hips.name = 'spine';
+    const foot = new THREE.Bone();
+    foot.name = 'foot.R';
+    foot.position.set(1.4, 0.8, -2.2);
+    hips.add(foot);
+    scene.add(hips);
+
+    // three.js drops the separator when it builds the scene, so `Plane.001`
+    // in the file arrives as `Plane001`. Both spellings must be hidden.
+    for (const name of ['Plane', 'Plane001']) {
+      const prop = new THREE.Mesh(new THREE.PlaneGeometry(7, 7));
+      prop.name = name;
+      scene.add(prop);
+    }
+    const body = new THREE.Mesh(new THREE.BoxGeometry(0.4, 1.7, 0.4));
+    body.name = 'DarkElf_Visual';
+    scene.add(body);
+    return scene;
+  }
+
+  const timing = {
+    fps: 25,
+    telegraphSeconds: 0.88,
+    strikeSeconds: 0.24,
+    recoverySeconds: 1.36,
+    contactFrames: [28],
+    preparationFrames: [22],
+    startMode: 'RUN_IN'
+  };
+
+  it('slides the scene so the kick lands on the origin', () => {
+    const scene = ungiuded();
+    const clip = new THREE.AnimationClip('Scene', 9.4, []);
+    expect(alignToStrikeContact(scene, clip, timing)).toBe(true);
+
+    scene.updateMatrixWorld(true);
+    const foot = scene.getObjectByName('foot.R')!;
+    const world = new THREE.Vector3();
+    foot.getWorldPosition(world);
+    // The contact point is what gets put on the origin; height is untouched.
+    expect(world.x).toBeCloseTo(0, 5);
+    expect(world.z).toBeCloseTo(0, 5);
+    expect(world.y).toBeCloseTo(0.8, 5);
+  });
+
+  it('puts the attacker in front of the player, whichever way the file faces', () => {
+    // The turn is chosen from where her body lands, not assumed, because the
+    // authored clips do not agree on which way round they were staged.
+    for (const authoredZ of [-2.2, 2.2]) {
+      const scene = ungiuded();
+      scene.getObjectByName('foot.R')!.position.z = authoredZ;
+      const body = scene.getObjectByName('DarkElf_Visual')!;
+      body.position.set(0, 0.85, authoredZ * 0.4);
+
+      alignToStrikeContact(scene, new THREE.AnimationClip('Scene', 9.4, []), timing);
+      scene.updateMatrixWorld(true);
+
+      const centre = new THREE.Box3().setFromObject(body).getCenter(new THREE.Vector3());
+      expect(centre.z).toBeGreaterThan(0);
+    }
+  });
+
+  it('declines when the rig has no strike bone', () => {
+    const scene = new THREE.Group();
+    expect(alignToStrikeContact(scene, new THREE.AnimationClip('Scene', 1, []), timing)).toBe(
+      false
+    );
+  });
+
+  it('declines when the clip carries no animation', () => {
+    expect(alignToStrikeContact(ungiuded(), null, timing)).toBe(false);
+  });
+
+  it('hides the studio floor and wall along with the guides', () => {
+    const scene = ungiuded();
+    hidePostureGuides(scene);
+    expect(scene.getObjectByName('Plane')!.visible).toBe(false);
+    expect(scene.getObjectByName('Plane001')!.visible).toBe(false);
+    // The attacker herself is never hidden.
+    expect(scene.getObjectByName('DarkElf_Visual')!.visible).toBe(true);
+  });
+
+  it('keeps a wearable whose name merely ends in Plane', () => {
+    const scene = new THREE.Group();
+    const shoe = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1));
+    shoe.name = 'Wearable_P05_L_Plane001';
+    scene.add(shoe);
+    hidePostureGuides(scene);
+    expect(shoe.visible).toBe(true);
   });
 });
