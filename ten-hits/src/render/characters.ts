@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { BUILT_IN_SHOE, dress, undress, NOTHING, type Dressed } from './dressing';
 import { POSES } from '../game/config';
 import { PROXY_FORWARD } from '../game/engine';
 import { clipTimeForPhase, type AttackClip } from './attack-clips';
@@ -220,6 +221,11 @@ export interface CharacterRig {
   usingAuthoredModel(): boolean;
   /** Swaps the procedural attacker for an authored rig and its kick clip. */
   applyAttackClip(clip: AttackClip | null): void;
+  /**
+   * Puts an authored pair of shoes on the attacker, replacing the ones her
+   * clip was exported wearing. Passing null puts those back.
+   */
+  applyFootwear(footwear: THREE.Object3D | null): void;
   usingAuthoredAttacker(): boolean;
   /** Positions the authored clip at the point in the attack the engine is at. */
   scrubAttackClip(
@@ -338,6 +344,7 @@ export function createCharacters(poseId: PoseId, shoeId: ShoeId): CharacterRig {
   let inspect = false;
   let authoredModel: THREE.Group | null = null;
   let attackClip: AttackClip | null = null;
+  let wornShoes: Dressed = NOTHING;
   let mixer: THREE.AnimationMixer | null = null;
   let action: THREE.AnimationAction | null = null;
 
@@ -375,7 +382,18 @@ export function createCharacters(poseId: PoseId, shoeId: ShoeId): CharacterRig {
     if (attackClip) attackClip.scene.visible = !inspect;
   }
 
+  function applyFootwear(footwear: THREE.Object3D | null): void {
+    undress(wornShoes);
+    wornShoes = NOTHING;
+    if (!footwear || !attackClip) return;
+    // The clip ships wearing FOOTWEAR_01; the chosen pair takes its place on
+    // the same skeleton, so it deforms with the kick like the original did.
+    wornShoes = dress(attackClip.scene, footwear, BUILT_IN_SHOE);
+  }
+
   function applyAttackClip(clip: AttackClip | null): void {
+    undress(wornShoes);
+    wornShoes = NOTHING;
     if (attackClip) {
       root.remove(attackClip.scene);
       mixer?.stopAllAction();
@@ -438,6 +456,7 @@ export function createCharacters(poseId: PoseId, shoeId: ShoeId): CharacterRig {
     applyPoseModel,
     usingAuthoredModel: () => authoredModel !== null,
     applyAttackClip,
+    applyFootwear,
     usingAuthoredAttacker: () => attackClip !== null,
     scrubAttackClip(phase, progress, followThroughSeconds = 0): void {
       if (!attackClip || !mixer || !action) return;

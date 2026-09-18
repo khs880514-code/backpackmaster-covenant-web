@@ -10,6 +10,7 @@ import { createHud, type HudSelection, type ToggleName } from './ui/hud';
 import { createQualityMonitor } from './performance/quality';
 import { loadPoseModels, type PoseModelLibrary } from './render/model-library';
 import { loadAttackClips, type AttackClipLibrary } from './render/attack-clips';
+import { createWearables, type WearableLibrary } from './render/wearables';
 import {
   defaultSave,
   loadSave,
@@ -128,6 +129,7 @@ export function mountGame(root: HTMLElement, options: MountOptions = {}): GameAp
 
   let models: PoseModelLibrary | null = null;
   let clips: AttackClipLibrary | null = null;
+  let wearables: WearableLibrary | null = null;
   let frames = 0;
   let running = true;
   let paused = false;
@@ -194,10 +196,25 @@ export function mountGame(root: HTMLElement, options: MountOptions = {}): GameAp
     hud.render(engine.snapshot());
   }
 
+  /**
+   * Fetches the chosen pair and puts it on. Guarded by the shoe it was asked
+   * for, so a slow download that lands after another pick is discarded rather
+   * than overwriting it.
+   */
+  function applyFootwear(): void {
+    if (!wearables || !rig.usingAuthoredAttacker()) return;
+    const wanted = selection.shoe;
+    void wearables.shoe(wanted).then((model) => {
+      if (!running || selection.shoe !== wanted) return;
+      rig.applyFootwear(model);
+    });
+  }
+
   /** Swaps the authored figure for the current pose in, when one exists. */
   function applyModels(): void {
     if (models) rig.applyPoseModel(models.pose(selection.pose));
     if (clips) rig.applyAttackClip(clips.get(selection.pose));
+    applyFootwear();
     // The procedural foot trail has nothing to follow once an authored rig
     // takes over the attack, so it would draw to a phantom position.
     animation.setTrailEnabled(!rig.usingAuthoredAttacker());
@@ -311,6 +328,7 @@ export function mountGame(root: HTMLElement, options: MountOptions = {}): GameAp
     void loadAttackClips({ baseUrl }).then((library) => {
       if (!running) return;
       clips = library;
+      wearables = createWearables({ baseUrl: `${baseUrl}assets/` });
       applyModels();
     });
   }
