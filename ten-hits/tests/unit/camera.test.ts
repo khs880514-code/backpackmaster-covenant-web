@@ -168,3 +168,68 @@ describe('camera view presets', () => {
     }
   });
 });
+
+describe('contact close-up', () => {
+  it('stays wide while nothing is landing', () => {
+    const { ctrl } = controller();
+    ctrl.applyPhase('telegraph', 'standing-front');
+    ctrl.update(1);
+    expect(ctrl.punch()).toBe(0);
+  });
+
+  it('pushes in on the contact', () => {
+    const { ctrl } = controller();
+    ctrl.applyPhase('impact', 'standing-front');
+    ctrl.update(0.2);
+    expect(ctrl.punch()).toBeGreaterThan(0.5);
+  });
+
+  it('gets measurably closer to the target while pushed in', () => {
+    const wide = controller();
+    wide.ctrl.applyPhase('strike', 'standing-front');
+    wide.ctrl.update(0.5);
+
+    const close = controller();
+    close.ctrl.applyPhase('impact', 'standing-front');
+    close.ctrl.update(0.5);
+
+    const anchor = new THREE.Vector3(0, 0.92, 0);
+    expect(close.camera.position.distanceTo(anchor)).toBeLessThan(
+      wide.camera.position.distanceTo(anchor) * 0.6
+    );
+  });
+
+  it('pulls back out once the attack recovers', () => {
+    const { ctrl } = controller();
+    ctrl.applyPhase('impact', 'standing-front');
+    ctrl.update(0.5);
+    expect(ctrl.punch()).toBeGreaterThan(0.9);
+
+    ctrl.applyPhase('recovery', 'standing-front');
+    ctrl.update(2);
+    expect(ctrl.punch()).toBeLessThan(0.1);
+  });
+
+  it('eases in faster than it eases out', () => {
+    const inward = controller();
+    inward.ctrl.applyPhase('impact', 'standing-front');
+    inward.ctrl.update(0.1);
+
+    const outward = controller();
+    outward.ctrl.applyPhase('impact', 'standing-front');
+    outward.ctrl.update(1);
+    outward.ctrl.applyPhase('recovery', 'standing-front');
+    outward.ctrl.update(0.1);
+
+    expect(inward.ctrl.punch()).toBeGreaterThan(1 - outward.ctrl.punch());
+  });
+
+  it('never leaves the camera pushed in after a run ends', () => {
+    const { ctrl } = controller();
+    ctrl.applyPhase('impact', 'standing-front');
+    ctrl.update(1);
+    ctrl.applyPhase('won', 'standing-front');
+    ctrl.update(3);
+    expect(ctrl.punch()).toBe(0);
+  });
+});

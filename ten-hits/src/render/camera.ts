@@ -54,6 +54,10 @@ const VIEWS: Record<ViewId, ViewPreset> = {
 const VIEW_BLEND_SECONDS = 0.3;
 
 const BLEND_SECONDS = 0.22;
+/** How tight the camera gets at the moment of contact. */
+const IMPACT_DISTANCE_SCALE = 0.32;
+const PUNCH_IN_RATE = 9;
+const PUNCH_OUT_RATE = 2.6;
 const MIN_DISTANCE = 0.9;
 const MAX_DISTANCE = 6.5;
 
@@ -68,6 +72,8 @@ export interface CameraController {
   view(): ViewId | null;
   setInspect(enabled: boolean): void;
   inspecting(): boolean;
+  /** 0 while framing the arena, 1 while pushed in on the contact. */
+  punch(): number;
   mode(): CameraPhase;
   orbitEnabled(): boolean;
   blendProgress(): number;
@@ -112,6 +118,10 @@ export function createCameraController(camera: THREE.PerspectiveCamera): CameraC
 
   let currentView: ViewId | null = null;
   let inspect = false;
+  // Contact happens on a target a few centimetres across, so the camera goes
+  // and looks at it. Without this the deformation is simply too small to read.
+  let punchAmount = 0;
+  let punchTarget = 0;
   let viewBlend = VIEW_BLEND_SECONDS;
   let viewFrom = { yaw: userYaw, pitch: userPitch, distance: preset.distance };
   let viewTo = { yaw: userYaw, pitch: userPitch, distance: preset.distance };
@@ -133,15 +143,28 @@ export function createCameraController(camera: THREE.PerspectiveCamera): CameraC
   }
 
   function frame(yaw: number, pitch: number, distance: number): void {
-    const horizontal = Math.cos(pitch) * distance;
-    const targetY = lookAtY();
-    const targetZ = lookAtZ();
+    const t = punchAmount;
+    // Blend the arena framing toward a close look at the target anchor.
+    const anchorY = POSES[poseId].anchorHeight;
+    const targetY = lookAtY() * (1 - t) + anchorY * t;
+    const targetZ = lookAtZ() * (1 - t);
+    const framedDistance = distance * (1 - t) + distance * IMPACT_DISTANCE_SCALE * t;
+    const framedPitch = pitch * (1 - t) + 0.02 * t;
+
+    const horizontal = Math.cos(framedPitch) * framedDistance;
     camera.position.set(
       Math.sin(yaw) * horizontal,
-      targetY + Math.sin(pitch) * distance + 0.28,
+      targetY + Math.sin(framedPitch) * framedDistance + 0.28 * (1 - t) + 0.02 * t,
       targetZ + Math.cos(yaw) * horizontal
     );
     camera.lookAt(0, targetY, targetZ);
+  }
+
+  function stepPunch(delta: number): void {
+    const rate = punchTarget > punchAmount ? PUNCH_IN_RATE : PUNCH_OUT_RATE;
+    const step = Math.min(1, Math.max(0, delta) * rate);
+    punchAmount += (punchTarget - punchAmount) * step;
+    if (Math.abs(punchTarget - punchAmount) < 0.001) punchAmount = punchTarget;
   }
 
   function beginViewBlend(view: ViewPreset): void {
@@ -171,6 +194,7 @@ export function createCameraController(camera: THREE.PerspectiveCamera): CameraC
       orbitAllowed = phase === 'setup' || phase === 'recovery' || phase === 'won' || phase === 'lost';
 
       if (locking) {
+        punchTarget = 0;
         currentMode = 'recentering';
         blendTime = 0;
         fromYaw = activeYaw;
@@ -180,8 +204,10 @@ export function createCameraController(camera: THREE.PerspectiveCamera): CameraC
       }
       if (phase === 'strike' || phase === 'impact') {
         currentMode = 'locked';
+        punchTarget = phase === 'impact' ? 1 : 0;
         return;
       }
+      punchTarget = 0;
       if (phase !== 'setup') {
         // Review framing belongs to the menus, never to an attack in flight.
         inspect = false;
@@ -196,6 +222,8 @@ export function createCameraController(camera: THREE.PerspectiveCamera): CameraC
     },
 
     update(delta: number): void {
+      stepPunch(delta);
+
       if (currentMode === 'free-orbit' && viewBlend < VIEW_BLEND_SECONDS) {
         viewBlend = Math.min(VIEW_BLEND_SECONDS, viewBlend + Math.max(0, delta));
         const t = easeInOut(viewBlend / VIEW_BLEND_SECONDS);
@@ -266,6 +294,10 @@ export function createCameraController(camera: THREE.PerspectiveCamera): CameraC
 
     inspecting(): boolean {
       return inspect;
+    },
+
+    punch(): number {
+      return punchAmount;
     },
 
     mode(): CameraPhase {
