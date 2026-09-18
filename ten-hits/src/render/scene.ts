@@ -19,6 +19,19 @@ const PIXEL_RATIO_CAP: Record<QualityLevel, number> = {
 };
 
 /**
+ * Upper bound on drawing-buffer pixels per quality level. Tall, high-density
+ * screens (Fold-class portrait at DPR 2 is over eight million pixels) would
+ * otherwise render at a few frames per second on integrated and software GPUs.
+ */
+const PIXEL_BUDGET: Record<QualityLevel, number> = {
+  high: 2_600_000,
+  medium: 1_700_000,
+  low: 1_000_000
+};
+
+const MIN_PIXEL_RATIO = 0.6;
+
+/**
  * Creates the renderer and a fixed three-point light rig. Throws when WebGL is
  * unavailable so the caller can show a support message instead of a blank page.
  */
@@ -50,9 +63,12 @@ export function createScene(canvas: HTMLCanvasElement): SceneController {
   function resize(width: number, height: number): void {
     const safeWidth = Math.max(1, Math.floor(width));
     const safeHeight = Math.max(1, Math.floor(height));
-    const ratio = Math.min(
-      window.devicePixelRatio || 1,
-      PIXEL_RATIO_CAP[quality]
+    const budgetRatio = Math.sqrt(
+      PIXEL_BUDGET[quality] / Math.max(1, safeWidth * safeHeight)
+    );
+    const ratio = Math.max(
+      MIN_PIXEL_RATIO,
+      Math.min(window.devicePixelRatio || 1, PIXEL_RATIO_CAP[quality], budgetRatio)
     );
     renderer.setPixelRatio(ratio);
     renderer.setSize(safeWidth, safeHeight, false);
