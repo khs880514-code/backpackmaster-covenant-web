@@ -1,4 +1,21 @@
 import './styles.css';
+import { createFeedback, type FeedbackController } from './audio/feedback';
+import { createGameEngine, type GameEngine } from './game/engine';
+import { createAnimation, type AnimationController } from './render/animation';
+import { createCameraController, type CameraController } from './render/camera';
+import { createCharacters, applySnapshot, type CharacterRig } from './render/characters';
+import { createScene, type SceneController } from './render/scene';
+import { createPointerController, type PointerController } from './input/pointer-controller';
+import { createHud, type HudSelection, type ToggleName } from './ui/hud';
+import { createQualityMonitor } from './performance/quality';
+import {
+  defaultSave,
+  loadSave,
+  recordKey,
+  writeSave,
+  type SaveData
+} from './persistence/storage';
+import type { GameSnapshot, Vec2 } from './game/types';
 
 export function mountShell(root: HTMLElement): HTMLElement {
   root.innerHTML = `
@@ -8,5 +25,276 @@ export function mountShell(root: HTMLElement): HTMLElement {
   return root;
 }
 
-const shellRoot = document.querySelector<HTMLElement>('#app');
-if (shellRoot) mountShell(shellRoot);
+export interface MountOptions {
+  createScene?: (canvas: HTMLCanvasElement) => SceneController;
+  storage?: Storage;
+  feedback?: FeedbackController;
+  seed?: number;
+}
+
+export interface GameApp {
+  snapshot(): GameSnapshot;
+  movePelvis(input: Vec2): void;
+  frameCount(): number;
+  simulationTime(): number;
+  sceneController(): SceneController;
+  destroy(): void;
+}
+
+const MAX_FRAME_DELTA = 0.1;
+
+function safeStorage(): Storage | null {
+  try {
+    return typeof localStorage === 'undefined' ? null : localStorage;
+  } catch {
+    return null;
+  }
+}
+
+function showUnsupported(hud: HTMLElement): void {
+  const note = document.createElement('section');
+  note.setAttribute('data-webgl-error', '');
+  note.className = 'hud__setup';
+  note.innerHTML =
+    '<h1 class="hud__title">TEN HITS</h1>' +
+    '<p class="hud__subtitle">이 브라우저에서 3D(WebGL)를 시작할 수 없습니다. ' +
+    '다른 브라우저에서 열거나 하드웨어 가속을 켜고 다시 시도해 주세요.</p>';
+  hud.append(note);
+}
+
+/**
+ * Wires every subsystem into one playable loop: scene, rig, engine, gestures,
+ * camera, HUD, feedback, persistence, and the quality watchdog.
+ */
+export function mountGame(root: HTMLElement, options: MountOptions = {}): GameApp {
+  mountShell(root);
+  const canvas = root.querySelector<HTMLCanvasElement>('[data-game-canvas]')!;
+  const hudRoot = root.querySelector<HTMLElement>('[data-game-hud]')!;
+
+  const storage = options.storage ?? safeStorage();
+  let save: SaveData = storage ? loadSave(storage) : defaultSave();
+  const persist = (): void => {
+    if (storage) writeSave(storage, save);
+  };
+
+  const feedback = options.feedback ?? createFeedback();
+  feedback.setEnabled('sound', save.settings.sound);
+  feedback.setEnabled('vibration', save.settings.vibration);
+  feedback.setEnabled('shake', save.settings.shake);
+
+  let scene: SceneController;
+  try {
+    scene = (options.createScene ?? createScene)(canvas);
+  } catch {
+    showUnsupported(hudRoot);
+    return {
+      snapshot: () => {
+        throw new Error('renderer unavailable');
+      },
+      movePelvis: () => {},
+      frameCount: () => 0,
+      simulationTime: () => 0,
+      sceneController: () => {
+        throw new Error('renderer unavailable');
+      },
+      destroy: () => {
+        hudRoot.innerHTML = '';
+      }
+    };
+  }
+
+  let selection: HudSelection = { ...save.lastSetup };
+  let engine: GameEngine = createGameEngine({
+    ...selection,
+    seed: options.seed ?? 1
+  });
+  let rig: CharacterRig = createCharacters(selection.pose, selection.shoe);
+  let animation: AnimationController = createAnimation(rig);
+  scene.scene.add(rig.root);
+  scene.scene.add(animation.trail);
+
+  const camera: CameraController = createCameraController(scene.camera);
+  const quality = createQualityMonitor();
+  let qualityLevel = quality.level();
+
+  let frames = 0;
+  let running = true;
+  let paused = false;
+  let lastTime = 0;
+  let rafId = 0;
+  let pelvis: Vec2 = { x: 0, y: 0 };
+  let lastPhase: GameSnapshot['phase'] = 'setup';
+  let missesThisRun = 0;
+
+  const hud = createHud(hudRoot, {
+    onStart: (choice) => {
+      selection = choice;
+      save.lastSetup = { ...choice };
+      persist();
+      feedback.unlock();
+      feedback.play('select');
+      rebuild();
+      engine.start();
+    },
+    onRestart: () => {
+      rebuild();
+    },
+    onToggle: (name: ToggleName, enabled: boolean) => {
+      save.settings[name] = enabled;
+      feedback.setEnabled(name, enabled);
+      animation.setShakeEnabled(save.settings.shake);
+      persist();
+    }
+  });
+  hud.setToggles(save.settings);
+
+  function rebuild(): void {
+    scene.scene.remove(rig.root);
+    scene.scene.remove(animation.trail);
+    animation.dispose();
+    rig.dispose();
+
+    rig = createCharacters(selection.pose, selection.shoe);
+    animation = createAnimation(rig);
+    animation.setShakeEnabled(save.settings.shake);
+    scene.scene.add(rig.root);
+    scene.scene.add(animation.trail);
+
+    engine = createGameEngine({
+      ...selection,
+      seed: (options.seed ?? Math.floor(Math.random() * 0xffffffff)) >>> 0
+    });
+    pelvis = { x: 0, y: 0 };
+    missesThisRun = 0;
+    lastPhase = 'setup';
+    hud.render(engine.snapshot());
+  }
+
+  function recordResult(snapshot: GameSnapshot): void {
+    if (snapshot.result === 'survived') {
+      const key = recordKey(snapshot.pose, snapshot.shoe);
+      save.records[key] = Math.max(save.records[key] ?? 0, snapshot.power);
+      if (missesThisRun === 0) {
+        save.bestNoMissRun = Math.max(save.bestNoMissRun, snapshot.power);
+      }
+      persist();
+    }
+  }
+
+  function announce(snapshot: GameSnapshot): void {
+    if (snapshot.phase === lastPhase) return;
+    if (snapshot.phase === 'telegraph') feedback.play('warning');
+    if (snapshot.phase === 'impact') {
+      if (snapshot.lastGrade === 'miss') missesThisRun += 1;
+      const cue =
+        snapshot.lastGrade === 'center-compression'
+          ? 'critical'
+          : snapshot.lastGrade === 'single-compression'
+            ? 'compression'
+            : snapshot.lastGrade === 'graze'
+              ? 'graze'
+              : 'warning';
+      feedback.play(cue);
+    }
+    if (snapshot.phase === 'won') feedback.play('win');
+    if (snapshot.phase === 'lost') feedback.play('rupture');
+    if (snapshot.phase === 'won' || snapshot.phase === 'lost') recordResult(snapshot);
+    lastPhase = snapshot.phase;
+  }
+
+  function frame(time: number): void {
+    if (!running || paused) return;
+    frames += 1;
+
+    const deltaMs = Math.max(0, time - lastTime);
+    lastTime = time;
+    const delta = Math.min(MAX_FRAME_DELTA, deltaMs / 1000);
+
+    const level = quality.sample(deltaMs);
+    if (level !== qualityLevel) {
+      qualityLevel = level;
+      scene.setQuality(level);
+    }
+
+    const snapshot = engine.update(delta);
+    quality.setStriking(snapshot.phase === 'strike');
+
+    applySnapshot(rig, snapshot);
+    animation.update(snapshot, delta);
+    camera.applyPhase(snapshot.phase, snapshot.pose);
+    camera.update(delta);
+
+    const shake = animation.shake();
+    scene.camera.position.set(
+      scene.camera.position.x + shake.x,
+      scene.camera.position.y + shake.y,
+      scene.camera.position.z
+    );
+
+    announce(snapshot);
+    hud.render(snapshot);
+    scene.render();
+
+    rafId = requestAnimationFrame(frame);
+  }
+
+  function onResize(): void {
+    scene.resize(window.innerWidth, window.innerHeight);
+  }
+
+  function onVisibility(): void {
+    paused = document.visibilityState === 'hidden';
+    if (!paused && running) {
+      // Skip the stalled interval instead of fast-forwarding the simulation.
+      lastTime = performance.now();
+      rafId = requestAnimationFrame(frame);
+    }
+  }
+
+  const pointer: PointerController = createPointerController(canvas, {
+    pelvisMove: (delta) => {
+      pelvis = delta;
+      engine.movePelvis(delta);
+    },
+    pelvisFlick: (direction) => {
+      const boosted = { x: pelvis.x + direction.x * 0.34, y: pelvis.y + direction.y * 0.34 };
+      pelvis = boosted;
+      engine.movePelvis(boosted);
+    },
+    orbit: (delta) => camera.orbit({ x: delta.x * 0.4, y: delta.y * 0.2 }),
+    zoom: (delta) => camera.zoom(delta)
+  });
+
+  window.addEventListener('resize', onResize);
+  window.addEventListener('orientationchange', onResize);
+  document.addEventListener('visibilitychange', onVisibility);
+
+  onResize();
+  hud.render(engine.snapshot());
+  rafId = requestAnimationFrame(frame);
+
+  return {
+    snapshot: () => engine.snapshot(),
+    movePelvis: (input: Vec2) => engine.movePelvis(input),
+    frameCount: () => frames,
+    simulationTime: () => engine.simulationTime(),
+    sceneController: () => scene,
+    destroy(): void {
+      running = false;
+      cancelAnimationFrame(rafId);
+      window.removeEventListener('resize', onResize);
+      window.removeEventListener('orientationchange', onResize);
+      document.removeEventListener('visibilitychange', onVisibility);
+      pointer.destroy();
+      hud.destroy();
+      animation.dispose();
+      rig.dispose();
+      scene.dispose();
+      feedback.dispose();
+      persist();
+    }
+  };
+}
+
+const appRoot = document.querySelector<HTMLElement>('#app');
+if (appRoot) mountGame(appRoot);
