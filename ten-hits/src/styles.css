@@ -188,12 +188,12 @@ body {
     linear-gradient(-58deg, transparent 52%, rgba(20, 8, 12, 0.7) 53%, transparent 55%);
 }
 
-.hud__proxy[data-stage='normal'] { --proxy: #9ad7ff; }
-.hud__proxy[data-stage='initial'] { --proxy: #ffd98a; }
-.hud__proxy[data-stage='damaged'] { --proxy: #ff9f6b; }
-.hud__proxy[data-stage='critical'] { --proxy: #d4575f; }
+.hud__proxy[data-stage='normal'] { --proxy: #c9b3a6; }
+.hud__proxy[data-stage='initial'] { --proxy: #bfa08c; }
+.hud__proxy[data-stage='damaged'] { --proxy: #a87f72; }
+.hud__proxy[data-stage='critical'] { --proxy: #7d5a5c; }
 .hud__proxy[data-stage='ruptured'] {
-  --proxy: #6a5060;
+  --proxy: #4e3f44;
   filter: saturate(0.5);
 }
 

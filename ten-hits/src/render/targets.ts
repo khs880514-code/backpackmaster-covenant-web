@@ -1,27 +1,59 @@
 import * as THREE from 'three';
-import { contactBands } from '../game/engine';
+import { contactBands, TARGET_RADIUS } from '../game/engine';
 import type { ColorStage, ProxySnapshot, ShoeId } from '../game/types';
 import { SHOES } from '../game/config';
 
 /**
- * Five accessible presets. The proxy is a rubber-ball stand-in, so damage reads
- * as discoloration, squashing, and surface cracking rather than injury.
+ * The proxy is an abstract stand-in, but it should read as a dense, soft-firm
+ * body rather than a boiled sweet. That means a desaturated palette, a matte
+ * surface, almost no emission, and a form that is not a perfect maths sphere.
+ *
+ * Damage shows as the material dulling and bruising down through muted tones,
+ * never as an injury: no reds that read as blood, no broken surface, no fluid.
  */
 const STAGE_COLORS: Record<ColorStage, number> = {
-  0: 0x9ad7ff,
-  1: 0xffd98a,
-  2: 0xff9f6b,
-  3: 0xd4575f,
-  4: 0x6a5060
+  0: 0xc9b3a6,
+  1: 0xbfa08c,
+  2: 0xa87f72,
+  3: 0x7d5a5c,
+  4: 0x4e3f44
 };
 
+/**
+ * Just enough self-lighting to stay readable against a dark arena. Far below
+ * the old values, which made the proxy glow like a lamp.
+ */
 const STAGE_EMISSIVE: Record<ColorStage, number> = {
-  0: 0x11304a,
-  1: 0x3a2a08,
-  2: 0x3d1d0a,
-  3: 0x3a0f14,
-  4: 0x120a0d
+  0: 0x140f0d,
+  1: 0x171009,
+  2: 0x180d09,
+  3: 0x15090b,
+  4: 0x0a0708
 };
+
+/** Measured from the authoring model: a lobe is far taller than it is wide. */
+const PROXY_HEIGHT_RATIO = 1.42;
+const PROXY_DEPTH_RATIO = 0.97;
+
+/**
+ * A smooth, seeded ripple so the surface is not mathematically perfect. Real
+ * soft tissue and real rubber both carry low-frequency irregularity, and its
+ * absence is most of what makes a sphere look moulded.
+ */
+function roughenSurface(geometry: THREE.BufferGeometry, amount: number): void {
+  const position = geometry.getAttribute('position') as THREE.BufferAttribute;
+  const vertex = new THREE.Vector3();
+  for (let i = 0; i < position.count; i += 1) {
+    vertex.fromBufferAttribute(position, i);
+    const ripple =
+      Math.sin(vertex.x * 47 + vertex.y * 31) * 0.6 +
+      Math.sin(vertex.y * 59 - vertex.z * 43) * 0.4;
+    const scale = 1 + ripple * amount;
+    position.setXYZ(i, vertex.x * scale, vertex.y * scale, vertex.z * scale);
+  }
+  position.needsUpdate = true;
+  geometry.computeVertexNormals();
+}
 
 export interface TargetOverlay {
   group: THREE.Group;
@@ -32,18 +64,26 @@ export interface TargetOverlay {
   dispose(): void;
 }
 
-const INSPECT_OPACITY = 0.95;
+const INSPECT_OPACITY = 0.97;
+const BASE_OPACITY = 0.88;
 
 export function createTargetOverlay(): TargetOverlay {
   const group = new THREE.Group();
-  const geometry = new THREE.SphereGeometry(0.028, 20, 16);
+  // The horizontal half-width is the radius the contact test measures, so the
+  // axis a dodge moves along stays honest; the proxy is simply taller on the
+  // axis nothing is judged against.
+  const geometry = new THREE.SphereGeometry(TARGET_RADIUS, 32, 24);
+  geometry.scale(1, PROXY_HEIGHT_RATIO, PROXY_DEPTH_RATIO);
+  roughenSurface(geometry, 0.035);
+
   const material = new THREE.MeshStandardMaterial({
     color: STAGE_COLORS[0],
     emissive: STAGE_EMISSIVE[0],
-    roughness: 0.34,
-    metalness: 0.04,
+    // Matte and dense, not moulded plastic.
+    roughness: 0.78,
+    metalness: 0,
     transparent: true,
-    opacity: 0.62,
+    opacity: BASE_OPACITY,
     depthWrite: false,
     // The overlay is a gameplay readout, not part of the body, so it stays
     // legible through the figure instead of being occluded by it.
@@ -68,8 +108,10 @@ export function createTargetOverlay(): TargetOverlay {
       material.opacity = inspecting
         ? INSPECT_OPACITY
         : proxy.stage === 'ruptured'
-          ? 0.42
-          : 0.62 - proxy.cracking * 0.12;
+          ? 0.92
+          : BASE_OPACITY - proxy.cracking * 0.06;
+      // Abuse dulls the surface further, so a spent proxy stops catching light.
+      material.roughness = 0.78 + Math.min(0.18, proxy.cracking * 0.18);
       // Rubber-ball deformation: flatten vertically, bulge sideways. The bulge
       // is derived from the flattening rather than picked separately, so the
       // proxy keeps its volume the way a closed surface under load would.
@@ -77,7 +119,11 @@ export function createTargetOverlay(): TargetOverlay {
       const flatten = 1 - squash * 0.35;
       const bulge = 1 / Math.sqrt(flatten);
       group.scale.set(bulge, flatten, bulge);
-      if (proxy.stage === 'ruptured') group.scale.multiplyScalar(0.86);
+      if (proxy.stage === 'ruptured') {
+        // Collapsed: it gives up its form and settles, without any tear
+        // geometry, spill, or wound. It simply stops holding itself up.
+        group.scale.set(bulge * 1.22, flatten * 0.34, bulge * 1.16);
+      }
       group.position.set(proxy.position.x, proxy.position.y, 0);
     },
     dispose(): void {
