@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { createGameEngine } from '../../src/game/engine';
+import { createTargetOverlay } from '../../src/render/targets';
 import type { GameSnapshot, ImpactGrade } from '../../src/game/types';
 
 /**
@@ -102,5 +103,73 @@ describe('dodge balance', () => {
     // to be able to clear the pair, or moving at all is pointless.
     expect(gap).toBeLessThan(0.12);
     expect(gap).toBeGreaterThan(0.05);
+  });
+});
+
+describe('damage progression', () => {
+  /** Samples one proxy at every phase change through a whole run. */
+  function trace(seed: number) {
+    const engine = createGameEngine({
+      pose: 'standing-front',
+      shoe: 'pump',
+      power: 7,
+      seed
+    });
+    engine.start();
+
+    const rows: Array<{ stage: number; cracking: number; squash: number }> = [];
+    let snapshot: GameSnapshot = engine.snapshot();
+    let previous = snapshot.phase;
+
+    for (let i = 0; i < 60 * 200; i += 1) {
+      snapshot = engine.update(1 / 60);
+      if (snapshot.phase !== previous) {
+        const proxy = snapshot.proxies[0]!;
+        rows.push({
+          stage: proxy.colorStage,
+          cracking: proxy.cracking,
+          squash: proxy.squash
+        });
+        previous = snapshot.phase;
+      }
+      if (snapshot.phase === 'won' || snapshot.phase === 'lost') break;
+    }
+    return rows;
+  }
+
+  it('never walks damage backwards', () => {
+    for (const seed of [1, 4, 9]) {
+      const rows = trace(seed);
+      expect(rows.length).toBeGreaterThan(4);
+      for (let i = 1; i < rows.length; i += 1) {
+        expect(rows[i]!.stage).toBeGreaterThanOrEqual(rows[i - 1]!.stage);
+        expect(rows[i]!.cracking).toBeGreaterThanOrEqual(rows[i - 1]!.cracking - 1e-9);
+      }
+    }
+  });
+
+  it('lets the recoverable part of a dent spring back', () => {
+    // Squash is the one channel that breathes: a proxy relaxes between
+    // attacks, onto a permanent floor that itself never drops.
+    const rows = trace(4);
+    const relaxed = rows.some((row, i) => i > 0 && row.squash < rows[i - 1]!.squash - 1e-6);
+    expect(relaxed).toBe(true);
+  });
+
+  it('keeps the proxy at constant volume while it deforms', () => {
+    const overlay = createTargetOverlay();
+    for (const squash of [0, 0.25, 0.5, 0.75, 1]) {
+      overlay.apply({
+        side: 'left',
+        stage: 'damaged',
+        colorStage: 2,
+        squash,
+        cracking: 0,
+        position: { x: 0, y: 0 }
+      });
+      const { x, y, z } = overlay.group.scale;
+      expect(x * y * z).toBeCloseTo(1, 6);
+    }
+    overlay.dispose();
   });
 });

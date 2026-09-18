@@ -70,13 +70,13 @@ export function createTargetOverlay(): TargetOverlay {
         : proxy.stage === 'ruptured'
           ? 0.42
           : 0.62 - proxy.cracking * 0.12;
-      // Rubber-ball deformation: flatten vertically, bulge sideways.
+      // Rubber-ball deformation: flatten vertically, bulge sideways. The bulge
+      // is derived from the flattening rather than picked separately, so the
+      // proxy keeps its volume the way a closed surface under load would.
       const squash = Math.min(1, Math.max(0, proxy.squash));
-      group.scale.set(
-        1 + squash * 0.22,
-        1 - squash * 0.35,
-        1 + squash * 0.18
-      );
+      const flatten = 1 - squash * 0.35;
+      const bulge = 1 / Math.sqrt(flatten);
+      group.scale.set(bulge, flatten, bulge);
       if (proxy.stage === 'ruptured') group.scale.multiplyScalar(0.86);
       group.position.set(proxy.position.x, proxy.position.y, 0);
     },
