@@ -69,15 +69,19 @@ describe('dodge balance', () => {
     expect(still.won).toBe(0);
   });
 
+  // The offsets below moved when the pair went from a spring to real cords:
+  // a measured dodge is now a larger fraction of a much smaller hip range
+  // (0.45m -> 0.10m), and the window it survives in is wider. The shape being
+  // asserted is unchanged — still is fatal, measured grazes, fleeing misses.
   it('rewards a measured dodge with grazing contact and wins', () => {
-    const measured = sweep(0.3);
+    const measured = sweep(0.4);
     expect(measured.share('graze')).toBeGreaterThan(0.6);
     expect(measured.share('single-compression')).toBeLessThan(0.2);
     expect(measured.won).toBeGreaterThanOrEqual(4);
   });
 
   it('punishes fleeing with clean misses', () => {
-    const fleeing = sweep(0.6);
+    const fleeing = sweep(0.9);
     expect(fleeing.share('miss')).toBeGreaterThan(0.8);
     expect(fleeing.won).toBe(0);
   });
@@ -124,6 +128,14 @@ describe('damage progression', () => {
 
     for (let i = 0; i < 60 * 200; i += 1) {
       snapshot = engine.update(1 / 60);
+      // Dodge enough to survive a few attacks. Standing still at power 7 is
+      // now fatal on the first contact, which is too short a run to prove a
+      // progression never reverses.
+      if (snapshot.phase === 'strike') {
+        engine.movePelvis({ x: snapshot.foot.x > 0 ? -0.4 : 0.4, y: 0 });
+      } else if (snapshot.phase === 'recovery') {
+        engine.movePelvis({ x: 0, y: 0 });
+      }
       if (snapshot.phase !== previous) {
         const proxy = snapshot.proxies[0]!;
         rows.push({

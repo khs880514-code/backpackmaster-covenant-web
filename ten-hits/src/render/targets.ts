@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { contactBands, TARGET_RADIUS } from '../game/engine';
+import { attachment } from '../game/pendulum';
 import type { ColorStage, ProxyImprint, ProxySnapshot, ShoeId } from '../game/types';
 import { SHOES } from '../game/config';
 
@@ -315,7 +316,12 @@ export interface TargetShell {
 
 /**
  * The structure the pair hangs in: one soft outer envelope holding both, and a
- * tether from the anchor down to each.
+ * cord descending to each from its own attachment point.
+ *
+ * The two cords root a short distance apart rather than at one point, which is
+ * the structure the reference describes and the same two attachments the
+ * simulation swings each body from — so what is drawn is what is being
+ * simulated, not a decoration over it.
  *
  * Without it the proxies float with nothing joining them to the body, which is
  * what makes them read as stuck on rather than suspended — and it is also why
@@ -343,7 +349,9 @@ export function createTargetShell(): TargetShell {
   envelope.renderOrder = 8;
   group.add(envelope);
 
-  const tetherGeometry = new THREE.CylinderGeometry(0.004, 0.009, 1, 8, 1, true);
+  // Thicker where it roots and tapering into the envelope, the way a cord
+  // carrying a load does.
+  const tetherGeometry = new THREE.CylinderGeometry(0.0075, 0.005, 1, 8, 1, true);
   // The cylinder is built along +Y and anchored at its top, so scaling its
   // length grows it downward from the attachment rather than about its middle.
   tetherGeometry.translate(0, -0.5, 0);
@@ -379,16 +387,19 @@ export function createTargetShell(): TargetShell {
       envelope.position.set(cx, cy, 0);
       envelope.scale.set(
         spread / 2 + TARGET_RADIUS * 1.5,
-        TARGET_RADIUS * PROXY_HEIGHT_RATIO * 1.35 + drop / 2,
+        // Close around the pair rather than reaching up to the anchor, so the
+        // cords are seen descending into it instead of being hidden by it.
+        TARGET_RADIUS * PROXY_HEIGHT_RATIO * 1.2 + drop / 2,
         TARGET_RADIUS * 1.45
       );
 
-      // Tethers: from the anchor at the origin down to each proxy.
+      // Cords: each from its own attachment down to the body it carries.
       tethers.forEach((tether, i) => {
         const proxy = pair[i]!;
-        to.set(proxy.position.x, proxy.position.y, 0);
+        const root = attachment(i === 0 ? 'left' : 'right');
+        to.set(proxy.position.x - root.x, proxy.position.y - root.y, 0);
         const length = Math.max(0.004, to.length());
-        tether.position.set(0, 0, 0);
+        tether.position.set(root.x, root.y, 0);
         tether.scale.set(1, length, 1);
         tether.quaternion.setFromUnitVectors(
           UP,

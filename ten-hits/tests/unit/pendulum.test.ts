@@ -1,9 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import {
   applyImpulse,
+  bodyDistance,
   createPendulumPair,
   stepPendulum,
-  advancePendulum
+  advancePendulum,
+  PENDULUM_CORD_LENGTH,
+  PENDULUM_SEPARATION,
+  PENDULUM_TETHER_RADIUS
 } from '../../src/game/pendulum';
 
 describe('paired pendulum', () => {
@@ -20,11 +24,50 @@ describe('paired pendulum', () => {
     expect(pair.left.restOffset.x).not.toBe(0);
   });
 
-  it('settles back toward the anchor when it stops moving', () => {
+  it('hangs below the anchor once it stops moving', () => {
     let pair = createPendulumPair();
     for (let i = 0; i < 1200; i += 1) pair = stepPendulum(pair, { x: 0.4, y: 0 }, 1 / 120);
-    expect(pair.left.position.x).toBeCloseTo(0.4 + pair.left.restOffset.x, 2);
+
+    // At rest it hangs off its own cord, held apart by the other body rather
+    // than by a spring pulling it to a fixed offset.
+    expect(pair.left.position.y).toBeLessThan(-PENDULUM_CORD_LENGTH * 0.9);
+    expect(pair.left.position.y).toBeGreaterThan(-PENDULUM_TETHER_RADIUS);
+    expect(pair.left.position.x).toBeLessThan(0.4);
+    expect(pair.right.position.x).toBeGreaterThan(0.4);
     expect(Math.abs(pair.left.velocity.x)).toBeLessThan(0.01);
+    expect(Math.abs(pair.left.velocity.y)).toBeLessThan(0.01);
+  });
+
+  it('swings through the bottom instead of stopping at it', () => {
+    // A spring returns to rest without overshooting. A pendulum carries its
+    // momentum past the low point, and that difference is the whole change.
+    let pair = createPendulumPair();
+    for (let i = 0; i < 240; i += 1) pair = stepPendulum(pair, { x: 0, y: 0 }, 1 / 120);
+    const settled = pair.left.position.x;
+
+    let swung = pair;
+    let crossings = 0;
+    let previous = swung.left.position.x - settled;
+    // One sharp sideways move of the hips, then hold still and watch.
+    for (let i = 0; i < 360; i += 1) {
+      swung = stepPendulum(swung, { x: i < 12 ? 0.09 : 0, y: 0 }, 1 / 120);
+      const offset = swung.left.position.x - settled;
+      if (previous < 0 !== offset < 0) crossings += 1;
+      previous = offset;
+    }
+    expect(crossings).toBeGreaterThan(1);
+  });
+
+  it('never lets the two bodies pass through each other', () => {
+    let pair = createPendulumPair();
+    let closest = Infinity;
+    for (let i = 0; i < 600; i += 1) {
+      // Shake the hips hard enough to swing them into one another.
+      const x = Math.sin(i / 7) * 0.1;
+      pair = stepPendulum(pair, { x, y: 0 }, 1 / 120);
+      closest = Math.min(closest, bodyDistance(pair.left.position, pair.right.position));
+    }
+    expect(closest).toBeGreaterThan(PENDULUM_SEPARATION - 0.002);
   });
 
   it('produces identical results regardless of frame pacing', () => {
@@ -73,9 +116,14 @@ describe('contact impulse', () => {
     expect(struck.left.position).toEqual(pair.left.position);
   });
 
-  it('settles back to rest after being knocked', () => {
-    let pair = applyImpulse(createPendulumPair(), 'left', { x: 0.4, y: 0 }, 1.2);
+  it('settles back under its own cord after being knocked', () => {
+    // Settle first: a freshly built pair starts on its cord but has not yet
+    // been pushed apart by the other body, so it is not where rest actually is.
+    let rest = createPendulumPair();
+    for (let i = 0; i < 600; i += 1) rest = stepPendulum(rest, { x: 0, y: 0 }, 1 / 120);
+    let pair = applyImpulse(rest, 'left', { x: 0.4, y: 0 }, 1.2);
     for (let i = 0; i < 1200; i += 1) pair = stepPendulum(pair, { x: 0, y: 0 }, 1 / 120);
-    expect(pair.left.position.x).toBeCloseTo(pair.left.restOffset.x, 2);
+    expect(pair.left.position.x).toBeCloseTo(rest.left.position.x, 2);
+    expect(pair.left.position.y).toBeCloseTo(rest.left.position.y, 2);
   });
 });

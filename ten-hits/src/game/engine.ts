@@ -142,7 +142,17 @@ function distanceToSegment(point: Vec3, a: Vec3, b: Vec3, depthScale: number): n
  * Pose profiles stay normalized 0..1 so they read as ratios; this is what
  * turns one of those ratios into a distance the shoe can miss by.
  */
-const PELVIS_RANGE = 0.45;
+/**
+ * How far, in metres, a full sideways input shifts the hips.
+ *
+ * It was 0.45 — half a metre of lateral travel, which no one standing can do.
+ * With the pair on real cords that much movement threw them clear of the shoe
+ * entirely, so every dodge became a miss and a miss is not a survived hit. At
+ * 0.10 a measured dodge grazes across a wide band of inputs (0.3 through 0.5
+ * all survive), which is the window the game is played in. Measured, not
+ * guessed: scripts read the grade distribution across eight seeds per value.
+ */
+const PELVIS_RANGE = 0.1;
 
 /**
  * How far past the contact plane the shoe keeps travelling, in world metres.

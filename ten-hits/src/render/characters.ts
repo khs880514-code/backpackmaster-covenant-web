@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { PELVIS_RANGE as ENGINE_PELVIS_RANGE } from '../game/engine';
 import { BUILT_IN_SHOE, dress, undress, NOTHING, type Dressed } from './dressing';
 import { POSES } from '../game/config';
 import { PROXY_FORWARD } from '../game/engine';
@@ -43,7 +44,9 @@ const PLAYER_HEIGHT = 1.8;
 const ATTACKER_HEIGHT = 1.73;
 const DEPTH_TO_Z = 0.12;
 /** Must match the engine's own pelvis range so art and physics agree. */
-const PELVIS_RANGE = 0.45;
+// The engine owns this: the figure has to stand where the contact test says
+// it does, or the dodge you see is not the dodge being judged.
+const PELVIS_RANGE = ENGINE_PELVIS_RANGE;
 
 /** Shared materials keep the whole arena under a dozen draw-call groups. */
 interface Palette {
