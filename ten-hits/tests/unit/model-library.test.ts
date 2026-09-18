@@ -1,6 +1,14 @@
+import { existsSync, readFileSync } from 'node:fs';
 import { describe, expect, it, vi } from 'vitest';
 import * as THREE from 'three';
-import { fitModel, loadPoseModels, type GltfSource } from '../../src/render/model-library';
+import { POSE_IDS } from '../../src/game/config';
+import {
+  fitModel,
+  loadPoseModels,
+  readEntries,
+  type GltfSource,
+  type PoseModelManifest
+} from '../../src/render/model-library';
 import selectionFixture from '../fixtures/selection-manifest.json';
 
 function boxOf(object: THREE.Object3D): THREE.Box3 {
@@ -249,5 +257,36 @@ describe('authored scale', () => {
     const size = new THREE.Vector3();
     boxOf(library.pose('standing-front')!).getSize(size);
     expect(size.y).toBeCloseTo(1.8, 4);
+  });
+});
+
+describe('the shipped manifest', () => {
+  it('gives every pose an authored body', () => {
+    const manifest = JSON.parse(
+      readFileSync('public/models/manifest.json', 'utf8')
+    ) as PoseModelManifest;
+    const covered = readEntries(manifest).map((entry) => entry.id);
+    for (const id of POSE_IDS) {
+      // An uncovered pose silently falls back to the blocky placeholder, which
+      // is what shipped in the first APK for two of the six poses.
+      expect(covered).toContain(id);
+    }
+  });
+
+  it('names only files that exist', () => {
+    const manifest = JSON.parse(
+      readFileSync('public/models/manifest.json', 'utf8')
+    ) as PoseModelManifest;
+    for (const entry of readEntries(manifest)) {
+      expect(existsSync(`public/models/${entry.file}`)).toBe(true);
+    }
+  });
+
+  it('turns the table-supported figure to face the attacker', () => {
+    const manifest = JSON.parse(
+      readFileSync('public/models/manifest.json', 'utf8')
+    ) as PoseModelManifest;
+    const braced = readEntries(manifest).find((e) => e.id === 'braced-back');
+    expect(braced?.turn).toBeCloseTo(Math.PI, 6);
   });
 });

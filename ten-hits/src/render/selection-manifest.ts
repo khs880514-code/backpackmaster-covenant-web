@@ -19,6 +19,20 @@ const POSTURE_TO_POSE: Readonly<Record<string, PoseId>> = {
   KNEELING_LOW: 'crouch-front'
 };
 
+/**
+ * Stand-ins for the two postures nobody has authored a kick for yet.
+ *
+ * Without them those poses fall back to the blocky procedural attacker, which
+ * is a placeholder and reads as a bug. A borrowed clip is the wrong motion but
+ * the right character, so it is the lesser of the two. Both borrow the standing
+ * kick because the attacker is on her feet for them; delete a row here the
+ * moment its own clip is authored.
+ */
+export const BORROWED_CLIP: Readonly<Partial<Record<PoseId, PoseId>>> = {
+  'spread-standing': 'standing-front',
+  'braced-back': 'standing-front'
+};
+
 export interface AttackTiming {
   fps: number;
   /** Clip start to the wind-up frame. */
@@ -169,6 +183,12 @@ export function parseSelectionManifest(raw: unknown): SelectionImport | null {
     } else if (pose.targetPosture) {
       unmapped.push(pose);
     }
+  }
+
+  for (const [id, from] of Object.entries(BORROWED_CLIP)) {
+    const target = id as PoseId;
+    const lender = poses[from as PoseId];
+    if (!poses[target] && lender) poses[target] = lender;
   }
 
   return {

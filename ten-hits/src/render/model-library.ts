@@ -21,9 +21,16 @@ export interface PoseModelManifest {
   playerHeight?: number;
   /** World-unit height the attacker model is normalized to. */
   attackerHeight?: number;
-  poses?: Partial<Record<PoseId, string>>;
+  poses?: Partial<Record<PoseId, PoseModelEntry>>;
   attacker?: string;
 }
+
+/**
+ * A file name, or a file name plus the correction it needs. `turn` is degrees
+ * about Y: an authored figure that was posed facing away from the attacker is
+ * turned here rather than re-exported.
+ */
+export type PoseModelEntry = string | { file: string; turn?: number };
 
 export interface PoseModelLibrary {
   pose(id: PoseId): THREE.Group | null;
@@ -85,14 +92,26 @@ function isManifest(value: unknown): value is PoseModelManifest {
   return typeof value === 'object' && value !== null && 'version' in value;
 }
 
-function readEntries(manifest: PoseModelManifest): Array<[PoseId, string]> {
+export interface ResolvedEntry {
+  id: PoseId;
+  file: string;
+  /** Radians about Y, already converted from the manifest's degrees. */
+  turn: number;
+}
+
+export function readEntries(manifest: PoseModelManifest): ResolvedEntry[] {
   const poses = manifest.poses ?? {};
-  const entries: Array<[PoseId, string]> = [];
+  const entries: ResolvedEntry[] = [];
   for (const id of POSE_IDS) {
-    const file = poses[id];
+    const entry = poses[id];
+    const file = typeof entry === 'string' ? entry : entry?.file;
     // Reject anything that is not a plain relative file name.
     if (typeof file !== 'string' || file.length === 0 || file.includes('..')) continue;
-    entries.push([id, file]);
+    const degrees =
+      typeof entry === 'object' && typeof entry.turn === 'number' && Number.isFinite(entry.turn)
+        ? entry.turn
+        : 0;
+    entries.push({ id, file, turn: (degrees * Math.PI) / 180 });
   }
   return entries;
 }
@@ -136,19 +155,21 @@ export async function loadPoseModels(options: LoadOptions = {}): Promise<PoseMod
   const attackerHeight = manifest.attackerHeight ?? DEFAULT_ATTACKER_HEIGHT;
 
   /** Wraps a loaded model, fitting it only when the manifest asks for it. */
-  function present(object: THREE.Object3D, targetHeight: number): THREE.Group {
-    if (normalize) return fitModel(object, targetHeight);
-    const wrapper = new THREE.Group();
-    wrapper.name = 'authored-model';
-    wrapper.add(object);
+  function present(object: THREE.Object3D, targetHeight: number, turn = 0): THREE.Group {
+    const wrapper = normalize ? fitModel(object, targetHeight) : new THREE.Group();
+    if (!normalize) {
+      wrapper.name = 'authored-model';
+      wrapper.add(object);
+    }
+    wrapper.rotation.y = turn;
     return wrapper;
   }
 
   const poses = new Map<PoseId, THREE.Group>();
   await Promise.all(
-    readEntries(manifest).map(async ([id, file]) => {
+    readEntries(manifest).map(async ({ id, file, turn }) => {
       try {
-        poses.set(id, present(await source.load(`${baseUrl}${file}`), playerHeight));
+        poses.set(id, present(await source.load(`${baseUrl}${file}`), playerHeight, turn));
       } catch {
         // One bad file must not cost the whole set.
       }

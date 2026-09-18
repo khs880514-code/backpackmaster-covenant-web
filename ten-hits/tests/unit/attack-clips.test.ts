@@ -117,7 +117,10 @@ describe('loadAttackClips', () => {
     }));
     const library = await loadAttackClips({ fetchImpl: fetchOk(), source: { load } });
 
-    expect(library.count()).toBe(4);
+    // Four authored clips plus the two poses that borrow the standing kick.
+    expect(library.count()).toBe(6);
+    expect(library.get('spread-standing')?.sourceId).toBe('POSE_12');
+    expect(library.get('braced-back')?.sourceId).toBe('POSE_12');
     const standing = library.get('standing-front')!;
     expect(standing.sourceId).toBe('POSE_12');
     expect(standing.animation?.name).toBe('Scene');

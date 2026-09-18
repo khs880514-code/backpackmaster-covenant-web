@@ -3,9 +3,10 @@ import fixture from '../fixtures/selection-manifest.json';
 import {
   parseSelectionManifest,
   toPoseModelManifest,
+  BORROWED_CLIP,
   SELECTION_SCHEMA
 } from '../../src/render/selection-manifest';
-import { POSES } from '../../src/game/config';
+import { POSES, POSE_IDS } from '../../src/game/config';
 
 /** The real authoring manifest, so the adapter is proven against actual data. */
 const imported = parseSelectionManifest(fixture)!;
@@ -24,22 +25,36 @@ describe('parseSelectionManifest', () => {
   });
 
   it('maps the four target postures that match a game pose', () => {
-    expect(Object.keys(imported.poses).sort()).toEqual([
-      'crouch-front',
-      'kneeling-front',
-      'seated-chair',
-      'standing-front'
-    ]);
     expect(imported.poses['standing-front']?.sourceId).toBe('POSE_12');
     expect(imported.poses['seated-chair']?.sourceId).toBe('POSE_16');
     expect(imported.poses['kneeling-front']?.sourceId).toBe('POSE_11');
     expect(imported.poses['crouch-front']?.sourceId).toBe('POSE_13');
   });
 
-  it('keeps every mapped clip close to the game pose anchor height', () => {
+  it('leaves no pose on the blocky procedural attacker', () => {
+    // Two poses shipped without a clip in the first APK and drew a placeholder
+    // doll instead of the authored character.
+    for (const id of POSE_IDS) {
+      expect(imported.poses[id]).toBeTruthy();
+    }
+  });
+
+  it('keeps every authored clip close to the game pose anchor height', () => {
     for (const [id, pose] of Object.entries(imported.poses)) {
+      // A borrowed clip was authored for a different posture, so this
+      // invariant is the authored rows' to keep.
+      if (id in BORROWED_CLIP) continue;
       const anchor = POSES[id as keyof typeof POSES].anchorHeight;
       expect(Math.abs((pose!.targetHeightM ?? 0) - anchor)).toBeLessThan(0.06);
+    }
+  });
+
+  it('borrows a clip only from a pose that has its own', () => {
+    for (const [id, from] of Object.entries(BORROWED_CLIP)) {
+      expect(BORROWED_CLIP[from as keyof typeof BORROWED_CLIP]).toBeUndefined();
+      expect(imported.poses[id as keyof typeof imported.poses]?.sourceId).toBe(
+        imported.poses[from as keyof typeof imported.poses]?.sourceId
+      );
     }
   });
 
@@ -110,6 +125,6 @@ describe('toPoseModelManifest', () => {
     expect(manifest.version).toBe(1);
     expect(manifest.poses?.['standing-front']).toBe('assets/pose-12.glb');
     expect(manifest.poses?.['seated-chair']).toBe('assets/pose-16.glb');
-    expect(Object.keys(manifest.poses ?? {})).toHaveLength(4);
+    expect(Object.keys(manifest.poses ?? {})).toHaveLength(POSE_IDS.length);
   });
 });
