@@ -105,6 +105,35 @@ describe('dressing the attacker', () => {
     expect(target.children.length).toBe(children);
   });
 
+  it('dresses a second rig from the same loaded wearable', () => {
+    // The loader caches each file and wears it again on the next run. Moving
+    // the original meshes emptied that cache, so the first run was dressed and
+    // every one after it silently was not.
+    const cached = wearable('Wearable_P05_R_Plane.001');
+
+    const first = dress(rig(), cached, BUILT_IN_SHOE);
+    expect(first.added).toHaveLength(1);
+
+    const second = dress(rig(), cached, BUILT_IN_SHOE);
+    expect(second.added).toHaveLength(1);
+    expect(second.added[0]).not.toBe(first.added[0]);
+  });
+
+  it('leaves the loaded wearable untouched', () => {
+    const cached = wearable('Wearable_P05_R_Plane.001');
+    const original = cached.children[0]!;
+    dress(rig(), cached, BUILT_IN_SHOE);
+    expect(cached.children).toContain(original);
+    expect(original.parent).toBe(cached);
+  });
+
+  it('shares geometry with the original rather than copying it', () => {
+    const cached = wearable('Wearable_P05_R_Plane.001');
+    const original = cached.children[0] as THREE.SkinnedMesh;
+    const worn = dress(rig(), cached, BUILT_IN_SHOE);
+    expect((worn.added[0] as THREE.SkinnedMesh).geometry).toBe(original.geometry);
+  });
+
   it('adds nothing when the rig has no bones', () => {
     const bare = new THREE.Group();
     const worn = dress(bare, wearable('Wearable_P05_R_Plane.001'), BUILT_IN_SHOE);

@@ -16,6 +16,16 @@ import * as THREE from 'three';
 /** The shoes the kick clips were exported already wearing. */
 export const BUILT_IN_SHOE = /^Elf_Fitted_P01_/;
 
+/**
+ * The attacker's own body as her kick clip carries it.
+ *
+ * It is a single mesh with one material covering skin and dress together, so
+ * the dress cannot be taken off it. A wardrobe export is a whole dressed
+ * figure — its own upper body, the garments, the skin showing between them —
+ * so an outfit replaces this rather than layering over it.
+ */
+export const BUILT_IN_BODY = /^DarkElf_Visual/;
+
 export interface Dressed {
   /** What was added, so it can be taken off again. */
   added: THREE.Object3D[];
@@ -63,6 +73,11 @@ export function rebind(mesh: THREE.SkinnedMesh, bones: Map<string, THREE.Bone>):
  * clip's built-in shoes when a different pair is chosen, her authored dress
  * when another outfit is. They are hidden rather than removed so the same rig
  * can be redressed for the next run.
+ *
+ * The wearable itself is never touched: each mesh is cloned before it is bound,
+ * because the loaded file is cached and worn again on the next run. Moving the
+ * originals emptied that cache, so the first run was dressed and every one
+ * after it silently was not.
  */
 export function dress(
   rig: THREE.Object3D,
@@ -80,11 +95,14 @@ export function dress(
 
   const added: THREE.Object3D[] = [];
   for (const mesh of meshes) {
-    if (!rebind(mesh, bones)) continue;
+    // Geometry and material are shared with the original by reference; only
+    // the skeleton binding is this copy's own.
+    const copy = mesh.clone() as THREE.SkinnedMesh;
+    if (!rebind(copy, bones)) continue;
     // Parented at the rig root, not under a bone: the skin already carries the
     // deformation, so an extra parent transform would apply it twice.
-    rig.add(mesh);
-    added.push(mesh);
+    rig.add(copy);
+    added.push(copy);
   }
   if (added.length === 0) return NOTHING;
 

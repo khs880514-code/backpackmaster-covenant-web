@@ -1,4 +1,5 @@
 import { MAX_POWER, MIN_POWER, isPoseId, isShoeId } from '../game/config';
+import { isOutfitId, type OutfitId } from '../render/wearables';
 import type { PoseId, ShoeId } from '../game/types';
 
 export const SAVE_KEY = 'ten-hits-save-v1';
@@ -14,6 +15,8 @@ export interface SaveSetup {
   pose: PoseId;
   shoe: ShoeId;
   power: number;
+  /** Cosmetic only; kept so a returning player finds what they last chose. */
+  outfit: OutfitId;
 }
 
 export interface SaveData {
@@ -30,7 +33,7 @@ export function defaultSave(): SaveData {
     version: SAVE_VERSION,
     settings: { sound: true, vibration: true, shake: true },
     records: {},
-    lastSetup: { pose: 'standing-front', shoe: 'pump', power: 4 },
+    lastSetup: { pose: 'standing-front', shoe: 'pump', power: 4, outfit: 'leggings' },
     bestNoMissRun: 0
   };
 }
@@ -95,7 +98,8 @@ export function loadSave(storage: Storage): SaveData {
     lastSetup: {
       pose: isPoseId(setup['pose']) ? setup['pose'] : fallback.lastSetup.pose,
       shoe: isShoeId(setup['shoe']) ? setup['shoe'] : fallback.lastSetup.shoe,
-      power: clampPower(setup['power'])
+      power: clampPower(setup['power']),
+      outfit: isOutfitId(setup['outfit']) ? setup['outfit'] : fallback.lastSetup.outfit
     },
     bestNoMissRun:
       typeof best === 'number' && Number.isFinite(best) ? Math.max(0, Math.round(best)) : 0

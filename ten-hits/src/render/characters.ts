@@ -1,6 +1,13 @@
 import * as THREE from 'three';
 import { PELVIS_RANGE as ENGINE_PELVIS_RANGE } from '../game/engine';
-import { BUILT_IN_SHOE, dress, undress, NOTHING, type Dressed } from './dressing';
+import {
+  BUILT_IN_BODY,
+  BUILT_IN_SHOE,
+  dress,
+  undress,
+  NOTHING,
+  type Dressed
+} from './dressing';
 import { POSES } from '../game/config';
 import { PROXY_FORWARD } from '../game/engine';
 import { clipTimeForPhase, type AttackClip } from './attack-clips';
@@ -229,6 +236,11 @@ export interface CharacterRig {
    * clip was exported wearing. Passing null puts those back.
    */
   applyFootwear(footwear: THREE.Object3D | null): void;
+  /**
+   * Swaps the attacker's whole dressed figure. Her clip bakes body and dress
+   * into one mesh, so an outfit replaces it rather than layering over it.
+   */
+  applyOutfit(outfit: THREE.Object3D | null): void;
   usingAuthoredAttacker(): boolean;
   /** Positions the authored clip at the point in the attack the engine is at. */
   scrubAttackClip(
@@ -348,6 +360,7 @@ export function createCharacters(poseId: PoseId, shoeId: ShoeId): CharacterRig {
   let authoredModel: THREE.Group | null = null;
   let attackClip: AttackClip | null = null;
   let wornShoes: Dressed = NOTHING;
+  let wornOutfit: Dressed = NOTHING;
   let mixer: THREE.AnimationMixer | null = null;
   let action: THREE.AnimationAction | null = null;
 
@@ -394,9 +407,18 @@ export function createCharacters(poseId: PoseId, shoeId: ShoeId): CharacterRig {
     wornShoes = dress(attackClip.scene, footwear, BUILT_IN_SHOE);
   }
 
+  function applyOutfit(outfit: THREE.Object3D | null): void {
+    undress(wornOutfit);
+    wornOutfit = NOTHING;
+    if (!outfit || !attackClip) return;
+    wornOutfit = dress(attackClip.scene, outfit, BUILT_IN_BODY);
+  }
+
   function applyAttackClip(clip: AttackClip | null): void {
     undress(wornShoes);
+    undress(wornOutfit);
     wornShoes = NOTHING;
+    wornOutfit = NOTHING;
     if (attackClip) {
       root.remove(attackClip.scene);
       mixer?.stopAllAction();
@@ -460,6 +482,7 @@ export function createCharacters(poseId: PoseId, shoeId: ShoeId): CharacterRig {
     usingAuthoredModel: () => authoredModel !== null,
     applyAttackClip,
     applyFootwear,
+    applyOutfit,
     usingAuthoredAttacker: () => attackClip !== null,
     scrubAttackClip(phase, progress, followThroughSeconds = 0): void {
       if (!attackClip || !mixer || !action) return;

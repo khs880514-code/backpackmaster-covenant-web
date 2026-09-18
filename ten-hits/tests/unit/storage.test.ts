@@ -49,7 +49,7 @@ describe('save data', () => {
     const storage = memoryStorage();
     const save = defaultSave();
     save.settings.vibration = false;
-    save.lastSetup = { pose: 'kneeling-front', shoe: 'stiletto', power: 7 };
+    save.lastSetup = { pose: 'kneeling-front', shoe: 'stiletto', outfit: 'leggings', power: 7 };
     save.records['kneeling-front:stiletto'] = 7;
     save.bestNoMissRun = 9;
     writeSave(storage, save);

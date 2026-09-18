@@ -1,4 +1,5 @@
 import { POSE_IDS, REQUIRED_VALID_HITS, SHOE_IDS } from '../game/config';
+import { OUTFIT_IDS, OUTFIT_LABEL, type OutfitId } from '../render/wearables';
 import { VIEW_IDS, type ViewId } from '../render/camera';
 import type { GameSnapshot, PoseId, ShoeId } from '../game/types';
 
@@ -8,6 +9,8 @@ export interface HudSelection {
   pose: PoseId;
   shoe: ShoeId;
   power: number;
+  /** What the attacker wears. Cosmetic; it changes nothing the engine judges. */
+  outfit: OutfitId;
 }
 
 export interface HudHandlers {
@@ -129,6 +132,7 @@ export function createHud(root: HTMLElement, handlers: HudHandlers): HudControll
 
   let selectedPose: PoseId = 'standing-front';
   let selectedShoe: ShoeId = 'pump';
+  let selectedOutfit: OutfitId = 'leggings';
 
   const poseGroup = el('div', 'hud__group hud__group--poses');
   poseGroup.setAttribute('role', 'group');
@@ -159,6 +163,22 @@ export function createHud(root: HTMLElement, handlers: HudHandlers): HudControll
       syncChoices();
     });
     shoeGroup.append(button);
+    return button;
+  });
+
+  const outfitGroup = el('div', 'hud__group hud__group--outfits');
+  outfitGroup.setAttribute('role', 'group');
+  outfitGroup.setAttribute('aria-label', '복장 선택');
+  const outfitButtons = OUTFIT_IDS.map((id) => {
+    const button = el('button', 'hud__chip');
+    button.type = 'button';
+    button.setAttribute('data-outfit-option', id);
+    button.textContent = OUTFIT_LABEL[id];
+    button.addEventListener('click', () => {
+      selectedOutfit = id;
+      syncChoices();
+    });
+    outfitGroup.append(button);
     return button;
   });
 
@@ -253,6 +273,7 @@ export function createHud(root: HTMLElement, handlers: HudHandlers): HudControll
     subtitle,
     poseGroup,
     shoeGroup,
+    outfitGroup,
     powerRow,
     toggleRow,
     review,
@@ -284,7 +305,8 @@ export function createHud(root: HTMLElement, handlers: HudHandlers): HudControll
     return {
       pose: selectedPose,
       shoe: selectedShoe,
-      power: Number(power.value)
+      power: Number(power.value),
+      outfit: selectedOutfit
     };
   }
 
@@ -314,6 +336,11 @@ export function createHud(root: HTMLElement, handlers: HudHandlers): HudControll
     });
     shoeButtons.forEach((button, index) => {
       const active = SHOE_IDS[index] === selectedShoe;
+      button.setAttribute('aria-pressed', String(active));
+      button.classList.toggle('is-active', active);
+    });
+    outfitButtons.forEach((button, index) => {
+      const active = OUTFIT_IDS[index] === selectedOutfit;
       button.setAttribute('aria-pressed', String(active));
       button.classList.toggle('is-active', active);
     });

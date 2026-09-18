@@ -210,10 +210,22 @@ export function mountGame(root: HTMLElement, options: MountOptions = {}): GameAp
     });
   }
 
+  /** Same guard as the shoes: a late download must not overwrite a newer pick. */
+  function applyOutfit(): void {
+    if (!wearables || !rig.usingAuthoredAttacker()) return;
+    const wanted = selection.outfit;
+    void wearables.outfit(wanted).then((model) => {
+      if (!running || selection.outfit !== wanted) return;
+      rig.applyOutfit(model);
+    });
+  }
+
   /** Swaps the authored figure for the current pose in, when one exists. */
   function applyModels(): void {
     if (models) rig.applyPoseModel(models.pose(selection.pose));
     if (clips) rig.applyAttackClip(clips.get(selection.pose));
+    // Outfit first: it replaces her whole body, and the shoes go on over it.
+    applyOutfit();
     applyFootwear();
     // The procedural foot trail has nothing to follow once an authored rig
     // takes over the attack, so it would draw to a phantom position.

@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { OUTFIT_IDS } from '../../src/render/wearables';
 import { createHud } from '../../src/ui/hud';
 import { createGameEngine } from '../../src/game/engine';
 import type { GameSnapshot } from '../../src/game/types';
@@ -44,12 +45,27 @@ describe('HUD', () => {
     hud.render(snapshotAfter(0));
     host.querySelectorAll<HTMLButtonElement>('[data-pose-option]')[1]!.click();
     host.querySelectorAll<HTMLButtonElement>('[data-shoe-option]')[4]!.click();
+    host.querySelectorAll<HTMLButtonElement>('[data-outfit-option]')[1]!.click();
     host.querySelector<HTMLButtonElement>('[data-start]')!.click();
     expect(start).toHaveBeenCalledWith({
       pose: 'kneeling-front',
       shoe: 'platform',
+      outfit: 'mini-stockings',
       power: expect.any(Number)
     });
+  });
+
+  it('offers an outfit for the attacker without changing what is judged', () => {
+    const start = vi.fn();
+    const hud = createHud(host, { onStart: start });
+    hud.render(snapshotAfter(0));
+    const options = host.querySelectorAll<HTMLButtonElement>('[data-outfit-option]');
+    expect(options.length).toBe(OUTFIT_IDS.length);
+    options[3]!.click();
+    expect(options[3]!.getAttribute('aria-pressed')).toBe('true');
+    host.querySelector<HTMLButtonElement>('[data-start]')!.click();
+    // The engine is handed the same pose, shoe and power whatever she wears.
+    expect(start.mock.calls[0]![0]).toMatchObject({ outfit: OUTFIT_IDS[3] });
   });
 
   it('shows exactly ten unlabelled progress dots during play', () => {

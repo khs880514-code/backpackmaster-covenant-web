@@ -12,10 +12,14 @@
  *
  * The two modes exist because the authored naming splits the other way for
  * each. A footwear export calls the shoe `Elf_Fitted_*` or `Wearable_*` and
- * everything else is body. A wardrobe export names each garment for what it is
- * — `Black_leggings`, `Suspender_1_front`, `Dress stitched hem_bound` — and
- * carries the same `Wearable_*` shoes as a fitting reference. So footwear keeps
- * that one pattern and wardrobe drops it, along with the body.
+ * everything else is body, so footwear keeps that one pattern.
+ *
+ * A wardrobe export is a whole dressed character: its own upper body, the
+ * garments named for what they are (`Black_leggings`, `Suspender_1_front`),
+ * the skin left showing between them, and the same `Wearable_*` shoes as a
+ * fitting reference. The game swaps footwear separately, so wardrobe drops
+ * only the shoes and keeps everything else — the figure replaces the attacker's
+ * own body rather than layering over it.
  */
 import { readdir, stat, readFile, writeFile } from 'node:fs/promises';
 import { join, extname } from 'node:path';
@@ -25,12 +29,10 @@ import { meshopt, prune, dedup } from '@gltf-transform/functions';
 import { MeshoptEncoder, MeshoptDecoder } from 'meshoptimizer';
 
 const SHOE = /^(Elf_Fitted|Wearable)_/;
-/** The authored character's own body, which the game already has its own of. */
-const BODY = /^(DarkElf_UpperOriginal|Elf_Authored_LowerBody)$/;
 
 function keeper(mode) {
   if (mode === 'footwear') return (name) => SHOE.test(name);
-  return (name) => !SHOE.test(name) && !BODY.test(name);
+  return (name) => !SHOE.test(name);
 }
 
 async function main() {
