@@ -2,14 +2,22 @@ import type * as THREE from 'three';
 import type { CameraPhase, GamePhase, PoseId, Vec2 } from '../game/types';
 
 interface PosePreset {
+  /** Look-at point sits between the two figures so both stay in frame. */
+  targetZ: number;
   targetY: number;
   distance: number;
   pitch: number;
+  /**
+   * Three-quarter framing from the player's front-left. Looking straight down
+   * the z axis would put the camera behind the attacker, so the attack reads
+   * as depth rather than as sideways travel.
+   */
+  yaw: number;
 }
 
 const PRESETS: Record<PoseId, PosePreset> = {
-  'standing-front': { targetY: 1.02, distance: 2.55, pitch: 0.05 },
-  'kneeling-front': { targetY: 0.72, distance: 2.2, pitch: 0.02 }
+  'standing-front': { targetY: 0.96, targetZ: 0.66, distance: 3.9, pitch: 0.11, yaw: -2.15 },
+  'kneeling-front': { targetY: 0.66, targetZ: 0.6, distance: 3.5, pitch: 0.09, yaw: -2.15 }
 };
 
 const BLEND_SECONDS = 0.22;
@@ -47,15 +55,21 @@ export function createCameraController(camera: THREE.PerspectiveCamera): CameraC
   let currentMode: CameraPhase = 'free-orbit';
   let orbitAllowed = true;
 
-  let userYaw = 0;
-  let userPitch = 0.08;
+  let userYaw = preset.yaw;
+  let userPitch = preset.pitch;
   let desiredDistance = preset.distance;
   let obstruction = Infinity;
 
+  // The frame the camera is actually using. It follows the player while
+  // orbiting and holds the blended pose preset once the attack locks on.
+  let activeYaw = userYaw;
+  let activePitch = userPitch;
+
   let blendTime = BLEND_SECONDS;
-  let fromYaw = 0;
-  let fromPitch = 0;
+  let fromYaw = userYaw;
+  let fromPitch = userPitch;
   let fromDistance = preset.distance;
+  let activeDistance = preset.distance;
 
   function effectiveDistance(): number {
     return Math.min(desiredDistance, obstruction);
@@ -66,13 +80,13 @@ export function createCameraController(camera: THREE.PerspectiveCamera): CameraC
     camera.position.set(
       Math.sin(yaw) * horizontal,
       preset.targetY + Math.sin(pitch) * distance + 0.28,
-      Math.cos(yaw) * horizontal
+      preset.targetZ + Math.cos(yaw) * horizontal
     );
-    camera.lookAt(0, preset.targetY, 0);
+    camera.lookAt(0, preset.targetY, preset.targetZ);
   }
 
   function applyNow(): void {
-    frame(userYaw, userPitch, effectiveDistance());
+    frame(activeYaw, activePitch, Math.min(activeDistance, obstruction));
   }
 
   return {
@@ -84,27 +98,31 @@ export function createCameraController(camera: THREE.PerspectiveCamera): CameraC
       if (locking) {
         currentMode = 'recentering';
         blendTime = 0;
-        fromYaw = userYaw;
-        fromPitch = userPitch;
-        fromDistance = desiredDistance;
+        fromYaw = activeYaw;
+        fromPitch = activePitch;
+        fromDistance = activeDistance;
         return;
       }
       if (phase === 'strike' || phase === 'impact') {
         currentMode = 'locked';
         return;
       }
+      // Hand the locked framing back to the player so the view does not jump.
       currentMode = 'free-orbit';
       blendTime = BLEND_SECONDS;
+      userYaw = activeYaw;
+      userPitch = activePitch;
+      desiredDistance = activeDistance;
     },
 
     update(delta: number): void {
       if (currentMode === 'recentering') {
         blendTime = Math.min(BLEND_SECONDS, blendTime + Math.max(0, delta));
         const t = easeInOut(blendTime / BLEND_SECONDS);
-        const yaw = fromYaw * (1 - t);
-        const pitch = fromPitch + (preset.pitch - fromPitch) * t;
-        const distance = fromDistance + (preset.distance - fromDistance) * t;
-        frame(yaw, pitch, Math.min(distance, obstruction));
+        activeYaw = fromYaw + (preset.yaw - fromYaw) * t;
+        activePitch = fromPitch + (preset.pitch - fromPitch) * t;
+        activeDistance = fromDistance + (preset.distance - fromDistance) * t;
+        applyNow();
         if (blendTime >= BLEND_SECONDS) currentMode = 'locked';
         return;
       }
@@ -115,11 +133,15 @@ export function createCameraController(camera: THREE.PerspectiveCamera): CameraC
       if (!orbitAllowed) return;
       userYaw += delta.x * 1.6;
       userPitch = clamp(userPitch + delta.y * 0.9, -0.35, 0.9);
+      activeYaw = userYaw;
+      activePitch = userPitch;
+      activeDistance = desiredDistance;
       applyNow();
     },
 
     zoom(delta: number): void {
       desiredDistance = clamp(desiredDistance + delta, MIN_DISTANCE, MAX_DISTANCE);
+      if (currentMode === 'free-orbit') activeDistance = desiredDistance;
     },
 
     setObstruction(maxDistance: number): void {

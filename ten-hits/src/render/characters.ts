@@ -4,6 +4,8 @@ import { createShoe } from './shoes';
 import { createTargetOverlay, type TargetOverlay } from './targets';
 import type { GameSnapshot, PoseId, ShoeId } from '../game/types';
 
+const THIGH_LENGTH = 0.46;
+const SHIN_LENGTH = 0.46;
 const PLAYER_HEIGHT = 1.8;
 const ATTACKER_HEIGHT = 1.73;
 const DEPTH_TO_Z = 0.3;
@@ -49,7 +51,8 @@ function place(mesh: THREE.Mesh, x: number, y: number, z: number): THREE.Mesh {
 interface FigureParts {
   root: THREE.Group;
   hips: THREE.Group;
-  rightLeg: THREE.Mesh;
+  /** Thigh and shin of the right leg, hidden on the attacker while kicking. */
+  rightLeg: THREE.Mesh[];
 }
 
 /**
@@ -108,19 +111,28 @@ function buildFigure(
     root.add(forearm);
   }
 
-  const legs: THREE.Mesh[] = [];
+  const rightLeg: THREE.Mesh[] = [];
   for (const side of [-1, 1]) {
     const thigh = capsule(0.072 * s, 0.32 * s, bottom);
     place(thigh, side * 0.082 * s, 0.76 * s, 0);
     root.add(thigh);
-    legs.push(thigh);
 
     const shin = capsule(0.055 * s, 0.34 * s, palette.skin);
     place(shin, side * 0.082 * s, 0.34 * s, 0);
     root.add(shin);
+
+    // A flat foot closes the gap between the shin capsule and the ground.
+    const foot = new THREE.Mesh(
+      new THREE.BoxGeometry(0.092 * s, 0.062 * s, 0.2 * s),
+      bottom
+    );
+    place(foot, side * 0.082 * s, 0.031 * s, 0.03 * s);
+    root.add(foot);
+
+    if (side === 1) rightLeg.push(thigh, shin, foot);
   }
 
-  return { root, hips, rightLeg: legs[1] ?? legs[0]! };
+  return { root, hips, rightLeg };
 }
 
 export interface CharacterRig {
@@ -132,7 +144,8 @@ export interface CharacterRig {
   leftTarget: THREE.Group;
   rightTarget: THREE.Group;
   overlays: { left: TargetOverlay; right: TargetOverlay };
-  attackerLeg: THREE.Mesh;
+  attackerThigh: THREE.Mesh;
+  attackerShin: THREE.Mesh;
   poseId: PoseId;
   dispose(): void;
 }
@@ -179,9 +192,15 @@ export function createCharacters(poseId: PoseId, shoeId: ShoeId): CharacterRig {
   attacker.rotation.y = Math.PI;
   root.add(attacker);
 
-  const attackerLeg = capsule(0.056, 0.4, palette.skin);
-  attackerLeg.name = 'attackerLeg';
-  root.add(attackerLeg);
+  // The kicking leg is driven by inverse kinematics, so the attacker's own
+  // right leg meshes step aside to avoid a duplicate limb.
+  for (const part of attackerParts.rightLeg) part.visible = false;
+
+  const attackerThigh = capsule(0.066, THIGH_LENGTH - 0.132, palette.attackerBottom);
+  attackerThigh.name = 'attackerThigh';
+  const attackerShin = capsule(0.05, SHIN_LENGTH - 0.1, palette.skin);
+  attackerShin.name = 'attackerShin';
+  root.add(attackerThigh, attackerShin);
 
   const attackingFoot = new THREE.Group();
   attackingFoot.name = 'attackingFoot';
@@ -209,7 +228,8 @@ export function createCharacters(poseId: PoseId, shoeId: ShoeId): CharacterRig {
     leftTarget: leftOverlay.group,
     rightTarget: rightOverlay.group,
     overlays: { left: leftOverlay, right: rightOverlay },
-    attackerLeg,
+    attackerThigh,
+    attackerShin,
     poseId,
     dispose(): void {
       leftOverlay.dispose();
@@ -224,7 +244,51 @@ export function createCharacters(poseId: PoseId, shoeId: ShoeId): CharacterRig {
 
 const HIP = new THREE.Vector3();
 const FOOT = new THREE.Vector3();
+const KNEE = new THREE.Vector3();
+const AXIS = new THREE.Vector3();
+const BEND = new THREE.Vector3();
 const MID = new THREE.Vector3();
+const DOWN = new THREE.Vector3(0, -1, 0);
+const FALLBACK_BEND = new THREE.Vector3(0, 0, -1);
+
+/** Places one capsule between two points, scaling it along its own axis. */
+function orientSegment(
+  mesh: THREE.Mesh,
+  from: THREE.Vector3,
+  to: THREE.Vector3,
+  baseLength: number
+): void {
+  MID.copy(from).add(to).multiplyScalar(0.5);
+  mesh.position.copy(MID);
+  mesh.lookAt(to);
+  mesh.rotateX(Math.PI / 2);
+  mesh.scale.set(1, Math.max(0.15, from.distanceTo(to) / baseLength), 1);
+}
+
+/**
+ * Two-bone inverse kinematics for the kicking leg. The knee always bends away
+ * from the straight hip-to-foot line so an extended kick never looks like a
+ * single stretched pole.
+ */
+function solveKnee(hip: THREE.Vector3, foot: THREE.Vector3): THREE.Vector3 {
+  AXIS.copy(foot).sub(hip);
+  const reach = Math.min(
+    THIGH_LENGTH + SHIN_LENGTH - 0.02,
+    Math.max(0.08, AXIS.length())
+  );
+  AXIS.normalize();
+
+  BEND.copy(DOWN).addScaledVector(AXIS, -DOWN.dot(AXIS));
+  if (BEND.lengthSq() < 1e-6) BEND.copy(FALLBACK_BEND);
+  BEND.normalize();
+
+  const along =
+    (reach * reach + THIGH_LENGTH * THIGH_LENGTH - SHIN_LENGTH * SHIN_LENGTH) /
+    (2 * reach);
+  const offset = Math.sqrt(Math.max(0, THIGH_LENGTH * THIGH_LENGTH - along * along));
+
+  return KNEE.copy(hip).addScaledVector(AXIS, along).addScaledVector(BEND, offset);
+}
 
 /** Copies one immutable snapshot onto the rig. Pure presentation, no logic. */
 export function applySnapshot(rig: CharacterRig, snapshot: GameSnapshot): void {
@@ -238,13 +302,9 @@ export function applySnapshot(rig: CharacterRig, snapshot: GameSnapshot): void {
   rig.attackingFoot.position.set(snapshot.foot.x, snapshot.foot.y, snapshot.foot.z);
   rig.attackingFoot.lookAt(0, snapshot.foot.y, snapshot.foot.z - 1);
 
-  // Bridge the attacker's hip to wherever the foot currently is.
-  HIP.set(0.1, 0.86, 1.45);
+  HIP.set(0.09, 0.88, 1.5);
   FOOT.set(snapshot.foot.x, snapshot.foot.y, snapshot.foot.z);
-  MID.copy(HIP).add(FOOT).multiplyScalar(0.5);
-  rig.attackerLeg.position.copy(MID);
-  rig.attackerLeg.lookAt(FOOT);
-  rig.attackerLeg.rotateX(Math.PI / 2);
-  const length = HIP.distanceTo(FOOT);
-  rig.attackerLeg.scale.set(1, Math.max(0.2, length / 0.512), 1);
+  const knee = solveKnee(HIP, FOOT).clone();
+  orientSegment(rig.attackerThigh, HIP, knee, THIGH_LENGTH);
+  orientSegment(rig.attackerShin, knee, FOOT, SHIN_LENGTH);
 }

@@ -38,9 +38,13 @@ export function createTargetOverlay(): TargetOverlay {
     metalness: 0.04,
     transparent: true,
     opacity: 0.62,
-    depthWrite: false
+    depthWrite: false,
+    // The overlay is a gameplay readout, not part of the body, so it stays
+    // legible through the figure instead of being occluded by it.
+    depthTest: false
   });
   const mesh = new THREE.Mesh(geometry, material);
+  mesh.renderOrder = 10;
   group.add(mesh);
 
   return {
