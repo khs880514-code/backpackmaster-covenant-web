@@ -57,14 +57,14 @@ const CORE_SCALE = 0.62;
  * work. Clamped below so the surface can crater deeply without passing through
  * the middle and turning itself inside out.
  */
-const IMPRINT_DEPTH = 1.15;
+const IMPRINT_DEPTH = 1.55;
 /** The deepest the pit may go, as a fraction of the radius. */
-const IMPRINT_LIMIT = 0.8;
+const IMPRINT_LIMIT = 0.92;
 /**
  * How far the inner body is driven away from the shoe, as a fraction of the
  * dent. It is not pressed in place: the contact shoves it to the far wall.
  */
-const CORE_SHIFT = 0.55;
+const CORE_SHIFT = 0.7;
 /**
  * How much deeper the narrowest shoe drives than the broadest: the narrowest
  * gets this multiplier and the broadest its reciprocal-ish counterpart, so the
@@ -421,10 +421,10 @@ export function createContactBands(shoeId: ShoeId): ContactBandRings {
 export interface TargetShell {
   group: THREE.Group;
   /**
-   * How far behind the pair the cords root, in metres along Z. Zero is the
-   * upright case, where they hang straight down from the attachment.
+   * Where the cords root, relative to the pair, in the pair's own frame.
+   * Zero is the upright case, where they hang straight down from it.
    */
-  setRootOffset(z: number): void;
+  setRootOffset(y: number, z: number): void;
   /** Re-fits the shell and tethers around wherever the pair has swung to. */
   apply(left: ProxySnapshot, right: ProxySnapshot): void;
   setInspect(enabled: boolean): void;
@@ -490,11 +490,13 @@ export function createTargetShell(): TargetShell {
 
   const UP = new THREE.Vector3(0, 1, 0);
   const to = new THREE.Vector3();
+  let rootY = 0;
   let rootZ = 0;
 
   return {
     group,
-    setRootOffset(z: number): void {
+    setRootOffset(y: number, z: number): void {
+      rootY = y;
       rootZ = z;
     },
     apply(left: ProxySnapshot, right: ProxySnapshot): void {
@@ -521,9 +523,13 @@ export function createTargetShell(): TargetShell {
       tethers.forEach((tether, i) => {
         const proxy = pair[i]!;
         const root = attachment(i === 0 ? 'left' : 'right');
-        to.set(proxy.position.x - root.x, proxy.position.y - root.y, -rootZ);
+        to.set(
+          proxy.position.x - root.x,
+          proxy.position.y - root.y - rootY,
+          -rootZ
+        );
         const length = Math.max(0.004, to.length());
-        tether.position.set(root.x, root.y, rootZ);
+        tether.position.set(root.x, root.y + rootY, rootZ);
         tether.scale.set(1, length, 1);
         tether.quaternion.setFromUnitVectors(
           UP,

@@ -84,6 +84,14 @@ export interface PoseProfile {
    * down from the attachment.
    */
   tetherForward?: number;
+  /**
+   * How far the whole pair is laid over, in degrees about X.
+   *
+   * Zero hangs it upright under the attachment, which is every standing or
+   * kneeling pose. A figure lying face down is not upright and neither is what
+   * hangs off it: -90 lays the pair down along the body, cords and all.
+   */
+  proxyTilt?: number;
 }
 
 export interface ShoeProfile {

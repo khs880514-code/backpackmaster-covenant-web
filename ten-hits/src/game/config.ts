@@ -54,7 +54,10 @@ export const POSES: Record<PoseId, PoseProfile> = {
     // The pubis itself does not come with it: pressed to the floor on the
     // belly side, with only the cords running back between the thighs. That
     // gap is what puts the cords at an angle instead of straight down.
-    tetherForward: 0.24
+    tetherForward: 0.24,
+    // Lying face down, so the pair lies down with him rather than standing up
+    // off his hip.
+    proxyTilt: -90
   },
   // Lowest target and the shortest warning: fast hands, no time to think.
   'crouch-front': {

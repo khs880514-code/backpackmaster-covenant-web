@@ -137,6 +137,11 @@ export function tetherForwardFor(pose: PoseProfile): number {
   return pose.tetherForward ?? proxyForwardFor(pose);
 }
 
+/** How far the pair is laid over, in radians about X. */
+export function proxyTiltFor(pose: PoseProfile): number {
+  return ((pose.proxyTilt ?? 0) * Math.PI) / 180;
+}
+
 /**
  * Length of the striking surface, in world metres, measured between the
  * authored TOE_CAP and INSTEP anchors.
@@ -260,6 +265,8 @@ export function createGameEngine(options: EngineOptions): GameEngine {
 
   let requestedPelvis: Vec2 = { x: 0, y: 0 };
   const proxyForward = proxyForwardFor(pose);
+  const tiltCos = Math.cos(proxyTiltFor(pose));
+  const tiltSin = Math.sin(proxyTiltFor(pose));
   let contactPoint: ContactPoint | null = null;
   /** A won or lost outcome, held until its impact has been reviewed. */
   let pendingResult: GamePhase | null = null;
@@ -282,12 +289,17 @@ export function createGameEngine(options: EngineOptions): GameEngine {
   let footWorld: Vec3 = { ...FOOT_REST_POSITION };
   let instepWorld: Vec3 = { ...FOOT_REST_POSITION };
 
+  /**
+   * The pair's world position. The pendulum swings in its own plane, and that
+   * plane is laid over with the figure: upright it hangs below the anchor,
+   * face down it trails along the ground instead.
+   */
   function targetWorld(side: TargetSide): Vec3 {
     const body = side === 'left' ? pair.left : pair.right;
     return {
       x: body.position.x,
-      y: pose.anchorHeight + body.position.y,
-      z: pelvis.y * DEPTH_TO_Z + proxyForward
+      y: pose.anchorHeight + body.position.y * tiltCos,
+      z: pelvis.y * DEPTH_TO_Z + proxyForward + body.position.y * tiltSin
     };
   }
 
