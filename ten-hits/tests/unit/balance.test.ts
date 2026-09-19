@@ -406,3 +406,45 @@ describe('the hit that ends the run', () => {
     for (const hold of holds.slice(0, -1)) expect(last).toBeGreaterThan(hold);
   });
 });
+
+describe('the strike arc', () => {
+  /** Samples the foot through one strike. */
+  function strikePath(pose: Parameters<typeof createGameEngine>[0]['pose']) {
+    const engine = createGameEngine({ pose, shoe: 'pump', power: 6, seed: 2 });
+    engine.start();
+    const path: Array<{ x: number; y: number; z: number }> = [];
+    let previous = 'setup';
+    for (let i = 0; i < 4000; i += 1) {
+      engine.update(1 / 120);
+      const snapshot = engine.update(0);
+      if (snapshot.phase === 'strike') path.push({ ...snapshot.foot });
+      if (previous === 'strike' && snapshot.phase !== 'strike') break;
+      previous = snapshot.phase;
+    }
+    return path;
+  }
+
+  it('drives up into the target instead of coming down onto it', () => {
+    // The animation plays a kick from underneath. The approach point used to
+    // sit above the target, so the foot rose past it and dropped onto it — and
+    // because the dent is read off this same segment, it was pressed downward
+    // into a target being kicked upward.
+    const path = strikePath('standing-front');
+    expect(path.length).toBeGreaterThan(6);
+
+    const from = path[path.length - 6]!;
+    const to = path[path.length - 1]!;
+    const rise = to.y - from.y;
+    const reach = Math.hypot(to.x - from.x, to.y - from.y, to.z - from.z);
+    expect(rise).toBeGreaterThan(0);
+    expect(rise / reach).toBeGreaterThan(0.3);
+  });
+
+  it('does not swing under a target lying on the floor', () => {
+    // There is no room beneath one, and asking for it puts the foot through
+    // the ground and out the far side without touching anything.
+    const path = strikePath('spread-standing');
+    const lowest = path.reduce((low, step) => Math.min(low, step.y), Infinity);
+    expect(lowest).toBeGreaterThan(-0.02);
+  });
+});

@@ -96,11 +96,26 @@ export function selectAttack(context: AttackContext): AttackPlan {
 
   const lift = kind === 'feint' ? 0.46 : 0.3;
   const swayX = kind === 'feint' ? -sideSign * 0.16 : sideSign * 0.07;
+  /**
+   * How far below the target the foot is still travelling on its last leg.
+   *
+   * This point used to sit above it, so the foot rose past the target and came
+   * back down onto it — a stamp, while the animation plays a kick driving up
+   * from underneath. Everything downstream read the strike from this segment,
+   * so the dent was pressed in the wrong direction too.
+   *
+   * How far under depends on how much room there is: a target at hip height
+   * has a swing's worth beneath it, one lying on the floor has none, and
+   * asking for clearance that is not there just sends the foot through the
+   * ground and under the target entirely.
+   */
+  const headroom = Math.max(0, aimY - FOOT_REST.y * 0.5);
+  const underswing = Math.min(kind === 'feint' ? 0.08 : 0.24, headroom * 0.34);
 
   const path: [Vec3, Vec3, Vec3, Vec3] = [
     { x: FOOT_REST.x * sideSign, y: FOOT_REST.y, z: FOOT_REST.z },
     { x: FOOT_REST.x * sideSign + swayX, y: FOOT_REST.y + lift, z: 1.02 },
-    { x: aimX + swayX * 0.5, y: aimY + lift * 0.42, z: 0.44 },
+    { x: aimX + swayX * 0.5, y: aimY - underswing, z: 0.44 },
     { x: aimX, y: aimY, z: aimZ }
   ];
 

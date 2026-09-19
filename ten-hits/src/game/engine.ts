@@ -303,15 +303,24 @@ export function createGameEngine(options: EngineOptions): GameEngine {
     };
   }
 
+  /**
+   * Where the pair will be, in the same world axes the contact test uses.
+   *
+   * The pendulum swings in its own plane and that plane is laid over with the
+   * pose, so the offset has to be turned the same way here. Aiming at the raw
+   * pendulum height sent every strike at where the pair would have been if it
+   * were still standing up, which for a figure lying down is nowhere at all.
+   */
   function predictTarget(lookahead: number): Vec3 {
     const cx = (pair.left.position.x + pair.right.position.x) / 2;
     const cy = (pair.left.position.y + pair.right.position.y) / 2;
     const vx = (pair.left.velocity.x + pair.right.velocity.x) / 2;
     const vy = (pair.left.velocity.y + pair.right.velocity.y) / 2;
+    const along = cy + vy * lookahead;
     return {
       x: cx + vx * lookahead,
-      y: cy + vy * lookahead,
-      z: pelvis.y * DEPTH_TO_Z + proxyForward
+      y: along * tiltCos,
+      z: pelvis.y * DEPTH_TO_Z + proxyForward + along * tiltSin
     };
   }
 
