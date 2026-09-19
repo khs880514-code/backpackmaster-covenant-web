@@ -17,6 +17,24 @@ function positions(geometry: THREE.BufferGeometry): Float32Array {
   return (geometry.getAttribute('position') as THREE.BufferAttribute).array as Float32Array;
 }
 
+/** Signed volume the closed surface encloses, by the divergence theorem. */
+function enclosedVolume(geometry: THREE.BufferGeometry): number {
+  const p = (geometry.getAttribute('position') as THREE.BufferAttribute)
+    .array as Float32Array;
+  const index = geometry.getIndex()!;
+  let volume = 0;
+  for (let i = 0; i < index.count; i += 3) {
+    const a = index.getX(i) * 3;
+    const b = index.getX(i + 1) * 3;
+    const c = index.getX(i + 2) * 3;
+    volume +=
+      p[a]! * (p[b + 1]! * p[c + 2]! - p[b + 2]! * p[c + 1]!) -
+      p[a + 1]! * (p[b]! * p[c + 2]! - p[b + 2]! * p[c]!) +
+      p[a + 2]! * (p[b]! * p[c + 1]! - p[b + 1]! * p[c]!);
+  }
+  return Math.abs(volume) / 6;
+}
+
 /** Total distance every vertex moved from rest. */
 function displaced(geometry: THREE.BufferGeometry, rest: Float32Array): number {
   const now = positions(geometry);
@@ -90,23 +108,36 @@ describe('pressImprint', () => {
     expect(broadSpread).toBeGreaterThan(narrowSpread * 1.5);
   });
 
-  it('only moves the side the shoe came from', () => {
+  it('presses the struck side in and swells the far side out', () => {
     const { geometry, rest } = sphere();
-    // The shoe presses along -z, so it arrives on the +z face and the far
-    // hemisphere must not move at all.
+    // The shoe presses along -z, so it arrives on the +z face. That side goes
+    // in; the opposite side takes what was displaced and goes out.
     pressImprint(geometry, rest, from(0.5, 1), RADIUS);
     const now = positions(geometry);
-    let moved = 0;
+
+    let pressedIn = 0;
+    let swelledOut = 0;
     for (let i = 0; i < rest.length; i += 3) {
-      if (rest[i + 2]! < 0) {
-        expect(now[i]!).toBe(rest[i]!);
-        expect(now[i + 1]!).toBe(rest[i + 1]!);
-        expect(now[i + 2]!).toBe(rest[i + 2]!);
-      } else if (now[i + 2]! !== rest[i + 2]!) {
-        moved += 1;
-      }
+      const wasOut = Math.hypot(rest[i]!, rest[i + 1]!, rest[i + 2]!);
+      const isOut = Math.hypot(now[i]!, now[i + 1]!, now[i + 2]!);
+      if (rest[i + 2]! > RADIUS * 0.7 && isOut < wasOut - 1e-6) pressedIn += 1;
+      if (rest[i + 2]! < -RADIUS * 0.7 && isOut > wasOut + 1e-9) swelledOut += 1;
     }
-    expect(moved).toBeGreaterThan(0);
+    expect(pressedIn).toBeGreaterThan(0);
+    expect(swelledOut).toBeGreaterThan(0);
+  });
+
+  it('gives back roughly what it takes', () => {
+    const { geometry, rest } = sphere();
+    const before = enclosedVolume(geometry);
+    for (const width of [0, 0.5, 1]) {
+      pressImprint(geometry, rest, from(width, 0.5), RADIUS);
+      const after = enclosedVolume(geometry);
+      // Not exact — the surface is not a fluid — but close enough that the
+      // body reads as shoved aside rather than quietly shrinking away.
+      expect(after / before).toBeGreaterThan(0.85);
+      expect(after / before).toBeLessThan(1.25);
+    }
   });
 
   it('centres the pit on the face the shoe met', () => {
@@ -130,13 +161,16 @@ describe('pressImprint', () => {
     expect(rest[deepestIndex + 2]!).toBeGreaterThan(RADIUS * 0.95);
   });
 
-  it('presses inward, never outward', () => {
+  it('never pushes the pit itself outward', () => {
     const { geometry, rest } = sphere();
     pressImprint(geometry, rest, from(0.5, 1), RADIUS);
     const now = positions(geometry);
     for (let i = 0; i < rest.length; i += 3) {
-      expect(Math.hypot(now[i]!, now[i + 1]!, now[i + 2]!)).toBeLessThanOrEqual(
-        Math.hypot(rest[i]!, rest[i + 1]!, rest[i + 2]!) + 1e-6
+      // Directly under the shoe only. The rim and the far side are meant to
+      // swell, which is where the displaced volume goes.
+      if (rest[i + 2]! < RADIUS * 0.9) continue;
+      expect(Math.hypot(now[i]!, now[i + 1]!, now[i + 2]!)).toBeLessThan(
+        Math.hypot(rest[i]!, rest[i + 1]!, rest[i + 2]!)
       );
     }
   });

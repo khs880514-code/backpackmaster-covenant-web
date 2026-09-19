@@ -61,6 +61,11 @@ const IMPRINT_DEPTH = 1.15;
 /** The deepest the pit may go, as a fraction of the radius. */
 const IMPRINT_LIMIT = 0.8;
 /**
+ * How far the inner body is driven away from the shoe, as a fraction of the
+ * dent. It is not pressed in place: the contact shoves it to the far wall.
+ */
+const CORE_SHIFT = 0.55;
+/**
  * How much deeper the narrowest shoe drives than the broadest: the narrowest
  * gets this multiplier and the broadest its reciprocal-ish counterpart, so the
  * middle of the range is left as authored.
@@ -136,6 +141,12 @@ export function taperProxy(geometry: THREE.BufferGeometry, radiusY: number): voi
  * concentrates into a deep local pit, a platform sole spreads the same depth
  * across most of the facing hemisphere. Without this the only thing separating
  * one shoe from another on screen was a slightly different shade.
+ *
+ * What is pressed in has to go somewhere. The far side swells to take it, by
+ * as much as the pit displaces — so a narrow cap drives deep and barely
+ * disturbs the rest, while a broad sole pushes the whole body out sideways.
+ * That is what makes it read as contents being shoved aside rather than
+ * material quietly disappearing.
  */
 export function pressImprint(
   geometry: THREE.BufferGeometry,
@@ -173,18 +184,33 @@ export function pressImprint(
       IMPRINT_DEPTH * concentration * Math.min(1, Math.max(0, imprint.depth))
     );
 
+  // What the pit takes out has to reappear, and it cannot reappear along the
+  // same axis — pushing the far side the same way would just slide the whole
+  // body across. It swells outward instead, everywhere the shoe is not.
+  //
+  // The pit's share of the surface integrates to 1/(2(sharpness+1)), so this
+  // is the amplitude that puts the same volume back over everything else: a
+  // narrow cap barely disturbs the rest, a broad sole pushes it all out.
+  const pitShare = 1 / (2 * (sharpness + 1));
+  const swell = pitShare / Math.max(1e-6, 1 - pitShare);
+
   for (let i = 0; i < rest.length; i += 3) {
     const x = rest[i]!;
     const y = rest[i + 1]!;
     const z = rest[i + 2]!;
     const norm = Math.hypot(x, y, z) || 1;
-    // How square-on this vertex faces the incoming shoe. The dot product is
-    // against the surface direction, so only the struck side moves.
-    const facing = -((x / norm) * dx + (y / norm) * dy + (z / norm) * dz);
-    const falloff = facing <= 0 ? 0 : Math.pow(facing, sharpness);
-    array[i] = x + dx * reach * falloff;
-    array[i + 1] = y + dy * reach * falloff;
-    array[i + 2] = z + dz * reach * falloff;
+    const nx = x / norm;
+    const ny = y / norm;
+    const nz = z / norm;
+    // How square-on this vertex faces the incoming shoe.
+    const facing = -(nx * dx + ny * dy + nz * dz);
+    const pressed = facing > 0 ? Math.pow(facing, sharpness) : 0;
+    const inward = reach * pressed;
+    const outward = reach * swell * (1 - pressed);
+
+    array[i] = x + dx * inward + nx * outward;
+    array[i + 1] = y + dy * inward + ny * outward;
+    array[i + 2] = z + dz * inward + nz * outward;
   }
 
   position.needsUpdate = true;
@@ -295,6 +321,22 @@ export function createTargetOverlay(): TargetOverlay {
         proxy.imprint ? { ...proxy.imprint, depth: crushed } : null,
         TARGET_RADIUS * CORE_SCALE
       );
+
+      // And it is driven off its centre: the contact shoves the inner body
+      // toward the far wall instead of compressing it where it sits.
+      if (proxy.imprint) {
+        const push =
+          TARGET_RADIUS * CORE_SHIFT * Math.min(1, Math.max(0, proxy.imprint.depth));
+        const length =
+          Math.hypot(proxy.imprint.x, proxy.imprint.y, proxy.imprint.z) || 1;
+        core.position.set(
+          (proxy.imprint.x / length) * push,
+          (proxy.imprint.y / length) * push,
+          (proxy.imprint.z / length) * push
+        );
+      } else {
+        core.position.set(0, 0, 0);
+      }
 
       // One sits a little smaller and a little lower than the other. The size
       // goes on the meshes rather than the group, because the group's scale is
