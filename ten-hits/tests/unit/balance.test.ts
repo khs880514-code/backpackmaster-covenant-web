@@ -474,14 +474,26 @@ describe('the kick that lands', () => {
     return { depth: 0, grade: null };
   }
 
-  it('drives through to the pubis at full power', () => {
-    // Not to the surface and no further: a hard kick carries to the bone
-    // behind it, which is what PROXY_FORWARD measures.
+  it('drives through to the pubis, and not only when kicked hard', () => {
+    // Soft tissue on a cord does not stop a foot; it is displaced and the shoe
+    // carries on to the bone. Reach is not what power buys, so a light kick
+    // still gets most of the way there.
     expect(followThroughDepth(10)).toBeCloseTo(PROXY_FORWARD, 5);
-    expect(followThroughDepth(1)).toBeLessThan(PROXY_FORWARD * 0.2);
+    expect(followThroughDepth(2)).toBeGreaterThan(PROXY_FORWARD * 0.7);
+    expect(followThroughDepth(3)).toBeGreaterThan(PROXY_FORWARD * 0.9);
+    // The lightest of all still stops short of the bone.
+    expect(followThroughDepth(1)).toBeLessThan(PROXY_FORWARD * 0.5);
     for (let power = 2; power <= 10; power += 1) {
       expect(followThroughDepth(power)).toBeGreaterThan(followThroughDepth(power - 1));
     }
+  });
+
+  it('presses harder with power even once the reach has flattened', () => {
+    // What separates a power-3 kick from a power-10 one is the crush at the
+    // bone, not how far in the foot got.
+    const light = firstDent(3, 'pump').depth;
+    const hard = firstDent(10, 'pump').depth;
+    expect(hard).toBeGreaterThan(light * 1.5);
   });
 
   it('dents deeper the harder the kick', () => {

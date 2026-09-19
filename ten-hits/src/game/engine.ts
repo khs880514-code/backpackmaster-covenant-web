@@ -81,6 +81,9 @@ export interface GameEngine {
  */
 const OFFSET_LEAN = 0.35;
 
+/** Where the lightest kick of all stops, in metres past the target. */
+const SHALLOWEST_FOLLOW_THROUGH = 0.045;
+
 /** How deeply each grade presses before power and placement scale it. */
 /**
  * How fast the surface springs back, in depth per second.
@@ -211,14 +214,21 @@ const PELVIS_RANGE = 0.1;
 /**
  * How far past the target the shoe carries, in metres.
  *
- * A full-power kick does not stop at the surface — it drives through to the
- * pubic bone behind it, which is what PROXY_FORWARD measures. This used to
- * reach 54% of that way at power 10, so even the hardest kick stopped short
- * of what it was supposed to be doing.
+ * Soft tissue on a cord does not stop a foot. It is displaced — measurably,
+ * eight to twelve centimetres of it — and the shoe carries on to the pubic
+ * bone behind it, which is what PROXY_FORWARD measures. So reach is not what
+ * power buys: even a light kick gets most of the way there, and what rises
+ * with power is how hard the pair is pressed against the bone once it
+ * arrives, which the dent depth carries.
+ *
+ * Scaling this linearly had a power-3 kick stopping a third of the way in, as
+ * though it had been blocked by something solid.
  */
 function followThroughDepth(powerLevel: number): number {
-  const level = (Math.min(10, Math.max(1, powerLevel)) - 1) / 9;
-  return 0.018 + (PROXY_FORWARD - 0.018) * level;
+  const level = Math.min(10, Math.max(1, powerLevel));
+  // Rises fast and then flattens: ~78% of the way at power 2, ~93% at 3.
+  const reach = 1 - Math.exp(-(level - 1) / 0.9);
+  return SHALLOWEST_FOLLOW_THROUGH + (PROXY_FORWARD - SHALLOWEST_FOLLOW_THROUGH) * reach;
 }
 
 /** How hard a graded contact shoves the pair it just landed on. */
