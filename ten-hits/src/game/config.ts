@@ -50,7 +50,11 @@ export const POSES: Record<PoseId, PoseProfile> = {
     // Face down with the hips turned toward the attacker, the pair is drawn
     // out between the thighs and hangs back behind him — which from her side
     // is toward her. The cord is what lets it sit this far from the pelvis.
-    proxyForward: 0.48
+    proxyForward: 0.48,
+    // The pubis itself does not come with it: pressed to the floor on the
+    // belly side, with only the cords running back between the thighs. That
+    // gap is what puts the cords at an angle instead of straight down.
+    tetherForward: 0.24
   },
   // Lowest target and the shortest warning: fast hands, no time to think.
   'crouch-front': {

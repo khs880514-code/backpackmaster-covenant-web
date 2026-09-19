@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { describe, expect, it } from 'vitest';
-import { pressImprint } from '../../src/render/targets';
+import { pressImprint, taperProxy } from '../../src/render/targets';
 import type { ProxyImprint } from '../../src/game/types';
 
 const RADIUS = 0.028;
@@ -147,5 +147,38 @@ describe('pressImprint', () => {
     expect(displaced(geometry, rest)).toBeGreaterThan(0);
     pressImprint(geometry, rest, null, RADIUS);
     expect(displaced(geometry, rest)).toBe(0);
+  });
+});
+
+describe('the proxy resting shape', () => {
+  it('narrows toward the top instead of staying a ball', () => {
+    const radius = 0.028;
+    const radiusY = radius * 1.42;
+    const geometry = new THREE.SphereGeometry(radius, 32, 24);
+    geometry.scale(1, 1.42, 0.97);
+    const before = (geometry.getAttribute('position') as THREE.BufferAttribute)
+      .array as Float32Array;
+    const widthAt = (source: Float32Array, high: boolean): number => {
+      let widest = 0;
+      for (let i = 0; i < source.length; i += 3) {
+        const y = source[i + 1]!;
+        const near = high ? y > radiusY * 0.6 : y < -radiusY * 0.6;
+        if (near) widest = Math.max(widest, Math.abs(source[i]!));
+      }
+      return widest;
+    };
+    const topBefore = widthAt(Float32Array.from(before), true);
+    const bottomBefore = widthAt(Float32Array.from(before), false);
+    expect(topBefore).toBeCloseTo(bottomBefore, 5);
+
+    taperProxy(geometry, radiusY);
+    const after = (geometry.getAttribute('position') as THREE.BufferAttribute)
+      .array as Float32Array;
+    const topAfter = widthAt(after, true);
+    const bottomAfter = widthAt(after, false);
+
+    // Narrower where the cord takes the weight, and the volume stays low.
+    expect(topAfter).toBeLessThan(topBefore * 0.85);
+    expect(bottomAfter).toBeGreaterThan(bottomBefore * 0.95);
   });
 });

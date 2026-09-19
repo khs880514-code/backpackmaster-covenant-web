@@ -132,6 +132,11 @@ export function proxyForwardFor(pose: PoseProfile): number {
   return pose.proxyForward ?? PROXY_FORWARD;
 }
 
+/** Where the cords root. Upright, that is the same place the pair hangs from. */
+export function tetherForwardFor(pose: PoseProfile): number {
+  return pose.tetherForward ?? proxyForwardFor(pose);
+}
+
 /**
  * Length of the striking surface, in world metres, measured between the
  * authored TOE_CAP and INSTEP anchors.

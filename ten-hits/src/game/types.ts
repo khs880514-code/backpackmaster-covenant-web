@@ -74,6 +74,16 @@ export interface PoseProfile {
    * back between the thighs instead, so this is per pose rather than fixed.
    */
   proxyForward?: number;
+  /**
+   * Where the cords root, in the same world metres as `proxyForward`.
+   *
+   * The pubic attachment does not move with the pair. Face down it stays
+   * against the belly while only the cords and the pair come back out between
+   * the thighs, so the two are metres apart and the cords run at an angle.
+   * Defaults to the pair's own offset, which is the upright case: straight
+   * down from the attachment.
+   */
+  tetherForward?: number;
 }
 
 export interface ShoeProfile {

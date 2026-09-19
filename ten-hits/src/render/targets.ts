@@ -35,6 +35,16 @@ const STAGE_EMISSIVE: Record<ColorStage, number> = {
 /** Measured from the authoring model: a lobe is far taller than it is wide. */
 const PROXY_HEIGHT_RATIO = 1.42;
 const PROXY_DEPTH_RATIO = 0.97;
+/**
+ * Taper toward the top, where the cord takes the weight.
+ *
+ * A sphere scaled on one axis is still a ball, which is what made these read
+ * as toys. An ovoid narrows toward the attachment and carries its volume low,
+ * and the two are not the same size — the reference pair never is.
+ */
+const PROXY_TAPER = 0.34;
+/** How much smaller the left one is, and how much lower it sits. */
+const PROXY_ASYMMETRY = 0.07;
 
 /** The core sits inside the shell and shows through it as the shell thins. */
 const CORE_SCALE = 0.62;
@@ -97,6 +107,26 @@ export interface TargetOverlay {
 
 const INSPECT_OPACITY = 0.97;
 const BASE_OPACITY = 0.88;
+
+/**
+ * Narrows a proxy toward its top so it reads as an ovoid rather than a ball.
+ *
+ * The taper is applied to the resting shape once, before any imprint, so the
+ * dent still presses into the form rather than fighting it.
+ */
+export function taperProxy(geometry: THREE.BufferGeometry, radiusY: number): void {
+  const position = geometry.getAttribute('position') as THREE.BufferAttribute;
+  const array = position.array as Float32Array;
+  for (let i = 0; i < array.length; i += 3) {
+    // 0 at the bottom, 1 at the top.
+    const t = Math.min(1, Math.max(0, (array[i + 1]! / radiusY + 1) / 2));
+    const squeeze = 1 - PROXY_TAPER * t * t;
+    array[i] = array[i]! * squeeze;
+    array[i + 2] = array[i + 2]! * squeeze;
+  }
+  position.needsUpdate = true;
+  geometry.computeVertexNormals();
+}
 
 /**
  * Presses the shape of the striking surface into a proxy mesh.
@@ -168,6 +198,7 @@ export function createTargetOverlay(): TargetOverlay {
   // axis nothing is judged against.
   const geometry = new THREE.SphereGeometry(TARGET_RADIUS, 32, 24);
   geometry.scale(1, PROXY_HEIGHT_RATIO, PROXY_DEPTH_RATIO);
+  taperProxy(geometry, TARGET_RADIUS * PROXY_HEIGHT_RATIO);
   roughenSurface(geometry, 0.035);
 
   const material = new THREE.MeshStandardMaterial({
@@ -191,6 +222,7 @@ export function createTargetOverlay(): TargetOverlay {
   // never recovers, so what is left at the end is what the run actually cost.
   const coreGeometry = new THREE.SphereGeometry(TARGET_RADIUS * CORE_SCALE, 20, 16);
   coreGeometry.scale(1, PROXY_HEIGHT_RATIO, PROXY_DEPTH_RATIO);
+  taperProxy(coreGeometry, TARGET_RADIUS * CORE_SCALE * PROXY_HEIGHT_RATIO);
   roughenSurface(coreGeometry, 0.05);
   const coreMaterial = new THREE.MeshStandardMaterial({
     color: CORE_COLORS[0],
@@ -264,7 +296,18 @@ export function createTargetOverlay(): TargetOverlay {
         TARGET_RADIUS * CORE_SCALE
       );
 
-      group.position.set(proxy.position.x, proxy.position.y, 0);
+      // One sits a little smaller and a little lower than the other. The size
+      // goes on the meshes rather than the group, because the group's scale is
+      // the volume-preserving squash and must keep multiplying out to one.
+      const lean = proxy.side === 'left' ? -PROXY_ASYMMETRY : PROXY_ASYMMETRY;
+      const sized = 1 - lean * 0.5;
+      mesh.scale.setScalar(sized);
+      core.scale.multiplyScalar(sized);
+      group.position.set(
+        proxy.position.x,
+        proxy.position.y + lean * TARGET_RADIUS * 0.9,
+        0
+      );
     },
     dispose(): void {
       geometry.dispose();
@@ -335,6 +378,11 @@ export function createContactBands(shoeId: ShoeId): ContactBandRings {
 
 export interface TargetShell {
   group: THREE.Group;
+  /**
+   * How far behind the pair the cords root, in metres along Z. Zero is the
+   * upright case, where they hang straight down from the attachment.
+   */
+  setRootOffset(z: number): void;
   /** Re-fits the shell and tethers around wherever the pair has swung to. */
   apply(left: ProxySnapshot, right: ProxySnapshot): void;
   setInspect(enabled: boolean): void;
@@ -400,9 +448,13 @@ export function createTargetShell(): TargetShell {
 
   const UP = new THREE.Vector3(0, 1, 0);
   const to = new THREE.Vector3();
+  let rootZ = 0;
 
   return {
     group,
+    setRootOffset(z: number): void {
+      rootZ = z;
+    },
     apply(left: ProxySnapshot, right: ProxySnapshot): void {
       const pair = [left, right];
 
@@ -420,13 +472,16 @@ export function createTargetShell(): TargetShell {
         TARGET_RADIUS * 1.45
       );
 
-      // Cords: each from its own attachment down to the body it carries.
+      // Cords: each from its own attachment to the body it carries. When the
+      // attachment is not above the pair — face down it is metres in front of
+      // it — the cord spans that gap and runs at an angle, which is the whole
+      // difference between hanging and being drawn out between the thighs.
       tethers.forEach((tether, i) => {
         const proxy = pair[i]!;
         const root = attachment(i === 0 ? 'left' : 'right');
-        to.set(proxy.position.x - root.x, proxy.position.y - root.y, 0);
+        to.set(proxy.position.x - root.x, proxy.position.y - root.y, -rootZ);
         const length = Math.max(0.004, to.length());
-        tether.position.set(root.x, root.y, 0);
+        tether.position.set(root.x, root.y, rootZ);
         tether.scale.set(1, length, 1);
         tether.quaternion.setFromUnitVectors(
           UP,

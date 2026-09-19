@@ -9,7 +9,7 @@ import {
   type Dressed
 } from './dressing';
 import { POSES } from '../game/config';
-import { proxyForwardFor } from '../game/engine';
+import { proxyForwardFor, tetherForwardFor } from '../game/engine';
 import { clipTimeForPhase, type AttackClip } from './attack-clips';
 import { createShoe } from './shoes';
 import {
@@ -575,6 +575,9 @@ export function applySnapshot(rig: CharacterRig, snapshot: GameSnapshot): void {
 
   rig.overlays.left.apply(snapshot.proxies[0]);
   rig.overlays.right.apply(snapshot.proxies[1]);
+  rig.shell.setRootOffset(
+    tetherForwardFor(POSES[rig.poseId]) - proxyForwardFor(POSES[rig.poseId])
+  );
   rig.shell.apply(snapshot.proxies[0], snapshot.proxies[1]);
 
   // The bands only matter while a strike is inbound, so they fade in with it.
