@@ -47,11 +47,10 @@ export const POSES: Record<PoseId, PoseProfile> = {
     // goes with it is 0.33m tall. It was set for a standing stance, which left
     // the attacker kicking at the floor while the player stood over it.
     anchorHeight: 0.2,
-    // Face down, the pair hangs back between the thighs, not forward of the
-    // pelvis. The figure lies along Z with its head toward the attacker, so
-    // forward of the pelvis is up by its chest, which is where this used to
-    // leave it floating.
-    proxyForward: -0.26
+    // Face down with the hips turned toward the attacker, the pair is drawn
+    // out between the thighs and hangs back behind him — which from her side
+    // is toward her. The cord is what lets it sit this far from the pelvis.
+    proxyForward: 0.48
   },
   // Lowest target and the shortest warning: fast hands, no time to think.
   'crouch-front': {
