@@ -68,6 +68,12 @@ export interface PoseProfile {
   telegraphMultiplier: number;
   /** Height of the target anchor in world units. */
   anchorHeight: number;
+  /**
+   * How far in front of the body's origin the pair hangs, in world metres.
+   * Upright poses hang it forward of the pelvis; a face-down figure hangs it
+   * back between the thighs instead, so this is per pose rather than fixed.
+   */
+  proxyForward?: number;
 }
 
 export interface ShoeProfile {

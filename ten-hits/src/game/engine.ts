@@ -28,6 +28,7 @@ import type {
   ImpactGrade,
   PendulumPair,
   PoseId,
+  PoseProfile,
   ProxyImprint,
   ProxySnapshot,
   ShoeId,
@@ -125,6 +126,11 @@ const DEPTH_TO_Z = 0.12;
  * the contact test measures is unchanged by it.
  */
 const PROXY_FORWARD = 0.138;
+
+/** The pose's own offset, or the upright default. */
+export function proxyForwardFor(pose: PoseProfile): number {
+  return pose.proxyForward ?? PROXY_FORWARD;
+}
 
 /**
  * Length of the striking surface, in world metres, measured between the
@@ -248,6 +254,7 @@ export function createGameEngine(options: EngineOptions): GameEngine {
   let right: TargetState = createTargetState();
 
   let requestedPelvis: Vec2 = { x: 0, y: 0 };
+  const proxyForward = proxyForwardFor(pose);
   let contactPoint: ContactPoint | null = null;
   /** A won or lost outcome, held until its impact has been reviewed. */
   let pendingResult: GamePhase | null = null;
@@ -275,7 +282,7 @@ export function createGameEngine(options: EngineOptions): GameEngine {
     return {
       x: body.position.x,
       y: pose.anchorHeight + body.position.y,
-      z: pelvis.y * DEPTH_TO_Z + PROXY_FORWARD
+      z: pelvis.y * DEPTH_TO_Z + proxyForward
     };
   }
 
@@ -287,7 +294,7 @@ export function createGameEngine(options: EngineOptions): GameEngine {
     return {
       x: cx + vx * lookahead,
       y: cy + vy * lookahead,
-      z: pelvis.y * DEPTH_TO_Z + PROXY_FORWARD
+      z: pelvis.y * DEPTH_TO_Z + proxyForward
     };
   }
 
