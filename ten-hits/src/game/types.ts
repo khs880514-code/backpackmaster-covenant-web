@@ -192,6 +192,14 @@ export interface ProxySnapshot {
   core: number;
   /** Null until something has actually landed on this side. */
   imprint: ProxyImprint | null;
+  /**
+   * How far the shoe has driven this one back toward the bone, in metres.
+   *
+   * Zero unless a shoe is on it right now. The pair gives way before it is
+   * crushed — it is hung on a cord, not bolted down — so this is the part of
+   * the follow-through it escapes with, and the dent is what is left over.
+   */
+  press: number;
   position: Vec2;
 }
 

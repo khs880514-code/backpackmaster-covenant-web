@@ -50,6 +50,14 @@ export interface ContactContext {
   plan: AttackPlan;
 }
 
+/** A shoe's drive through one side: how far it carries, and how sharply. */
+interface CrushDrive {
+  advance: number;
+  escape: number;
+  force: number;
+  pressure: number;
+}
+
 export interface ContactOutcome {
   grade: ImpactGrade;
   contacted: TargetSide;
@@ -83,6 +91,15 @@ const OFFSET_LEAN = 0.35;
 
 /** Where the lightest kick of all stops, in metres past the target. */
 const SHALLOWEST_FOLLOW_THROUGH = 0.045;
+
+/**
+ * How far a contact right on the edge lets the pair slip aside, in metres.
+ *
+ * A whole width of itself: at that point the shoe has gone past rather than
+ * through, which is what a graze is. A contact through the middle gets none
+ * of this and is crushed where it sits.
+ */
+const ESCAPE_SPAN = 0.056;
 
 /** How deeply each grade presses before power and placement scale it. */
 /**
@@ -333,6 +350,9 @@ export function createGameEngine(options: EngineOptions): GameEngine {
     left: null,
     right: null
   };
+  /** What the shoe currently on each side is doing to it, while it is on it. */
+  const drives: Record<TargetSide, CrushDrive | null> = { left: null, right: null };
+  const pressed: Record<TargetSide, number> = { left: 0, right: 0 };
   let pelvis: Vec2 = { x: 0, y: 0 };
   let drift: Vec2 = { x: 0, y: 0 };
 
@@ -442,6 +462,96 @@ export function createGameEngine(options: EngineOptions): GameEngine {
   }
 
   /**
+   * What this blow is going to do to one side, as the shoe drives through it.
+   *
+   * The dent used to be a number set the instant the strike ended and then
+   * left to decay, which is why it read as a canned effect played after the
+   * fact rather than as the shoe doing something. This is the drive itself,
+   * and the dent is read off it frame by frame while the shoe is still
+   * arriving.
+   */
+  function crushDrive(grade: ImpactGrade, target: Vec3): CrushDrive {
+    const reach = TARGET_RADIUS * shoe.contactWidth + 0.022;
+    const offset = Math.hypot(
+      target.x - footWorld.x,
+      target.y - footWorld.y,
+      target.z - footWorld.z
+    );
+    // A contact through the middle has nowhere to send it; one on the edge
+    // lets it slip aside, and most of the drive goes past rather than into it.
+    const squarely = 1 - Math.min(1, offset / Math.max(1e-6, reach));
+    return {
+      advance:
+        followThroughDepth(power.level) *
+        GRADE_PRESS[grade] *
+        (0.55 + squarely * 0.45),
+      // How far it gets out of the way before it is caught. A contact through
+      // the middle has nowhere to send it and it is crushed where it sits; one
+      // on the edge lets it slip a whole width aside, and most of the drive
+      // goes past rather than into it.
+      escape: ESCAPE_SPAN * (1 - squarely),
+      // How hard what is caught gets squeezed. Reach flattens off with power —
+      // soft tissue does not stop a foot, so even a light kick gets most of
+      // the way to the bone — but what happens to what is trapped there does
+      // not. This is the part that keeps climbing.
+      force: 0.34 + ((Math.min(10, Math.max(1, power.level)) - 1) / 9) * 0.66,
+      pressure: shoe.localPressure
+    };
+  }
+
+  /**
+   * How deeply one side is dented by the time the shoe has driven this far
+   * through it, and how far it has been carried back in the meantime.
+   *
+   * It is caught between the shoe and the bone, so what is dented is whatever
+   * part of the drive it could not get out of the way of. A kick that never
+   * arrives leaves no mark, and one that only catches the edge sends it aside
+   * with its shape intact — which is what a graze is.
+   */
+  function crushAt(drive: CrushDrive, progress: number): { depth: number; press: number } {
+    const travelled = drive.advance * Math.min(1, Math.max(0, progress));
+    // Whatever the shoe drove that the pair could not get out of the way of.
+    const caught = Math.max(0, travelled - drive.escape);
+    return {
+      depth: Math.min(1, (caught / proxyForward) * drive.force * drive.pressure),
+      // And it is carried back toward the bone in the meantime, as far as
+      // there is room for it to go.
+      press: Math.min(travelled, Math.max(0, proxyForward - TARGET_RADIUS * 2))
+    };
+  }
+
+  /** Presses each dented side to whatever the shoe has reached so far. */
+  function crushProgress(progress: number): void {
+    for (const side of ['left', 'right'] as const) {
+      const drive = drives[side];
+      const mark = imprints[side];
+      if (!drive || !mark) continue;
+      const now = crushAt(drive, progress);
+      // Only ever deeper while the shoe is still going in.
+      mark.depth = Math.max(mark.depth, now.depth);
+      pressed[side] = now.press;
+    }
+  }
+
+  /** Lets each dent rise back toward the crush that will not come out. */
+  function relaxImprints(dt: number): void {
+    for (const side of ['left', 'right'] as const) {
+      const mark = imprints[side];
+      if (!mark) continue;
+      // Settles onto the core, from whichever side it is on. Deeper than the
+      // core, the surface springs back to it; shallower, it sinks onto it —
+      // the core has been crushed that far and the surface lies over it, so
+      // it cannot stay rounder than what it is sitting on.
+      const core = Math.min(1, Math.max(0, (side === 'left' ? left : right).permanent));
+      const step = IMPRINT_RELAX * dt;
+      mark.depth =
+        mark.depth > core
+          ? Math.max(core, mark.depth - step)
+          : Math.min(core, mark.depth + step);
+    }
+  }
+
+  /**
    * Stores which way the shoe pressed into one side, as a unit direction.
    *
    * It is the direction the foot was *travelling*, not the offset from the
@@ -450,42 +560,6 @@ export function createGameEngine(options: EngineOptions): GameEngine {
    * essentially sideways — which dented the pair edge-on to the camera, where
    * nothing could be seen of it. The travel direction is the one that presses.
    */
-  /**
-   * How hard this one blow presses, 0..1.
-   *
-   * The dent used to be drawn from accumulated damage, which saturates after a
-   * couple of contacts — so a power-1 tap and a power-10 kick left the same
-   * mark. This is the blow itself: its power, its grade, and how squarely it
-   * landed. What the run has cost so far is the core's to carry, not the
-   * surface's.
-   */
-  function strikeDepth(grade: ImpactGrade, target: Vec3): number {
-    const reach = TARGET_RADIUS * shoe.contactWidth + 0.022;
-    const offset = Math.hypot(
-      target.x - footWorld.x,
-      target.y - footWorld.y,
-      target.z - footWorld.z
-    );
-    const squarely = 1 - Math.min(1, offset / Math.max(1e-6, reach));
-    const force = 0.34 + (Math.min(10, Math.max(1, power.level)) - 1) / 9 * 0.66;
-    return Math.min(
-      1,
-      GRADE_PRESS[grade] * force * (0.55 + squarely * 0.45) * shoe.localPressure
-    );
-  }
-
-  /** Lets each dent rise back toward the crush that will not come out. */
-  function relaxImprints(dt: number): void {
-    for (const side of ['left', 'right'] as const) {
-      const mark = imprints[side];
-      if (!mark) continue;
-      const floor = Math.min(1, Math.max(0, (side === 'left' ? left : right).permanent));
-      if (mark.depth > floor) {
-        mark.depth = Math.max(floor, mark.depth - IMPRINT_RELAX * dt);
-      }
-    }
-  }
-
   function recordImprint(side: TargetSide, target: Vec3, currentPlan: AttackPlan): void {
     const [, , approach, end] = currentPlan.path;
     const tx = end.x - approach.x;
@@ -505,12 +579,20 @@ export function createGameEngine(options: EngineOptions): GameEngine {
     const x = tx / travel + ox * lean;
     const y = ty / travel + oy * lean;
     const z = tz / travel + oz * lean;
-    const length = Math.hypot(x, y, z) || 1;
+
+    // Into the pair's own frame. The direction is measured in world axes, but
+    // the pair is laid over with the figure and the dent is pressed into its
+    // local geometry — so for a pose that is lying down, a direction left in
+    // world axes puts the dent on the wrong face of it entirely. No change at
+    // all for a pose standing up, where the two frames are the same.
+    const localY = y * tiltCos + z * tiltSin;
+    const localZ = -y * tiltSin + z * tiltCos;
+    const length = Math.hypot(x, localY, localZ) || 1;
 
     imprints[side] = {
       x: x / length,
-      y: y / length,
-      z: z / length,
+      y: localY / length,
+      z: localZ / length,
       width: contactBreadth(),
       depth: 0
     };
@@ -560,16 +642,18 @@ export function createGameEngine(options: EngineOptions): GameEngine {
     // Where the shoe actually met the pair, so the camera can frame the spot
     // rather than the body's midline.
     const struck = targetWorld(outcome.contacted);
+    drives.left = null;
+    drives.right = null;
     if (outcome.grade !== 'miss') {
+      // The drive is set up here; nothing is dented yet. What the dent becomes
+      // is read off the shoe's position while it is still on its way in.
       recordImprint(outcome.contacted, struck, plan);
-      const pressed = imprints[outcome.contacted];
-      if (pressed) pressed.depth = strikeDepth(outcome.grade, struck);
+      drives[outcome.contacted] = crushDrive(outcome.grade, struck);
       if (outcome.grade === 'center-compression') {
         const other = outcome.contacted === 'left' ? 'right' : 'left';
         const far = targetWorld(other);
         recordImprint(other, far, plan);
-        const also = imprints[other];
-        if (also) also.depth = strikeDepth(outcome.grade, far);
+        drives[other] = crushDrive(outcome.grade, far);
       }
     }
     contactPoint =
@@ -610,6 +694,12 @@ export function createGameEngine(options: EngineOptions): GameEngine {
         phaseTime = 0;
         lastGrade = null;
         contactPoint = null;
+        // The shoe is off it. What is left springs back toward the crush the
+        // core has taken, which is the recovery's job from here.
+        drives.left = null;
+        drives.right = null;
+        pressed.left = 0;
+        pressed.right = 0;
         break;
       case 'recovery':
         beginTelegraph();
@@ -648,9 +738,12 @@ export function createGameEngine(options: EngineOptions): GameEngine {
     } else if (run.phase === 'recovery' || run.phase === 'impact') {
       left = recoverTarget(left, dt);
       right = recoverTarget(right, dt);
-      relaxImprints(dt);
       if (run.phase === 'impact' && plan) {
-        // Carry the shoe through the contact rather than parking it there.
+        // Carry the shoe through the contact rather than parking it there,
+        // and let what it is doing to the pair follow from where it has got
+        // to. This is the whole of the impact: the shoe drives the pair back
+        // against the bone, and the dent is however much of the drive the
+        // pair could not get out of the way of.
         const drive = Math.min(1, phaseTime / impactHold(lastGrade, pendingResult !== null));
         const end = sampleFootPath(plan, 1);
         footWorld = {
@@ -659,6 +752,9 @@ export function createGameEngine(options: EngineOptions): GameEngine {
           z: end.z - followThroughDepth(power.level) * drive
         };
         updateInstep(plan);
+        crushProgress(drive);
+      } else {
+        relaxImprints(dt);
       }
       if (run.phase === 'recovery' && plan) {
         const ease = Math.min(1, phaseTime / Math.max(dt, plan.recoveryDuration));
@@ -684,6 +780,7 @@ export function createGameEngine(options: EngineOptions): GameEngine {
       cracking: crackingFactor(state),
       core: Math.min(1, Math.max(0, state.permanent)),
       imprint: imprints[side] ? { ...imprints[side]! } : null,
+      press: pressed[side],
       position: { x: body.position.x, y: body.position.y }
     };
   }

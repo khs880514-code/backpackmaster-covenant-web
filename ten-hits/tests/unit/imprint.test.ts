@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { describe, expect, it } from 'vitest';
 import { pressImprint, taperProxy } from '../../src/render/targets';
+import { createGameEngine } from '../../src/game/engine';
 import type { ProxyImprint } from '../../src/game/types';
 
 const RADIUS = 0.028;
@@ -214,5 +215,41 @@ describe('the proxy resting shape', () => {
     // Narrower where the cord takes the weight, and the volume stays low.
     expect(topAfter).toBeLessThan(topBefore * 0.85);
     expect(bottomAfter).toBeGreaterThan(bottomBefore * 0.95);
+  });
+});
+
+describe('which way the dent faces when the pose is lying down', () => {
+  /** The dent direction from the first graded contact of a run. */
+  function firstDirection(pose: 'standing-front' | 'spread-standing') {
+    const engine = createGameEngine({ pose, shoe: 'pump', power: 8, seed: 4 });
+    engine.start();
+    for (let i = 0; i < 60 * 200; i += 1) {
+      const snapshot = engine.update(1 / 60);
+      if (snapshot.phase !== 'impact') continue;
+      for (const proxy of snapshot.proxies) {
+        if (proxy.imprint) return proxy.imprint;
+      }
+    }
+    throw new Error('no contact was reviewed');
+  }
+
+  it('presses into the face the shoe arrived at, whichever way the pair lies', () => {
+    // The direction is measured in world axes but pressed into the pair's own
+    // geometry. Standing, those are the same frame. Face down the pair is laid
+    // over with the figure, so a direction left in world axes dents the wrong
+    // face of it — the shoe comes in along the body and the mark appears
+    // underneath.
+    const upright = firstDirection('standing-front');
+    const prone = firstDirection('spread-standing');
+
+    // The kick drives up and in, so standing it presses mostly along depth.
+    expect(Math.abs(upright.z)).toBeGreaterThan(Math.abs(upright.y));
+    // Laid down a quarter turn, that same arrival is along the pair's length.
+    expect(Math.abs(prone.y)).toBeGreaterThan(Math.abs(prone.z));
+
+    // Either way it is a unit direction, which is what the renderer presses.
+    for (const mark of [upright, prone]) {
+      expect(Math.hypot(mark.x, mark.y, mark.z)).toBeCloseTo(1, 6);
+    }
   });
 });

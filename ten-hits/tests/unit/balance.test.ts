@@ -184,6 +184,7 @@ describe('damage progression', () => {
         squash,
         cracking: 0,
         imprint: null,
+        press: 0,
         core: 0,
         position: { x: 0, y: 0 }
       });
@@ -455,24 +456,167 @@ describe('the strike arc', () => {
 });
 
 describe('the kick that lands', () => {
-  /** The deepest dent from the first graded contact of a run. */
+  /**
+   * The deepest dent the first graded contact of a run reaches.
+   *
+   * Sampled across the whole impact, not at its first frame: the dent is no
+   * longer a value set the instant the strike ends. It grows while the shoe is
+   * still driving in, so the depth at the start of the impact is zero for
+   * every power and tells you nothing.
+   */
   function firstDent(power: number, shoe: 'stiletto' | 'pump' | 'platform') {
     const engine = createGameEngine({ pose: 'standing-front', shoe, power, seed: 4 });
+    engine.start();
+    let previous = 'setup';
+    let deepest = 0;
+    let grade: ReturnType<typeof engine.snapshot>['lastGrade'] = null;
+    for (let i = 0; i < 60 * 200; i += 1) {
+      const snapshot = engine.update(1 / 60);
+      if (snapshot.phase === 'impact') {
+        grade = snapshot.lastGrade;
+        for (const proxy of snapshot.proxies) {
+          if (proxy.imprint) deepest = Math.max(deepest, proxy.imprint.depth);
+        }
+      } else if (previous === 'impact') {
+        return { depth: deepest, grade };
+      }
+      previous = snapshot.phase;
+    }
+    return { depth: deepest, grade };
+  }
+
+  it('does not dent anything before the shoe has driven into it', () => {
+    // The complaint this answers: it went flat without being hit. The dent is
+    // geometry now — the gap left between the shoe and the bone — so there is
+    // nothing to see until that gap is narrower than the pair is wide.
+    const engine = createGameEngine({
+      pose: 'standing-front',
+      shoe: 'stiletto',
+      power: 10,
+      seed: 4
+    });
     engine.start();
     let previous = 'setup';
     for (let i = 0; i < 60 * 200; i += 1) {
       const snapshot = engine.update(1 / 60);
       if (snapshot.phase === 'impact' && previous !== 'impact') {
-        let deepest = 0;
         for (const proxy of snapshot.proxies) {
-          if (proxy.imprint) deepest = Math.max(deepest, proxy.imprint.depth);
+          // A frame in, the shoe has barely moved and nothing is crushed.
+          expect(proxy.imprint?.depth ?? 0).toBeLessThan(0.01);
         }
-        return { depth: deepest, grade: snapshot.lastGrade };
+        return;
       }
       previous = snapshot.phase;
     }
-    return { depth: 0, grade: null };
-  }
+    throw new Error('no contact was reviewed');
+  });
+
+  it('drives the pair back before it crushes it', () => {
+    // It is hung on a cord, not bolted down: the shoe shoves it toward the
+    // bone, and only what it cannot escape becomes a dent.
+    const engine = createGameEngine({
+      pose: 'standing-front',
+      shoe: 'pump',
+      power: 9,
+      seed: 4
+    });
+    engine.start();
+    let shovedBeforeDenting = false;
+    let denting = false;
+    for (let i = 0; i < 60 * 200; i += 1) {
+      const snapshot = engine.update(1 / 60);
+      if (snapshot.phase !== 'impact') continue;
+      for (const proxy of snapshot.proxies) {
+        const depth = proxy.imprint?.depth ?? 0;
+        if (proxy.press > 0 && depth === 0) shovedBeforeDenting = true;
+        if (depth > 0) denting = true;
+      }
+      if (denting) break;
+    }
+    expect(shovedBeforeDenting).toBe(true);
+    expect(denting).toBe(true);
+  });
+
+  it('deepens the dent while the shoe is still going in', () => {
+    const engine = createGameEngine({
+      pose: 'standing-front',
+      shoe: 'stiletto',
+      power: 10,
+      seed: 4
+    });
+    engine.start();
+    const trace: number[] = [];
+    for (let i = 0; i < 60 * 200; i += 1) {
+      const snapshot = engine.update(1 / 60);
+      if (snapshot.phase !== 'impact') {
+        if (trace.length > 0) break;
+        continue;
+      }
+      let deepest = 0;
+      for (const proxy of snapshot.proxies) {
+        if (proxy.imprint) deepest = Math.max(deepest, proxy.imprint.depth);
+      }
+      trace.push(deepest);
+    }
+    // Long enough to watch, and it only ever goes one way while the shoe is
+    // still arriving.
+    expect(trace.length).toBeGreaterThan(30);
+    for (let i = 1; i < trace.length; i += 1) {
+      expect(trace[i]!).toBeGreaterThanOrEqual(trace[i - 1]!);
+    }
+
+    // Spread across the whole hold rather than crammed into its last moments.
+    // The point of holding the impact open is to be able to watch the shoe do
+    // it; a crush that happens in the last few frames is the snap it replaced.
+    const final = trace[trace.length - 1]!;
+    expect(final).toBeGreaterThan(0.3);
+    expect(trace[Math.floor(trace.length / 2)]!).toBeGreaterThan(final * 0.3);
+    expect(trace[Math.floor(trace.length / 4)]!).toBeGreaterThan(0);
+  });
+
+  it('holds the hit that ends the run open longest of all', () => {
+    // The one contact a player most wants to understand used to get no review
+    // at all: a win or a loss skipped straight to the result screen.
+    for (let seed = 1; seed < 40; seed += 1) {
+      const engine = createGameEngine({
+        pose: 'standing-front',
+        shoe: 'stiletto',
+        power: 9,
+        seed
+      });
+      engine.start();
+      let frames = 0;
+      let grew = 0;
+      let deepest = [0, 0];
+      for (let i = 0; i < 60 * 400; i += 1) {
+        const snapshot = engine.update(1 / 60);
+        if (snapshot.phase === 'impact') {
+          frames += 1;
+          // Per side: only the side the shoe is on moves, and the other one
+          // is already carrying whatever an earlier attack left on it.
+          if (
+            snapshot.proxies.some(
+              (proxy, side) => (proxy.imprint?.depth ?? 0) > deepest[side]! + 1e-9
+            )
+          ) {
+            grew += 1;
+          }
+          deepest = snapshot.proxies.map((proxy) => proxy.imprint?.depth ?? 0);
+          continue;
+        }
+        if (snapshot.phase === 'lost') {
+          // Two seconds and more of it, and the dent moving through most of it.
+          expect(frames / 60).toBeGreaterThan(2);
+          expect(grew).toBeGreaterThan(frames / 2);
+          return;
+        }
+        frames = 0;
+        grew = 0;
+        deepest = [0, 0];
+      }
+    }
+    throw new Error('no run ended in a rupture');
+  });
 
   it('drives through to the pubis, and not only when kicked hard', () => {
     // Soft tissue on a cord does not stop a foot; it is displaced and the shoe
@@ -520,15 +664,13 @@ describe('the kick that lands', () => {
     engine.start();
 
     let struck = 0;
-    let previous = 'setup';
     for (let i = 0; i < 60 * 200; i += 1) {
       const snapshot = engine.update(1 / 60);
-      if (snapshot.phase === 'impact' && previous !== 'impact') {
+      if (snapshot.phase === 'impact') {
         for (const proxy of snapshot.proxies) {
           if (proxy.imprint) struck = Math.max(struck, proxy.imprint.depth);
         }
       }
-      previous = snapshot.phase;
       if (struck > 0 && snapshot.phase === 'telegraph') {
         // By the next wind-up the surface has recovered, but not past the
         // permanent crush underneath it.

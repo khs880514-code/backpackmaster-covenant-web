@@ -65,6 +65,15 @@ const IMPRINT_LIMIT = 0.92;
  * dent. It is not pressed in place: the contact shoves it to the far wall.
  */
 const CORE_SHIFT = 0.7;
+
+/**
+ * How quickly the collapse follows the dent. Over one, because a side that has
+ * gone is past holding its shape before the shoe has finished pressing.
+ */
+const COLLAPSE_GAIN = 1.8;
+
+const FADE_FROM = new THREE.Color();
+const FADE_TO = new THREE.Color();
 /**
  * How much deeper the narrowest shoe drives than the broadest: the narrowest
  * gets this multiplier and the broadest its reciprocal-ish counterpart, so the
@@ -273,6 +282,16 @@ export function createTargetOverlay(): TargetOverlay {
   );
 
   let inspecting = false;
+  /**
+   * How far the collapse has got, once this side has gone.
+   *
+   * It used to be instant: the moment the contact resolved, the proxy dropped
+   * to its collapsed shape and colour — before the shoe that did it had
+   * finished arriving. So the one hit worth watching was over before it could
+   * be seen. The collapse now follows the dent the shoe is pressing, and only
+   * ever goes one way.
+   */
+  let collapse = 0;
 
   return {
     group,
@@ -283,12 +302,25 @@ export function createTargetOverlay(): TargetOverlay {
       if (enabled) material.opacity = INSPECT_OPACITY;
     },
     apply(proxy: ProxySnapshot): void {
-      material.color.setHex(STAGE_COLORS[proxy.colorStage] ?? STAGE_COLORS[0]);
-      material.emissive.setHex(STAGE_EMISSIVE[proxy.colorStage] ?? STAGE_EMISSIVE[0]);
+      const gone = proxy.stage === 'ruptured';
+      if (gone) {
+        collapse = Math.max(
+          collapse,
+          Math.min(1, Math.max(0, proxy.imprint?.depth ?? 1) * COLLAPSE_GAIN)
+        );
+      }
+      // Coming apart is read off the shoe pressing, so the last stage arrives
+      // as the crush does rather than the instant the contact is scored.
+      FADE_FROM.setHex(STAGE_COLORS[3] ?? STAGE_COLORS[0]);
+      FADE_TO.setHex(STAGE_COLORS[proxy.colorStage] ?? STAGE_COLORS[0]);
+      material.color.copy(gone ? FADE_FROM.lerp(FADE_TO, collapse) : FADE_TO);
+      FADE_FROM.setHex(STAGE_EMISSIVE[3] ?? STAGE_EMISSIVE[0]);
+      FADE_TO.setHex(STAGE_EMISSIVE[proxy.colorStage] ?? STAGE_EMISSIVE[0]);
+      material.emissive.copy(gone ? FADE_FROM.lerp(FADE_TO, collapse) : FADE_TO);
       material.opacity = inspecting
         ? INSPECT_OPACITY
-        : proxy.stage === 'ruptured'
-          ? 0.92
+        : gone
+          ? BASE_OPACITY + (0.92 - BASE_OPACITY) * collapse
           : BASE_OPACITY - proxy.cracking * 0.06;
       // Abuse dulls the surface further, so a spent proxy stops catching light.
       material.roughness = 0.78 + Math.min(0.18, proxy.cracking * 0.18);
@@ -299,10 +331,15 @@ export function createTargetOverlay(): TargetOverlay {
       const flatten = 1 - squash * 0.35;
       const bulge = 1 / Math.sqrt(flatten);
       group.scale.set(bulge, flatten, bulge);
-      if (proxy.stage === 'ruptured') {
+      if (gone) {
         // Collapsed: it gives up its form and settles, without any tear
-        // geometry, spill, or wound. It simply stops holding itself up.
-        group.scale.set(bulge * 1.22, flatten * 0.34, bulge * 1.16);
+        // geometry, spill, or wound. It simply stops holding itself up — and
+        // it does so while the shoe is still pressing, not before it lands.
+        group.scale.set(
+          bulge * (1 + 0.22 * collapse),
+          flatten * (1 - 0.66 * collapse),
+          bulge * (1 + 0.16 * collapse)
+        );
       }
       // Permanent crushing: the core flattens and darkens, and only becomes
       // visible once there is something to see. It never springs back.
@@ -345,10 +382,21 @@ export function createTargetOverlay(): TargetOverlay {
       const sized = 1 - lean * 0.5;
       mesh.scale.setScalar(sized);
       core.scale.multiplyScalar(sized);
+      // Driven back by whatever is on it. The shoe shoves it toward the bone
+      // before it crushes it against it, so it gives way first and only then
+      // starts to dent — which is the difference between a kick arriving and
+      // a dent being switched on.
+      const shove = proxy.imprint ? Math.max(0, proxy.press) : 0;
+      const along =
+        proxy.imprint && shove > 0
+          ? Math.hypot(proxy.imprint.x, proxy.imprint.y, proxy.imprint.z) || 1
+          : 1;
       group.position.set(
-        proxy.position.x,
-        proxy.position.y + lean * TARGET_RADIUS * 0.9,
-        0
+        proxy.position.x + (proxy.imprint ? (proxy.imprint.x / along) * shove : 0),
+        proxy.position.y +
+          lean * TARGET_RADIUS * 0.9 +
+          (proxy.imprint ? (proxy.imprint.y / along) * shove : 0),
+        proxy.imprint ? (proxy.imprint.z / along) * shove : 0
       );
     },
     dispose(): void {

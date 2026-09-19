@@ -103,6 +103,7 @@ describe('applySnapshot', () => {
       squash: 0.8,
       cracking: 0.6,
       imprint: null,
+      press: 0,
       core: 0.5,
       position: { x: 0, y: 0 }
     });
@@ -462,5 +463,46 @@ describe('aiming the authored kick', () => {
     const before = contact().clone();
     rig.aimAttackClip({ x: 0.18, y: 0.5, z: 0.6 }, 0);
     expect(contact().distanceTo(before)).toBeLessThan(1e-6);
+  });
+});
+
+describe('coming apart while the shoe is still pressing', () => {
+  function ruptured(depth: number) {
+    return {
+      side: 'left' as const,
+      stage: 'ruptured' as const,
+      colorStage: 4 as const,
+      squash: 1,
+      cracking: 1,
+      core: 1,
+      press: 0,
+      imprint: { x: 0, y: 0, z: -1, width: 0.2, depth },
+      position: { x: 0, y: 0 }
+    };
+  }
+
+  it('collapses as the dent deepens rather than the moment it is scored', () => {
+    // It used to drop to its collapsed shape and colour on the first frame of
+    // the impact, before the shoe that did it had finished arriving — so the
+    // one hit worth watching was over before it could be seen.
+    const overlay = createTargetOverlay();
+    overlay.apply(ruptured(0));
+    const standing = overlay.group.scale.y;
+
+    overlay.apply(ruptured(0.3));
+    const partway = overlay.group.scale.y;
+    expect(partway).toBeLessThan(standing);
+
+    overlay.apply(ruptured(1));
+    expect(overlay.group.scale.y).toBeLessThan(partway);
+  });
+
+  it('never stands back up once it has gone', () => {
+    const overlay = createTargetOverlay();
+    overlay.apply(ruptured(1));
+    const gone = overlay.group.scale.y;
+    // The dent settles back toward the core afterwards; the collapse does not.
+    overlay.apply(ruptured(0.1));
+    expect(overlay.group.scale.y).toBeCloseTo(gone, 6);
   });
 });
