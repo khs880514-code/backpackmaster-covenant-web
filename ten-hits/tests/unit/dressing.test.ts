@@ -84,12 +84,19 @@ describe('dressing the attacker', () => {
   it('leaves everything else on the rig alone', () => {
     const target = rig();
     const body = skinned('DarkElf_Visual');
-    const ankle = skinned('Elf_P01_Ankle_R');
-    target.add(body, ankle);
+    target.add(body);
     dress(target, wearable('Wearable_P05_R_Plane.001'), BUILT_IN_SHOE);
-
     expect(body.visible).toBe(true);
-    expect(ankle.visible).toBe(true);
+  });
+
+  it('takes the old shoe ankle pieces off with the shoe', () => {
+    // They belong to the pair the clip was exported in and are bright red, so
+    // leaving them put the old straps on top of whichever shoe was chosen.
+    const target = rig();
+    const ankle = skinned('Elf_P01_Ankle_R');
+    target.add(ankle);
+    dress(target, wearable('Wearable_P05_R_Plane.001'), BUILT_IN_SHOE);
+    expect(ankle.visible).toBe(false);
   });
 
   it('puts the rig back exactly as it was', () => {

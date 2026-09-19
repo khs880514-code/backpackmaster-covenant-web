@@ -59,7 +59,61 @@ describe('resolveImpact', () => {
         right: { fatigue: 0.5, permanent: 0.5 }
       })
     );
-    expect(result.ruptured).toBe(true);
+    // One side going is a loss of half the pair, not the end of the run.
+    expect(result.ruptureSide).not.toBeNull();
+    expect(result.ruptured).toBe(false);
+  });
+
+  it('ends the run only once both sides have gone', () => {
+    const first = resolveImpact(
+      fixture({
+        grade: 'center-compression',
+        anger: 5,
+        random: 0,
+        left: { fatigue: 0.5, permanent: 0.5 },
+        right: { fatigue: 0.5, permanent: 0.5 }
+      })
+    );
+    expect(first.ruptured).toBe(false);
+
+    const second = resolveImpact(
+      fixture({
+        grade: 'center-compression',
+        anger: 5,
+        random: 0,
+        left: first.left,
+        right: first.right
+      })
+    );
+    expect(second.left.ruptured && second.right.ruptured).toBe(true);
+    expect(second.ruptured).toBe(true);
+  });
+
+  it('turns on whatever is left once one side has gone', () => {
+    // Everything the pair used to share lands on the survivor, or standing
+    // still would simply outlast the run.
+    const lonely = resolveImpact(
+      fixture({
+        grade: 'single-compression',
+        contacted: 'right',
+        anger: 0,
+        random: 0.5,
+        left: { fatigue: 0.9, permanent: 0.9, ruptured: true },
+        right: { fatigue: 0.3, permanent: 0.3 }
+      })
+    );
+    const paired = resolveImpact(
+      fixture({
+        grade: 'single-compression',
+        contacted: 'right',
+        anger: 0,
+        random: 0.5,
+        left: { fatigue: 0.9, permanent: 0.9 },
+        right: { fatigue: 0.3, permanent: 0.3 }
+      })
+    );
+    expect(lonely.right.ruptured).toBe(true);
+    expect(paired.right.ruptured).toBe(false);
   });
 
   it('leaves both sides untouched on a miss', () => {

@@ -100,6 +100,17 @@ const PROXY_STAGES: ProxyStage[] = [
   'ruptured'
 ];
 
+/**
+ * How much more easily the second side goes once the first has.
+ *
+ * The run ends when both are gone rather than the first, which on its own made
+ * standing still survivable — and a game where doing nothing wins is not one
+ * worth dodging in. Concentrating the damage restores the pressure without
+ * taking the first rupture back to being fatal.
+ */
+const LAST_SIDE_RUPTURE_BONUS = 0.4;
+const LAST_SIDE_GATE = 0.55;
+
 export function createTargetState(): TargetState {
   return {
     reversible: 0,
@@ -204,9 +215,19 @@ export function resolveImpact(input: ImpactInput): ImpactResult {
       : [{ side: 'right', state: right }];
 
   let ruptureSide: TargetSide | null = null;
-  const worst = candidates.reduce((a, b) => (b.state.fatigue > a.state.fatigue ? b : a));
+  // A side that has already gone cannot go again, so only the intact ones are
+  // in the running.
+  const intact = candidates.filter((c) => !c.state.ruptured);
+  const worst =
+    intact.length > 0
+      ? intact.reduce((a, b) => (b.state.fatigue > a.state.fatigue ? b : a))
+      : null;
 
-  if (Number.isFinite(rule.ruptureGate) && worst.state.fatigue > rule.ruptureGate) {
+  // Everything the pair used to share now lands on whatever is left of it.
+  const alone = worst !== null && (left.ruptured || right.ruptured);
+  const gate = alone ? rule.ruptureGate * LAST_SIDE_GATE : rule.ruptureGate;
+
+  if (worst && Number.isFinite(gate) && worst.state.fatigue > gate) {
     const chance = Math.min(
       0.95,
       Math.max(
@@ -214,7 +235,8 @@ export function resolveImpact(input: ImpactInput): ImpactResult {
         rule.ruptureBase +
           input.anger * 0.08 +
           worst.state.fatigue * 0.35 +
-          input.shoe.localPressure * 0.08
+          input.shoe.localPressure * 0.08 +
+          (alone ? LAST_SIDE_RUPTURE_BONUS : 0)
       )
     );
     if (input.random() < chance) ruptureSide = worst.side;
@@ -226,7 +248,9 @@ export function resolveImpact(input: ImpactInput): ImpactResult {
   return {
     left: withColorStage(left),
     right: withColorStage(right),
-    ruptured: ruptureSide !== null,
+    // The run ends when there is nothing left to defend. One side going is a
+    // loss of half the pair, not the end of it.
+    ruptured: left.ruptured && right.ruptured,
     ruptureSide
   };
 }

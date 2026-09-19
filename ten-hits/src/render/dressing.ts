@@ -13,8 +13,14 @@ import * as THREE from 'three';
  * the clip plays exactly as it did before.
  */
 
-/** The shoes the kick clips were exported already wearing. */
-export const BUILT_IN_SHOE = /^Elf_Fitted_P01_/;
+/**
+ * The shoes the kick clips were exported already wearing.
+ *
+ * The ankle pieces belong to that same pair and have to go with it: they are
+ * bright red, so leaving them behind put the old shoe's straps on top of every
+ * other pair the player chose.
+ */
+export const BUILT_IN_SHOE = /^Elf_(Fitted_P01_|P01_Ankle_)/;
 
 /**
  * The attacker's own body as her kick clip carries it.
