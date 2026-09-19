@@ -1,7 +1,9 @@
 import * as THREE from 'three';
 import { createGltfLoader } from './gltf';
 import { parseSelectionManifest, type AttackTiming } from './selection-manifest';
-import type { GamePhase, PoseId } from '../game/types';
+import { POSES } from '../game/config';
+import { targetRestPoint } from '../game/engine';
+import type { GamePhase, PoseId, Vec3 } from '../game/types';
 
 /**
  * Authored attack clips: a rigged attacker plus the kick animation authored for
@@ -15,6 +17,27 @@ export interface AttackClip {
   scene: THREE.Group;
   animation: THREE.AnimationClip | null;
   timing: AttackTiming;
+  /**
+   * Where the kick was aimed when the scene was aligned, and where the scene
+   * had to sit for it to land there. Moving the scene by the difference
+   * between a new aim and this one carries the contact with it.
+   */
+  alignment: StrikeAlignment | null;
+}
+
+export interface StrikeAlignment {
+  /** The point the kick was stood over, in world metres. */
+  aimedAt: Vec3;
+  /** The scene position that stands her there. */
+  base: THREE.Vector3;
+  /** Which way the shoe is travelling as it arrives, as a unit vector. */
+  travel: Vec3;
+  /**
+   * How far above the strike bone the shoe actually strikes, in metres. The
+   * authored clips are consistent about this: 3.5cm, and 3.4cm below for the
+   * one that stamps downward instead.
+   */
+  standoff: number;
 }
 
 export interface AttackClipLibrary {
@@ -45,7 +68,12 @@ const PELVIS_GUIDE = 'POSTURE_GUIDE_Pelvis';
  */
 const STUDIO_PROP = /^Plane[._]?\d*$/;
 /** The bone the manifest names as the end of the strike chain. */
-const STRIKE_BONE = 'foot.R';
+export const STRIKE_BONE = 'foot.R';
+/**
+ * The rest of that chain, hip first. Turning these two is what aims the kick:
+ * the hip points the leg at the target and the knee makes up the distance.
+ */
+export const STRIKE_CHAIN = ['thigh.R', 'shin.R'] as const;
 
 /**
  * Compares names the way they survive the loader.
@@ -55,7 +83,7 @@ const STRIKE_BONE = 'foot.R';
  * as `footR`, and `Plane.001` as `Plane001`. Comparing the stripped forms
  * matches either spelling without having to know which one a file used.
  */
-function sameName(a: string, b: string): boolean {
+export function sameName(a: string, b: string): boolean {
   const strip = (value: string): string => value.replace(/[._\s-]/g, '').toLowerCase();
   return strip(a) === strip(b);
 }
@@ -85,48 +113,98 @@ export function alignToTargetGuide(scene: THREE.Group): boolean {
   return true;
 }
 
+/** How many frames back the travel direction is measured over. */
+const TRAVEL_FRAMES = 4;
+
 /**
- * Aligns a clip that carries no target guide, by where its kick actually lands.
+ * How much slack to leave once she has had to step in at all, in metres.
  *
- * Not every authored clip was staged against a stand-in figure — the run-in
- * kick has a studio floor and wall instead — and with no guide to slide onto
- * the origin the scene was left exactly where it was authored, metres from the
- * player. So the contact frame is sampled and the striking foot read off the
- * rig at that instant: that is the point the animator aimed at the target, and
- * putting it on the origin lands the kick where the guide would have.
+ * Enough for the player to pull the pair away and still be followed: the aim
+ * goes wherever the pair has swung to, so a stance with no slack in it can
+ * reach the resting place and nothing else. Measured, stepping in a pose that
+ * already reaches costs accuracy rather than buying it, so this only ever
+ * applies to one that does not.
  */
-export function alignToStrikeContact(
+const REACH_HEADROOM = 0.06;
+
+/**
+ * Stands the attacker at the right distance and records what her kick hits.
+ *
+ * The scene used to be slid until the strike bone sat on the world origin —
+ * the floor under the player's midline. But the pair does not hang at the
+ * origin, so every kick arrived short: measured across the delivered clips,
+ * between 26cm away in the best pose and 66cm in the worst. That is why it did
+ * not look like it was connecting. It was not.
+ *
+ * Only the ground plan is corrected here. Lifting her to meet a target at a
+ * different height would take her feet off the floor — by 31cm in the worst
+ * clip — so the height is left to the leg, which aims at the target frame by
+ * frame and can also follow the player as they dodge.
+ *
+ * `contactHeight` is the authoring manifest's `target_height_m`: the height
+ * the animator aimed this kick at. Against it the strike bone lands a
+ * consistent 3.5cm low on every delivered clip, which is the offset from the
+ * ankle to the part of the shoe that actually arrives.
+ */
+export function alignContactToTarget(
   scene: THREE.Group,
   animation: THREE.AnimationClip | null,
-  timing: AttackTiming
-): boolean {
+  timing: AttackTiming,
+  target: Vec3,
+  contactHeight: number | null
+): StrikeAlignment | null {
   let foot: THREE.Object3D | null = null;
+  let hipBone: THREE.Object3D | null = null;
+  let kneeBone: THREE.Object3D | null = null;
   scene.traverse((node) => {
     if (!foot && sameName(node.name, STRIKE_BONE)) foot = node;
+    if (!hipBone && sameName(node.name, STRIKE_CHAIN[0])) hipBone = node;
+    if (!kneeBone && sameName(node.name, STRIKE_CHAIN[1])) kneeBone = node;
   });
-  if (!foot || !animation) return false;
+  if (!foot || !animation) return null;
+  const ankleBone = foot as THREE.Object3D;
+  const clip = animation;
 
   const mixer = new THREE.AnimationMixer(scene);
-  const action = mixer.clipAction(animation);
+  const action = mixer.clipAction(clip);
   action.play();
   action.paused = true;
-  const contact = timing.contactFrames[0] ?? 0;
-  action.time = Math.min(animation.duration, contact / Math.max(1, timing.fps));
-  mixer.update(0);
 
-  const world = new THREE.Vector3();
+  const fps = Math.max(1, timing.fps);
+  const contact = Math.min(clip.duration, (timing.contactFrames[0] ?? 0) / fps);
+  const ankle = new THREE.Vector3();
+  const before = new THREE.Vector3();
+  const travel = new THREE.Vector3();
+  const hip = new THREE.Vector3();
+  const knee = new THREE.Vector3();
   const box = new THREE.Box3();
   const centre = new THREE.Vector3();
 
-  /** Slides the scene so the contact lands on the origin, at one facing. */
+  /** Poses the rig on a frame and leaves every world matrix current. */
+  function poseAt(seconds: number): void {
+    action.time = Math.max(0, Math.min(clip.duration, seconds));
+    mixer.update(0);
+    scene.updateMatrixWorld(true);
+  }
+
+  /** Slides the scene so the contact lands over the target, at one facing. */
   function place(turn: number): number {
     scene.rotation.y = turn;
     scene.position.set(0, 0, 0);
+
+    poseAt(contact - TRAVEL_FRAMES / fps);
+    ankleBone.getWorldPosition(before);
+    poseAt(contact);
+    ankleBone.getWorldPosition(ankle);
+
+    travel.subVectors(ankle, before);
+    if (travel.lengthSq() < 1e-12) travel.set(0, 0, -1);
+    travel.normalize();
+
+    // Ground plan only: her feet stay on the floor they were authored on.
+    scene.position.set(target.x - ankle.x, 0, target.z - ankle.z);
     scene.updateMatrixWorld(true);
-    (foot as THREE.Object3D).getWorldPosition(world);
-    scene.position.x -= world.x;
-    scene.position.z -= world.z;
-    scene.updateMatrixWorld(true);
+    standIn();
 
     box.makeEmpty();
     scene.traverse((node) => {
@@ -135,20 +213,62 @@ export function alignToStrikeContact(
     return box.isEmpty() ? 0 : box.getCenter(centre).z;
   }
 
+  /**
+   * Brings her in until the target is inside the kicking leg's reach.
+   *
+   * Standing her so the strike bone passes over the target is right in plan
+   * but says nothing about distance, and a clip authored against a target at
+   * another height has to reach further to get down or up to this one.
+   * Measured, the worst pose ended up 4.3cm beyond what the leg spans — so the
+   * kick could not arrive however it was aimed, and stopped short every time.
+   * A step closer costs nothing and keeps her feet on the floor.
+   */
+  function standIn(): void {
+    if (!hipBone || !kneeBone) return;
+    hipBone.getWorldPosition(hip);
+    kneeBone.getWorldPosition(knee);
+    ankleBone.getWorldPosition(ankle);
+    const span = hip.distanceTo(knee) + knee.distanceTo(ankle);
+
+    const rise = hip.y - target.y;
+    const outX = hip.x - target.x;
+    const outZ = hip.z - target.z;
+    const ground = Math.hypot(outX, outZ);
+    if (ground < 1e-6) return;
+    // A stance that already reaches is left exactly as authored.
+    if (Math.hypot(ground, rise) <= span) return;
+
+    const reach = span - REACH_HEADROOM;
+    const allowed = Math.sqrt(Math.max(0, reach * reach - rise * rise));
+    const step = ground - allowed;
+    if (step <= 0) return;
+
+    scene.position.x -= (outX / ground) * step;
+    scene.position.z -= (outZ / ground) * step;
+    scene.updateMatrixWorld(true);
+  }
+
   // Which way round the authored scene faces is not something every clip
   // agrees on, so it is decided rather than assumed: the game puts the
-  // attacker in front of the player on +Z, and the contact sits on the origin
-  // either way, so the turn that leaves her body on +Z is the right one.
+  // attacker in front of the player on +Z, and the contact sits over the
+  // target either way, so the turn that leaves her body on +Z is the right one.
   const turned = place(Math.PI);
   if (turned < 0) place(0);
 
+  const base = scene.position.clone();
+  const heading: Vec3 = { x: travel.x, y: travel.y, z: travel.z };
+  // Where the kick lands relative to the bone that carries it. Measured
+  // against what the animator aimed at, so a clip that declares nothing
+  // simply strikes with the bone itself.
+  const standoff = contactHeight === null ? 0 : contactHeight - ankle.y;
+
   // Leave the clip parked at its start; the engine owns the clock from here.
-  action.time = 0;
-  mixer.update(0);
+  poseAt(0);
   action.stop();
-  mixer.uncacheClip(animation);
+  mixer.uncacheClip(clip);
   scene.updateMatrixWorld(true);
-  return true;
+
+  return { aimedAt: { ...target }, base, travel: heading, standoff };
 }
 
 /**
@@ -209,16 +329,27 @@ export async function loadAttackClips(
           // Props first: the contact alignment measures where her body ended
           // up, and a seven-metre studio wall would dominate that.
           hidePostureGuides(scene);
-          // A clip staged without a target guide is aligned by its own contact.
-          if (!alignToTargetGuide(scene)) {
-            alignToStrikeContact(scene, animation, pose.timing);
-          }
+          // Where this pose's pair hangs is where the kick has to arrive.
+          // Aligning by the authored target guide only lines her body up with
+          // the stand-in figure; it says nothing about where the shoe ends up,
+          // which is the thing the player is watching.
+          const alignment = alignContactToTarget(
+            scene,
+            animation,
+            pose.timing,
+            targetRestPoint(POSES[id as PoseId]),
+            pose.targetHeightM
+          );
+          // A clip with no animation has no contact to measure, so the
+          // authored guide is the only thing left to line it up by.
+          if (!alignment) alignToTargetGuide(scene);
           clips.set(id as PoseId, {
             poseId: id as PoseId,
             sourceId: pose.sourceId,
             scene,
             animation,
-            timing: pose.timing
+            timing: pose.timing,
+            alignment
           });
           return;
         } catch {

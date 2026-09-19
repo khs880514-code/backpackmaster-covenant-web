@@ -292,7 +292,8 @@ describe('authored attack clip playback', () => {
         contactFrames: [50],
         preparationFrames: [25],
         startMode: 'STEP_IN'
-      }
+      },
+      alignment: null
     });
     return { rig, foot: scene.getObjectByName('foot_R')! };
   }
@@ -359,5 +360,107 @@ describe('fading an alpha-masked body', () => {
     rig.setInspect(false);
     expect(material.alphaTest).toBe(0.5);
     expect(material.opacity).toBe(1);
+  });
+});
+
+describe('aiming the authored kick', () => {
+  /**
+   * A two-bone leg with the authored joint names, hanging from a hip so the
+   * whole chain starts out pointing straight down +/- nothing. Straight is the
+   * configuration an aim solver has the most trouble with, so it is the one
+   * worth testing from.
+   */
+  function legRig(standoff = 0): {
+    rig: ReturnType<typeof createCharacters>;
+    contact: () => THREE.Vector3;
+  } {
+    const scene = new THREE.Group();
+    const hip = new THREE.Bone();
+    hip.name = 'thigh.R';
+    hip.position.set(0, 0.9, 1.2);
+    const knee = new THREE.Bone();
+    knee.name = 'shin.R';
+    knee.position.set(0, -0.44, 0);
+    const ankle = new THREE.Bone();
+    ankle.name = 'foot.R';
+    ankle.position.set(0, -0.44, 0);
+    knee.add(ankle);
+    hip.add(knee);
+    scene.add(hip);
+
+    const rig = createCharacters('standing-front', 'pump');
+    rig.applyAttackClip({
+      poseId: 'standing-front',
+      sourceId: 'POSE_12',
+      scene,
+      animation: null,
+      timing: {
+        fps: 25,
+        telegraphSeconds: 1,
+        strikeSeconds: 0.24,
+        recoverySeconds: 2,
+        contactFrames: [50],
+        preparationFrames: [25],
+        startMode: 'STEP_IN'
+      },
+      alignment: {
+        aimedAt: { x: 0, y: 0.02, z: 1.2 },
+        base: new THREE.Vector3(),
+        travel: { x: 0, y: 0, z: -1 },
+        standoff
+      }
+    });
+
+    return {
+      rig,
+      contact: () => {
+        scene.updateMatrixWorld(true);
+        const at = new THREE.Vector3();
+        ankle.getWorldPosition(at);
+        return at.setY(at.y + standoff);
+      }
+    };
+  }
+
+  it('puts the contact on what the attack is aimed at', () => {
+    const { rig, contact } = legRig();
+    const aim = { x: 0.18, y: 0.5, z: 0.6 };
+    rig.aimAttackClip(aim, 1);
+
+    const at = contact();
+    expect(at.x).toBeCloseTo(aim.x, 3);
+    expect(at.y).toBeCloseTo(aim.y, 3);
+    expect(at.z).toBeCloseTo(aim.z, 3);
+  });
+
+  it('bends the knee to reach a target the leg is too long for', () => {
+    // The failure this was written for: an aim straight down the leg, nearer
+    // than the leg is long. Turning both joints toward it changes nothing —
+    // they are already pointing at it — so a solver that only turns them
+    // stalls. Measured against the real clips it stalled 9.3cm out and stayed
+    // there however many rounds it was given.
+    const { rig, contact } = legRig();
+    const aim = { x: 0, y: 0.34, z: 1.2 };
+    rig.aimAttackClip(aim, 1);
+
+    const at = contact();
+    expect(at.distanceTo(new THREE.Vector3(aim.x, aim.y, aim.z))).toBeLessThan(0.002);
+  });
+
+  it('allows for the shoe striking off the bone that carries it', () => {
+    const standoff = 0.035;
+    const { rig, contact } = legRig(standoff);
+    const aim = { x: 0.1, y: 0.4, z: 0.9 };
+    rig.aimAttackClip(aim, 1);
+
+    // The ankle sits below the contact by exactly the authored offset.
+    expect(contact().y).toBeCloseTo(aim.y, 3);
+  });
+
+  it('gives the correction back as she recovers', () => {
+    const { rig, contact } = legRig();
+    const before = contact().clone();
+    rig.aimAttackClip({ x: 0.18, y: 0.5, z: 0.6 }, 0);
+    expect(contact().distanceTo(before)).toBeLessThan(1e-6);
   });
 });

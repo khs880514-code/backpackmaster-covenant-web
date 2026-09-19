@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import * as THREE from 'three';
 import fixture from '../fixtures/selection-manifest.json';
 import {
-  alignToStrikeContact,
+  alignContactToTarget,
   alignToTargetGuide,
   clipTimeForPhase,
   hidePostureGuides,
@@ -118,39 +118,52 @@ describe('loadAttackClips', () => {
     }));
     const library = await loadAttackClips({ fetchImpl: fetchOk(), source: { load } });
 
-    // Every pose is covered: five with a clip of their own, and three
-    // borrowing one until theirs is delivered.
+    // Every pose is covered, each by the clip authored for its own posture.
     expect(library.count()).toBe(8);
     expect(library.get('spread-standing')?.sourceId).toBe('POSE_17');
-    expect(library.get('braced-back')?.sourceId).toBe('POSE_01');
+    // Nothing is authored for this one, so it borrows whatever its kick can
+    // reach rather than a hand-picked lender.
+    expect(library.get('braced-back')?.sourceId).toBe('POSE_16');
     const standing = library.get('standing-front')!;
-    expect(standing.sourceId).toBe('POSE_01');
+    expect(standing.sourceId).toBe('POSE_12');
     expect(standing.animation?.name).toBe('Scene');
     expect(standing.scene.getObjectByName('POSTURE_GUIDE_Pelvis')!.visible).toBe(false);
-    expect(load).toHaveBeenCalledWith('models/assets/pose-01.glb');
+    expect(load).toHaveBeenCalledWith('models/assets/pose-12.glb');
   });
 
   it('falls back to the next take when the preferred one is not delivered', async () => {
     // Only four of the twelve clips the manifest describes actually exist, so
     // a pose whose best take is missing has to use the one that is there.
     const load = vi.fn(async (url: string) => {
-      if (url.includes('pose-01')) throw new Error('not delivered');
+      if (url.includes('pose-12')) throw new Error('not delivered');
       return { scene: authoredScene(), animations: [] };
     });
     const library = await loadAttackClips({ fetchImpl: fetchOk(), source: { load } });
-    expect(library.get('standing-front')?.sourceId).toBe('POSE_12');
-    expect(load).toHaveBeenCalledWith('models/assets/pose-01.glb');
+    expect(library.get('standing-front')?.sourceId).toBe('POSE_01');
+    expect(load).toHaveBeenCalledWith('models/assets/pose-12.glb');
   });
 
   it('leaves a pose procedural only when every take fails', async () => {
+    const load = vi.fn(async () => {
+      throw new Error('bad file');
+    });
+    const library = await loadAttackClips({ fetchImpl: fetchOk(), source: { load } });
+    expect(library.count()).toBe(0);
+    expect(library.get('standing-front')).toBeNull();
+  });
+
+  it('borrows past a take that is not delivered rather than going without', async () => {
+    // Only some of the twelve clips the manifest describes actually exist. A
+    // pose whose own take is missing walks its list until one loads.
     const load = vi.fn(async (url: string) => {
-      if (url.includes('pose-01') || url.includes('pose-12')) throw new Error('bad file');
+      if (!url.includes('pose-17')) throw new Error('not delivered');
       return { scene: authoredScene(), animations: [] };
     });
     const library = await loadAttackClips({ fetchImpl: fetchOk(), source: { load } });
-    expect(library.get('standing-front')).toBeNull();
-    // braced-back borrows the standing take, so it goes with it.
-    expect(library.get('braced-back')).toBeNull();
+    expect(library.count()).toBe(8);
+    for (const pose of ['standing-front', 'crouch-front', 'braced-back'] as const) {
+      expect(library.get(pose)?.sourceId).toBe('POSE_17');
+    }
   });
 
   it('returns an empty library when the manifest is missing', async () => {
@@ -185,7 +198,9 @@ describe('clip follow-through', () => {
   });
 });
 
-describe('clips staged without a target guide', () => {
+describe('standing the attacker where her kick can land', () => {
+  const target = { x: 0.2, y: 0.8, z: 0.14 };
+
   /** A rig with the strike bone and the studio props, but no posture guide. */
   function ungiuded(): THREE.Group {
     const scene = new THREE.Group();
@@ -220,19 +235,34 @@ describe('clips staged without a target guide', () => {
     startMode: 'RUN_IN'
   };
 
-  it('slides the scene so the kick lands on the origin', () => {
+  it('stands her so the kick passes over the target', () => {
     const scene = ungiuded();
     const clip = new THREE.AnimationClip('Scene', 9.4, []);
-    expect(alignToStrikeContact(scene, clip, timing)).toBe(true);
+    const aligned = alignContactToTarget(scene, clip, timing, target, null);
+    expect(aligned).not.toBeNull();
 
     scene.updateMatrixWorld(true);
-    const foot = scene.getObjectByName('foot.R')!;
     const world = new THREE.Vector3();
-    foot.getWorldPosition(world);
-    // The contact point is what gets put on the origin; height is untouched.
-    expect(world.x).toBeCloseTo(0, 5);
-    expect(world.z).toBeCloseTo(0, 5);
+    scene.getObjectByName('foot.R')!.getWorldPosition(world);
+    // The ground plan is corrected onto the target. The height is not: lifting
+    // her to meet a target authored at another height takes her feet off the
+    // floor, so that is the leg's job and the leg does it every frame.
+    expect(world.x).toBeCloseTo(target.x, 5);
+    expect(world.z).toBeCloseTo(target.z, 5);
     expect(world.y).toBeCloseTo(0.8, 5);
+  });
+
+  it('records where the shoe strikes relative to the bone that carries it', () => {
+    const scene = ungiuded();
+    const clip = new THREE.AnimationClip('Scene', 9.4, []);
+    // The authored height is what the animator aimed at; the strike bone sits
+    // a little under it, and that gap is what the aim has to allow for.
+    const aligned = alignContactToTarget(scene, clip, timing, target, 0.835)!;
+    expect(aligned.standoff).toBeCloseTo(0.035, 5);
+
+    // With nothing declared there is nothing to offset by.
+    const bare = alignContactToTarget(ungiuded(), clip, timing, target, null)!;
+    expect(bare.standoff).toBe(0);
   });
 
   it('puts the attacker in front of the player, whichever way the file faces', () => {
@@ -244,7 +274,7 @@ describe('clips staged without a target guide', () => {
       const body = scene.getObjectByName('DarkElf_Visual')!;
       body.position.set(0, 0.85, authoredZ * 0.4);
 
-      alignToStrikeContact(scene, new THREE.AnimationClip('Scene', 9.4, []), timing);
+      alignContactToTarget(scene, new THREE.AnimationClip('Scene', 9.4, []), timing, target, null);
       scene.updateMatrixWorld(true);
 
       const centre = new THREE.Box3().setFromObject(body).getCenter(new THREE.Vector3());
@@ -254,13 +284,13 @@ describe('clips staged without a target guide', () => {
 
   it('declines when the rig has no strike bone', () => {
     const scene = new THREE.Group();
-    expect(alignToStrikeContact(scene, new THREE.AnimationClip('Scene', 1, []), timing)).toBe(
-      false
-    );
+    expect(
+      alignContactToTarget(scene, new THREE.AnimationClip('Scene', 1, []), timing, target, null)
+    ).toBeNull();
   });
 
   it('declines when the clip carries no animation', () => {
-    expect(alignToStrikeContact(ungiuded(), null, timing)).toBe(false);
+    expect(alignContactToTarget(ungiuded(), null, timing, target, null)).toBeNull();
   });
 
   it('hides the studio floor and wall along with the guides', () => {

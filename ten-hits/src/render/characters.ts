@@ -10,7 +10,13 @@ import {
 } from './dressing';
 import { POSES } from '../game/config';
 import { proxyForwardFor, proxyTiltFor, tetherForwardFor } from '../game/engine';
-import { clipTimeForPhase, type AttackClip } from './attack-clips';
+import {
+  STRIKE_BONE,
+  STRIKE_CHAIN,
+  clipTimeForPhase,
+  sameName,
+  type AttackClip
+} from './attack-clips';
 import { createShoe } from './shoes';
 import {
   createContactBands,
@@ -20,7 +26,7 @@ import {
   type TargetOverlay,
   type TargetShell
 } from './targets';
-import type { GameSnapshot, PoseId, ShoeId } from '../game/types';
+import type { GameSnapshot, PoseId, ShoeId, Vec3 } from '../game/types';
 
 interface PoseShape {
   /** Vertical drop applied to the whole figure. */
@@ -245,6 +251,12 @@ export interface CharacterRig {
    */
   applyOutfit(outfit: THREE.Object3D | null): void;
   usingAuthoredAttacker(): boolean;
+  /**
+   * Swings the kicking leg so this attack's contact lands on `aim`.
+   * `reach` eases the correction in and out, 0 to 1. Call it after scrubbing:
+   * it reads the pose the clip was just put into.
+   */
+  aimAttackClip(aim: Vec3, reach: number): void;
   /** Positions the authored clip at the point in the attack the engine is at. */
   scrubAttackClip(
     phase: GameSnapshot['phase'],
@@ -366,6 +378,77 @@ export function createCharacters(poseId: PoseId, shoeId: ShoeId): CharacterRig {
   let wornOutfit: Dressed = NOTHING;
   let mixer: THREE.AnimationMixer | null = null;
   let action: THREE.AnimationAction | null = null;
+  /** The kicking leg, hip first, and its ankle, so the strike can be aimed. */
+  let strikeChain: THREE.Object3D[] = [];
+  let strikeAnkle: THREE.Object3D | null = null;
+
+  /** Where the shoe strikes: off the ankle by what the animator aimed at. */
+  function contactOf(standoff: number): void {
+    strikeAnkle?.getWorldPosition(FOOT_WORLD);
+    CONTACT.copy(FOOT_WORLD).setY(FOOT_WORLD.y + standoff);
+  }
+
+  /**
+   * One round of the aim: the knee sets how far the leg spans, then the hip
+   * points it. In that order, because each does a job the other cannot.
+   *
+   * Turning both toward the target instead — the obvious thing, and what this
+   * did at first — cannot close a gap that lies along the leg: every rotation
+   * that would shorten the reach is the one the solver reads as already
+   * correct. Measured, it sat 9.3cm short of the prone pose's target and
+   * stayed there however many rounds it was given.
+   *
+   * A round is repeated because the shoe strikes a little off the bone that
+   * carries it, and that offset is a height rather than something fixed to the
+   * bone, so it moves as the leg turns. A second round takes up what the first
+   * left; a third is worth under a millimetre.
+   */
+  function solve(
+    standoff: number,
+    travel: Vec3,
+    hipBone: THREE.Object3D,
+    kneeBone: THREE.Object3D,
+    blend: number
+  ): void {
+    hipBone.getWorldPosition(HIP_WORLD);
+    kneeBone.getWorldPosition(KNEE_WORLD);
+    contactOf(standoff);
+
+    const upper = HIP_WORLD.distanceTo(KNEE_WORLD);
+    const lower = KNEE_WORLD.distanceTo(CONTACT);
+    if (upper < 1e-4 || lower < 1e-4) return;
+
+    // How far the leg has to span, kept inside what it can fold and reach.
+    const span = Math.min(
+      upper + lower - JOINT_GUARD,
+      Math.max(Math.abs(upper - lower) + JOINT_GUARD, HIP_WORLD.distanceTo(TARGET))
+    );
+    const folded = kneeAngle(upper, lower, span);
+    const nowFolded = kneeAngle(upper, lower, HIP_WORLD.distanceTo(CONTACT));
+
+    FROM.subVectors(HIP_WORLD, KNEE_WORLD);
+    TO.subVectors(CONTACT, KNEE_WORLD);
+    BEND_AXIS.crossVectors(FROM, TO);
+    if (BEND_AXIS.lengthSq() < 1e-10) {
+      // A leg at full stretch has no bend plane of its own, so the one the
+      // kick is travelling in stands in for it.
+      BEND_AXIS.crossVectors(TO, ARRIVAL.set(travel.x, travel.y, travel.z));
+      if (BEND_AXIS.lengthSq() < 1e-10) return;
+    }
+    SWING.setFromAxisAngle(BEND_AXIS.normalize(), (folded - nowFolded) * blend);
+    turnBone(kneeBone, SWING);
+
+    // Now the leg is the right length, point it.
+    hipBone.getWorldPosition(HIP_WORLD);
+    contactOf(standoff);
+    FROM.subVectors(CONTACT, HIP_WORLD);
+    TO.subVectors(TARGET, HIP_WORLD);
+    if (FROM.lengthSq() < 1e-8 || TO.lengthSq() < 1e-8) return;
+    SWING.setFromUnitVectors(FROM.normalize(), TO.normalize());
+    if (blend < 1) SWING.slerp(IDENTITY, 1 - blend);
+    turnBone(hipBone, SWING);
+  }
+
 
   function fadeBody(enabled: boolean): void {
     for (const material of collectMaterials(player)) {
@@ -429,7 +512,19 @@ export function createCharacters(poseId: PoseId, shoeId: ShoeId): CharacterRig {
       action = null;
     }
     attackClip = clip;
+    strikeChain = [];
+    strikeAnkle = null;
     if (clip) {
+      const found = new Map<string, THREE.Object3D>();
+      clip.scene.traverse((node) => {
+        for (const name of STRIKE_CHAIN) {
+          if (!found.has(name) && sameName(node.name, name)) found.set(name, node);
+        }
+        if (!strikeAnkle && sameName(node.name, STRIKE_BONE)) strikeAnkle = node;
+      });
+      strikeChain = STRIKE_CHAIN.map((name) => found.get(name)).filter(
+        (bone): bone is THREE.Object3D => bone !== undefined
+      );
       root.add(clip.scene);
       if (clip.animation) {
         mixer = new THREE.AnimationMixer(clip.scene);
@@ -500,6 +595,31 @@ export function createCharacters(poseId: PoseId, shoeId: ShoeId): CharacterRig {
       );
       mixer.update(0);
     },
+    aimAttackClip(aim, reach): void {
+      const clip = attackClip;
+      const hipBone = strikeChain[0];
+      const kneeBone = strikeChain[1];
+      if (!clip?.alignment || !strikeAnkle || !hipBone || !kneeBone) return;
+      const blend = Math.min(1, Math.max(0, reach));
+      if (blend <= 0) return;
+
+      // Bend the kicking leg until the part of the shoe that arrives is on
+      // what this attack is aimed at.
+      //
+      // The alternative was to slide her whole body onto the target, which is
+      // what the alignment used to do, and it takes her feet off the floor by
+      // up to 31cm whenever the clip was authored against a target at another
+      // height. A leg that bends a few degrees costs nothing, keeps her
+      // standing on the ground, and follows the player as they dodge — which
+      // a body placed at wind-up cannot.
+      //
+      clip.scene.updateMatrixWorld(true);
+      TARGET.set(aim.x, aim.y, aim.z);
+      for (let pass = 0; pass < AIM_PASSES; pass += 1) {
+        solve(clip.alignment.standoff, clip.alignment.travel, hipBone, kneeBone, blend);
+      }
+    },
+
     setInspect,
     inspecting: () => inspect,
     dispose(): void {
@@ -518,6 +638,47 @@ export function createCharacters(poseId: PoseId, shoeId: ShoeId): CharacterRig {
 const HIP = new THREE.Vector3();
 const FOOT = new THREE.Vector3();
 const KNEE = new THREE.Vector3();
+const HIP_WORLD = new THREE.Vector3();
+const FOOT_WORLD = new THREE.Vector3();
+const CONTACT = new THREE.Vector3();
+const FROM = new THREE.Vector3();
+const TO = new THREE.Vector3();
+const SWING = new THREE.Quaternion();
+const BONE_WORLD = new THREE.Quaternion();
+const PARENT = new THREE.Quaternion();
+const IDENTITY = new THREE.Quaternion();
+const SPARE = new THREE.Quaternion();
+const TARGET = new THREE.Vector3();
+const KNEE_WORLD = new THREE.Vector3();
+const BEND_AXIS = new THREE.Vector3();
+const ARRIVAL = new THREE.Vector3();
+
+/**
+ * How far short of locked straight, and of folded shut, the knee is held.
+ * Either end is a place where the leg has no bend plane to solve in.
+ */
+const JOINT_GUARD = 0.004;
+
+/** How many rounds the aim takes. See the note on `solve`. */
+const AIM_PASSES = 2;
+
+/** The angle at the knee that makes the leg span `reach`, hip to contact. */
+function kneeAngle(upper: number, lower: number, reach: number): number {
+  const cosine = (upper * upper + lower * lower - reach * reach) / (2 * upper * lower);
+  return Math.acos(Math.min(1, Math.max(-1, cosine)));
+}
+
+/**
+ * Applies a world-space turn to one bone. A bone carries its parent's motion,
+ * so the turn has to come back into the parent's frame before it can be
+ * written, or every joint above this one gets counted twice.
+ */
+function turnBone(bone: THREE.Object3D, turn: THREE.Quaternion): void {
+  bone.getWorldQuaternion(BONE_WORLD);
+  PARENT.copy(BONE_WORLD).multiply(SPARE.copy(bone.quaternion).invert()).invert();
+  bone.quaternion.copy(PARENT).multiply(turn).multiply(BONE_WORLD);
+  bone.updateMatrixWorld(true);
+}
 const AXIS = new THREE.Vector3();
 const BEND = new THREE.Vector3();
 const MID = new THREE.Vector3();
@@ -563,6 +724,26 @@ function solveKnee(hip: THREE.Vector3, foot: THREE.Vector3): THREE.Vector3 {
   return KNEE.copy(hip).addScaledVector(AXIS, along).addScaledVector(BEND, offset);
 }
 
+/**
+ * How much of the aim correction the leg is carrying right now.
+ *
+ * Nothing before the wind-up starts, all of it from the moment the strike
+ * begins until the foot is back under her, and handed back over the recovery.
+ */
+function aimReach(snapshot: GameSnapshot): number {
+  switch (snapshot.phase) {
+    case 'telegraph':
+      return snapshot.phaseProgress;
+    case 'strike':
+    case 'impact':
+      return 1;
+    case 'recovery':
+      return 1 - snapshot.phaseProgress;
+    default:
+      return 0;
+  }
+}
+
 /** Copies one immutable snapshot onto the rig. Pure presentation, no logic. */
 export function applySnapshot(rig: CharacterRig, snapshot: GameSnapshot): void {
   const depth = snapshot.anchor.y * DEPTH_TO_Z;
@@ -601,6 +782,11 @@ export function applySnapshot(rig: CharacterRig, snapshot: GameSnapshot): void {
       snapshot.phaseProgress,
       0.05 + snapshot.power * 0.019
     );
+    // Then aim what that pose produced at what this attack is going for, so
+    // the shoe the player watches and the shoe the contact test measures are
+    // the same shoe. The leg takes the correction up over the wind-up and
+    // gives it back as she recovers.
+    if (snapshot.aim) rig.aimAttackClip(snapshot.aim, aimReach(snapshot));
     return;
   }
 

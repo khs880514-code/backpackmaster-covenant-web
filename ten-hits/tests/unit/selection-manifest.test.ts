@@ -3,10 +3,11 @@ import fixture from '../fixtures/selection-manifest.json';
 import {
   parseSelectionManifest,
   toPoseModelManifest,
-  BORROWED_CLIP,
-  SELECTION_SCHEMA
+  SELECTION_SCHEMA,
+  POSTURE_TO_POSE
 } from '../../src/render/selection-manifest';
 import { POSES, POSE_IDS } from '../../src/game/config';
+import { targetRestPoint } from '../../src/game/engine';
 
 /** The real authoring manifest, so the adapter is proven against actual data. */
 const imported = parseSelectionManifest(fixture)!;
@@ -24,18 +25,21 @@ describe('parseSelectionManifest', () => {
     expect(imported.character.strikeChain).toEqual(['thigh.R', 'shin.R', 'foot.R']);
   });
 
-  it('maps the four target postures that match a game pose', () => {
-    // POSE_01 is the run-in kick and carries no target posture, so it used to
-    // be dropped. It is the current take for the standing pose.
-    expect(imported.poses['standing-front']?.sourceId).toBe('POSE_01');
-    expect(imported.candidates['standing-front']?.map((p) => p.sourceId)).toEqual([
-      'POSE_01',
-      'POSE_12'
-    ]);
+  it('gives each pose the clip authored for its own posture', () => {
     expect(imported.poses['spread-standing']?.sourceId).toBe('POSE_17');
     expect(imported.poses['seated-chair']?.sourceId).toBe('POSE_16');
     expect(imported.poses['kneeling-front']?.sourceId).toBe('POSE_11');
     expect(imported.poses['crouch-front']?.sourceId).toBe('POSE_13');
+    // POSE_01 is the run-in kick. It carries no target posture, so it used to
+    // be dropped entirely; then it was made the standing pose's preferred take,
+    // which was worse — it is authored against a target 43cm below where a
+    // standing figure's pair hangs, so its kick could not reach. The standing
+    // clip proper goes first and the run-in stays as the next take.
+    expect(imported.poses['standing-front']?.sourceId).toBe('POSE_12');
+    expect(imported.candidates['standing-front']?.slice(0, 2).map((p) => p.sourceId)).toEqual([
+      'POSE_12',
+      'POSE_01'
+    ]);
   });
 
   it('leaves no pose on the blocky procedural attacker', () => {
@@ -46,33 +50,38 @@ describe('parseSelectionManifest', () => {
     }
   });
 
-  it('keeps every authored clip close to the game pose anchor height', () => {
-    for (const [id, pose] of Object.entries(imported.poses)) {
-      // A borrowed clip was authored for a different posture, so this
-      // invariant is the authored rows' to keep.
-      if (id in BORROWED_CLIP) continue;
-      // Some authored clips declare no target height; there is nothing to
-      // check against for those.
-      if (!pose!.targetHeightM) continue;
-      const anchor = POSES[id as keyof typeof POSES].anchorHeight;
-      expect(Math.abs(pose!.targetHeightM - anchor)).toBeLessThan(0.06);
+  it('orders the takes a pose may borrow by what they can reach', () => {
+    for (const id of POSE_IDS) {
+      const list = imported.candidates[id] ?? [];
+      expect(list.length).toBeGreaterThan(1);
+      const want = targetRestPoint(POSES[id]).y;
+
+      // A pose's own takes come first whatever their height, because the
+      // animator built them for this posture. Everything behind them is
+      // borrowed, and borrowed takes are ranked purely by what they can reach.
+      const mine = (pose: (typeof list)[number]): boolean =>
+        POSTURE_TO_POSE[pose.targetPosture ?? ''] === id ||
+        (id === 'standing-front' && pose.sourceId === 'POSE_01');
+      const own = list.filter(mine);
+      expect(list.slice(0, own.length)).toEqual(own);
+
+      const borrowed = list.slice(own.length);
+      const fits = borrowed.map((pose) =>
+        pose.targetHeightM === null
+          ? Number.POSITIVE_INFINITY
+          : Math.abs(pose.targetHeightM - want)
+      );
+      expect(fits).toEqual([...fits].sort((a, b) => a - b));
     }
   });
 
-  it('keeps a borrowed clip behind the pose own takes', () => {
-    for (const [id, from] of Object.entries(BORROWED_CLIP)) {
-      // A lender must not itself be borrowing, or the fallback is circular.
-      expect(BORROWED_CLIP[from as keyof typeof BORROWED_CLIP]).toBeUndefined();
-      const list = (imported.candidates[id as keyof typeof imported.candidates] ?? []).map(
-        (pose) => pose.sourceId
-      );
-      const lent = (imported.candidates[from as keyof typeof imported.candidates] ?? []).map(
-        (pose) => pose.sourceId
-      );
-      // The lender's takes sit at the very end, behind anything the pose owns.
-      expect(list.slice(-lent.length)).toEqual(lent);
-      // spread-standing has POSE_17 of its own, so the borrow must not displace it.
-      if (list.length > lent.length) expect(list[0]).not.toBe(lent[0]);
+  it('never lets a borrowed take displace a pose own clip', () => {
+    for (const id of POSE_IDS) {
+      const chosen = imported.poses[id]!;
+      const posture = chosen.targetPosture;
+      // Every pose in this manifest has a clip authored for its own posture,
+      // so that is the one it must be playing however the heights fall.
+      expect(posture).not.toBeNull();
     }
   });
 
@@ -140,7 +149,7 @@ describe('toPoseModelManifest', () => {
   it('projects the import onto the loader manifest shape', () => {
     const manifest = toPoseModelManifest(imported);
     expect(manifest.version).toBe(1);
-    expect(manifest.poses?.['standing-front']).toBe('assets/pose-01.glb');
+    expect(manifest.poses?.['standing-front']).toBe('assets/pose-12.glb');
     expect(manifest.poses?.['seated-chair']).toBe('assets/pose-16.glb');
     expect(Object.keys(manifest.poses ?? {})).toHaveLength(POSE_IDS.length);
   });

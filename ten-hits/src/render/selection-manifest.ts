@@ -1,4 +1,6 @@
 import type { PoseModelManifest } from './model-library';
+import { POSES } from '../game/config';
+import { targetRestPoint } from '../game/engine';
 import type { PoseId } from '../game/types';
 
 /**
@@ -26,40 +28,35 @@ const POSTURE_TO_POSE: Readonly<Record<string, PoseId>> = {
  * Clips the authoring set describes without a target posture.
  *
  * POSE_01 is the run-in kick — the two-step approach — and it carries no
- * `target_posture`, so mapping by posture alone dropped it on the floor. It is
- * the current take for the standing pose, which is why PREFERRED_SOURCE puts it
- * ahead of POSE_12 rather than beside it.
+ * `target_posture`, so mapping by posture alone dropped it on the floor.
  */
 const SOURCE_TO_POSE: Readonly<Record<string, PoseId>> = {
   POSE_01: 'standing-front'
 };
 
 /**
- * The take to use when more than one clip fits a pose. It is a preference, not
- * a requirement: if its file is not there, the next candidate is used, so
- * naming a clip that has not been delivered yet costs nothing.
- */
-const PREFERRED_SOURCE: Readonly<Partial<Record<PoseId, string>>> = {
-  'standing-front': 'POSE_01'
-};
-
-/**
- * Last-resort stand-ins, appended behind a pose's own takes.
+ * How well a clip's authored target height suits a pose, lower being better.
  *
- * Without them a pose with no deliverable clip falls back to the blocky
- * procedural attacker, which is a placeholder and reads as a bug. A borrowed
- * clip is the wrong motion but the right character, so it is the lesser of the
- * two. They sit at the end of the candidate list, so a pose's own clip always
- * wins when its file is actually there — including one delivered later.
+ * This replaced a hand-written list of preferred takes, which had the standing
+ * pose playing the run-in kick — a clip authored against a target 43cm below
+ * where a standing figure's pair hangs. A leg can be aimed but not lengthened,
+ * so that kick could not reach however it was placed: measured, it arrived
+ * 27cm short every time. Sorting by the height the animator declares puts each
+ * clip on a pose it can actually reach, and goes on doing so as clips are
+ * delivered. One that declares no height sorts last.
  */
-export const BORROWED_CLIP: Readonly<Partial<Record<PoseId, PoseId>>> = {
-  'spread-standing': 'standing-front',
-  'braced-back': 'standing-front',
-  // Until pose-14 and pose-15 are delivered. Their own takes are already
-  // wired, so each drops in and takes over the moment its file is there.
-  'all-fours': 'crouch-front',
-  'kneel-folded': 'crouch-front'
-};
+function heightFit(pose: PoseId, clip: SelectionPose): number {
+  if (clip.targetHeightM === null) return Number.POSITIVE_INFINITY;
+  return Math.abs(clip.targetHeightM - targetRestPoint(POSES[pose]).y);
+}
+
+/** Best fit first, stable among equals so the manifest order decides ties. */
+function byHeightFit(pose: PoseId, clips: SelectionPose[]): SelectionPose[] {
+  return clips
+    .map((clip, index) => ({ clip, index, fit: heightFit(pose, clip) }))
+    .sort((a, b) => a.fit - b.fit || a.index - b.index)
+    .map((entry) => entry.clip);
+}
 
 export interface AttackTiming {
   fps: number;
@@ -198,13 +195,15 @@ export function parseSelectionManifest(raw: unknown): SelectionImport | null {
   const character = asRecord(root['character']) ?? {};
   const posesRaw = asRecord(root['poses']) ?? {};
 
-  const candidates: Partial<Record<PoseId, SelectionPose[]>> = {};
+  const own: Partial<Record<PoseId, SelectionPose[]>> = {};
+  const every: SelectionPose[] = [];
   const unmapped: SelectionPose[] = [];
   const warnings: string[] = [];
 
   for (const [sourceId, value] of Object.entries(posesRaw)) {
     const pose = readPose(sourceId, value);
     if (!pose) continue;
+    every.push(pose);
 
     const entry = asRecord(value);
     if (entry?.['source_changed_after_export'] === true) {
@@ -215,29 +214,27 @@ export function parseSelectionManifest(raw: unknown): SelectionImport | null {
       SOURCE_TO_POSE[sourceId] ??
       (pose.targetPosture ? POSTURE_TO_POSE[pose.targetPosture] : undefined);
     if (target) {
-      const list = candidates[target] ?? [];
-      // The preferred take goes to the front; everything else keeps its order.
-      if (PREFERRED_SOURCE[target] === sourceId) list.unshift(pose);
-      else list.push(pose);
-      candidates[target] = list;
+      const list = own[target] ?? [];
+      list.push(pose);
+      own[target] = list;
     } else if (pose.targetPosture) {
       unmapped.push(pose);
     }
   }
 
+  // A pose's own takes come first, best-reaching first; then every other clip
+  // on the same terms, so a pose with nothing authored for it borrows the kick
+  // that can reach it rather than a hand-picked one that cannot. A clip that
+  // has not been delivered falls through to the next on its own.
+  const candidates: Partial<Record<PoseId, SelectionPose[]>> = {};
   const poses: Partial<Record<PoseId, SelectionPose>> = {};
-  for (const [id, list] of Object.entries(candidates)) {
-    const best = list?.[0];
-    if (best) poses[id as PoseId] = best;
-  }
-
-  for (const [id, from] of Object.entries(BORROWED_CLIP)) {
-    const target = id as PoseId;
-    const lender = candidates[from as PoseId] ?? [];
-    if (lender.length === 0) continue;
-    const own = candidates[target] ?? [];
-    candidates[target] = [...own, ...lender];
-    if (!poses[target]) poses[target] = lender[0]!;
+  for (const id of Object.keys(POSES) as PoseId[]) {
+    const mine = own[id] ?? [];
+    const borrowed = every.filter((clip) => !mine.includes(clip));
+    const list = [...byHeightFit(id, mine), ...byHeightFit(id, borrowed)];
+    if (list.length === 0) continue;
+    candidates[id] = list;
+    poses[id] = list[0]!;
   }
 
   return {

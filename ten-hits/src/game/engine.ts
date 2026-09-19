@@ -163,6 +163,25 @@ export function proxyTiltFor(pose: PoseProfile): number {
 }
 
 /**
+ * Where the pair hangs when nothing has disturbed it, in world axes.
+ *
+ * This is the point an authored kick has to arrive at, and it was written down
+ * nowhere: the clips were aligned to the world origin instead, which is the
+ * floor under the player's midline. Every kick therefore landed short — by a
+ * hand's width in the best pose and by two thirds of a metre in the worst.
+ */
+export function targetRestPoint(pose: PoseProfile): Vec3 {
+  const rest = createPendulumPair();
+  const along = (rest.left.position.y + rest.right.position.y) / 2;
+  const tilt = proxyTiltFor(pose);
+  return {
+    x: 0,
+    y: pose.anchorHeight + along * Math.cos(tilt),
+    z: proxyForwardFor(pose) + along * Math.sin(tilt)
+  };
+}
+
+/**
  * Length of the striking surface, in world metres, measured between the
  * authored TOE_CAP and INSTEP anchors.
  *
@@ -686,6 +705,10 @@ export function createGameEngine(options: EngineOptions): GameEngine {
       proxies: [proxyOf('left', left), proxyOf('right', right)],
       anchor: { x: pelvis.x, y: pelvis.y },
       foot: { ...footWorld },
+      // The end of the planned arc: where she has committed to kick. It is
+      // fixed when the attack is chosen, so a dodge after that point makes her
+      // visibly miss instead of the shoe following the player around.
+      aim: plan ? { ...plan.path[3] } : null,
       attackKind: plan ? plan.kind : null,
       phaseProgress: duration > 0 ? Math.min(1, phaseTime / duration) : 0,
       lastGrade,

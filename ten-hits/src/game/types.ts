@@ -232,6 +232,13 @@ export interface GameSnapshot {
   proxies: [ProxySnapshot, ProxySnapshot];
   anchor: Vec2;
   foot: Vec3;
+  /**
+   * Where this attack is aimed, in world metres, or null between attacks.
+   *
+   * The authored kick is aligned to the pair's resting place, so this is what
+   * the renderer moves it by to put the shoe where the pair actually is.
+   */
+  aim: Vec3 | null;
   attackKind: AttackKind | null;
   /** 0..1 progress through the current phase, for animation blending. */
   phaseProgress: number;
