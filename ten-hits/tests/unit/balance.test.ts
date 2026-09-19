@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { contactBands, createGameEngine, followThroughDepth } from '../../src/game/engine';
+import {
+  contactBands,
+  createGameEngine,
+  followThroughDepth,
+  PROXY_FORWARD
+} from '../../src/game/engine';
 import { SHOES, SHOE_IDS } from '../../src/game/config';
 import { createTargetOverlay } from '../../src/render/targets';
 import type { GameSnapshot, ImpactGrade, ShoeId } from '../../src/game/types';
@@ -446,5 +451,83 @@ describe('the strike arc', () => {
     const path = strikePath('spread-standing');
     const lowest = path.reduce((low, step) => Math.min(low, step.y), Infinity);
     expect(lowest).toBeGreaterThan(-0.02);
+  });
+});
+
+describe('the kick that lands', () => {
+  /** The deepest dent from the first graded contact of a run. */
+  function firstDent(power: number, shoe: 'stiletto' | 'pump' | 'platform') {
+    const engine = createGameEngine({ pose: 'standing-front', shoe, power, seed: 4 });
+    engine.start();
+    let previous = 'setup';
+    for (let i = 0; i < 60 * 200; i += 1) {
+      const snapshot = engine.update(1 / 60);
+      if (snapshot.phase === 'impact' && previous !== 'impact') {
+        let deepest = 0;
+        for (const proxy of snapshot.proxies) {
+          if (proxy.imprint) deepest = Math.max(deepest, proxy.imprint.depth);
+        }
+        return { depth: deepest, grade: snapshot.lastGrade };
+      }
+      previous = snapshot.phase;
+    }
+    return { depth: 0, grade: null };
+  }
+
+  it('drives through to the pubis at full power', () => {
+    // Not to the surface and no further: a hard kick carries to the bone
+    // behind it, which is what PROXY_FORWARD measures.
+    expect(followThroughDepth(10)).toBeCloseTo(PROXY_FORWARD, 5);
+    expect(followThroughDepth(1)).toBeLessThan(PROXY_FORWARD * 0.2);
+    for (let power = 2; power <= 10; power += 1) {
+      expect(followThroughDepth(power)).toBeGreaterThan(followThroughDepth(power - 1));
+    }
+  });
+
+  it('dents deeper the harder the kick', () => {
+    // It used to come from accumulated damage, which saturates after a couple
+    // of contacts — so a tap and a full-power kick left an identical mark.
+    const depths = [1, 4, 7, 10].map((power) => firstDent(power, 'pump').depth);
+    for (let i = 1; i < depths.length; i += 1) {
+      expect(depths[i]!).toBeGreaterThan(depths[i - 1]!);
+    }
+    expect(depths[0]!).toBeLessThan(depths[3]! * 0.5);
+  });
+
+  it('dents deeper through a narrower shoe at the same power', () => {
+    expect(firstDent(7, 'stiletto').depth).toBeGreaterThan(firstDent(7, 'platform').depth);
+  });
+
+  it('springs back toward what will not come out', () => {
+    const engine = createGameEngine({
+      pose: 'standing-front',
+      shoe: 'pump',
+      power: 6,
+      seed: 4
+    });
+    engine.start();
+
+    let struck = 0;
+    let previous = 'setup';
+    for (let i = 0; i < 60 * 200; i += 1) {
+      const snapshot = engine.update(1 / 60);
+      if (snapshot.phase === 'impact' && previous !== 'impact') {
+        for (const proxy of snapshot.proxies) {
+          if (proxy.imprint) struck = Math.max(struck, proxy.imprint.depth);
+        }
+      }
+      previous = snapshot.phase;
+      if (struck > 0 && snapshot.phase === 'telegraph') {
+        // By the next wind-up the surface has recovered, but not past the
+        // permanent crush underneath it.
+        for (const proxy of snapshot.proxies) {
+          if (!proxy.imprint) continue;
+          expect(proxy.imprint.depth).toBeLessThan(struck);
+          expect(proxy.imprint.depth).toBeGreaterThanOrEqual(proxy.core - 1e-6);
+        }
+        return;
+      }
+    }
+    throw new Error('no contact was reviewed');
   });
 });

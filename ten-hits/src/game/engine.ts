@@ -81,6 +81,23 @@ export interface GameEngine {
  */
 const OFFSET_LEAN = 0.35;
 
+/** How deeply each grade presses before power and placement scale it. */
+/**
+ * How fast the surface springs back, in depth per second.
+ *
+ * The dent a blow leaves is not the mark it leaves. The surface recovers
+ * toward whatever the core has been permanently crushed to, so what is still
+ * showing a run later is what the run actually cost.
+ */
+const IMPRINT_RELAX = 0.55;
+
+const GRADE_PRESS: Record<ImpactGrade, number> = {
+  miss: 0,
+  graze: 0.3,
+  'single-compression': 0.78,
+  'center-compression': 1
+};
+
 const IMPACT_HOLD = 0.25;
 
 /**
@@ -191,8 +208,17 @@ const PELVIS_RANGE = 0.1;
  * A strike that stops dead on the surface reads as a tap; carrying through
  * toward the pelvis is what makes a heavy contact feel like it connected.
  */
+/**
+ * How far past the target the shoe carries, in metres.
+ *
+ * A full-power kick does not stop at the surface — it drives through to the
+ * pubic bone behind it, which is what PROXY_FORWARD measures. This used to
+ * reach 54% of that way at power 10, so even the hardest kick stopped short
+ * of what it was supposed to be doing.
+ */
 function followThroughDepth(powerLevel: number): number {
-  return 0.012 + Math.min(10, Math.max(1, powerLevel)) * 0.0062;
+  const level = (Math.min(10, Math.max(1, powerLevel)) - 1) / 9;
+  return 0.018 + (PROXY_FORWARD - 0.018) * level;
 }
 
 /** How hard a graded contact shoves the pair it just landed on. */
@@ -274,7 +300,7 @@ export function createGameEngine(options: EngineOptions): GameEngine {
    * The lasting shape of what hit each side. Kept here rather than in
    * `TargetState` so the damage model stays a pure function of the grade.
    */
-  const imprints: Record<TargetSide, Omit<ProxyImprint, 'depth'> | null> = {
+  const imprints: Record<TargetSide, ProxyImprint | null> = {
     left: null,
     right: null
   };
@@ -395,6 +421,42 @@ export function createGameEngine(options: EngineOptions): GameEngine {
    * essentially sideways — which dented the pair edge-on to the camera, where
    * nothing could be seen of it. The travel direction is the one that presses.
    */
+  /**
+   * How hard this one blow presses, 0..1.
+   *
+   * The dent used to be drawn from accumulated damage, which saturates after a
+   * couple of contacts — so a power-1 tap and a power-10 kick left the same
+   * mark. This is the blow itself: its power, its grade, and how squarely it
+   * landed. What the run has cost so far is the core's to carry, not the
+   * surface's.
+   */
+  function strikeDepth(grade: ImpactGrade, target: Vec3): number {
+    const reach = TARGET_RADIUS * shoe.contactWidth + 0.022;
+    const offset = Math.hypot(
+      target.x - footWorld.x,
+      target.y - footWorld.y,
+      target.z - footWorld.z
+    );
+    const squarely = 1 - Math.min(1, offset / Math.max(1e-6, reach));
+    const force = 0.34 + (Math.min(10, Math.max(1, power.level)) - 1) / 9 * 0.66;
+    return Math.min(
+      1,
+      GRADE_PRESS[grade] * force * (0.55 + squarely * 0.45) * shoe.localPressure
+    );
+  }
+
+  /** Lets each dent rise back toward the crush that will not come out. */
+  function relaxImprints(dt: number): void {
+    for (const side of ['left', 'right'] as const) {
+      const mark = imprints[side];
+      if (!mark) continue;
+      const floor = Math.min(1, Math.max(0, (side === 'left' ? left : right).permanent));
+      if (mark.depth > floor) {
+        mark.depth = Math.max(floor, mark.depth - IMPRINT_RELAX * dt);
+      }
+    }
+  }
+
   function recordImprint(side: TargetSide, target: Vec3, currentPlan: AttackPlan): void {
     const [, , approach, end] = currentPlan.path;
     const tx = end.x - approach.x;
@@ -420,7 +482,8 @@ export function createGameEngine(options: EngineOptions): GameEngine {
       x: x / length,
       y: y / length,
       z: z / length,
-      width: contactBreadth()
+      width: contactBreadth(),
+      depth: 0
     };
   }
 
@@ -470,9 +533,14 @@ export function createGameEngine(options: EngineOptions): GameEngine {
     const struck = targetWorld(outcome.contacted);
     if (outcome.grade !== 'miss') {
       recordImprint(outcome.contacted, struck, plan);
+      const pressed = imprints[outcome.contacted];
+      if (pressed) pressed.depth = strikeDepth(outcome.grade, struck);
       if (outcome.grade === 'center-compression') {
         const other = outcome.contacted === 'left' ? 'right' : 'left';
-        recordImprint(other, targetWorld(other), plan);
+        const far = targetWorld(other);
+        recordImprint(other, far, plan);
+        const also = imprints[other];
+        if (also) also.depth = strikeDepth(outcome.grade, far);
       }
     }
     contactPoint =
@@ -551,6 +619,7 @@ export function createGameEngine(options: EngineOptions): GameEngine {
     } else if (run.phase === 'recovery' || run.phase === 'impact') {
       left = recoverTarget(left, dt);
       right = recoverTarget(right, dt);
+      relaxImprints(dt);
       if (run.phase === 'impact' && plan) {
         // Carry the shoe through the contact rather than parking it there.
         const drive = Math.min(1, phaseTime / impactHold(lastGrade, pendingResult !== null));
@@ -585,9 +654,7 @@ export function createGameEngine(options: EngineOptions): GameEngine {
       squash: squashFactor(state),
       cracking: crackingFactor(state),
       core: Math.min(1, Math.max(0, state.permanent)),
-      imprint: imprints[side]
-        ? { ...imprints[side]!, depth: squashFactor(state) }
-        : null,
+      imprint: imprints[side] ? { ...imprints[side]! } : null,
       position: { x: body.position.x, y: body.position.y }
     };
   }
