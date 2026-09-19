@@ -76,6 +76,36 @@ export const POSES: Record<PoseId, PoseProfile> = {
     rotationLimit: 0.8,
     telegraphMultiplier: 0.96,
     anchorHeight: 0.74
+  },
+  /**
+   * On hands and knees. The authored clip for this posture comes in from the
+   * side, so there is room to shift along the body and very little across it.
+   */
+  'all-fours': {
+    id: 'all-fours',
+    lateralLimit: 0.42,
+    depthLimit: 0.68,
+    rotationLimit: 0.34,
+    telegraphMultiplier: 0.94,
+    // POSE_14 is authored against a target at 0.46m.
+    anchorHeight: 0.46,
+    proxyForward: 0.2,
+    tetherForward: 0.06,
+    // Horizontal like the prone pose, but only half over: the hips are up.
+    proxyTilt: -52
+  },
+  /** Kneeling with the chest folded down, which closes the angle right in. */
+  'kneel-folded': {
+    id: 'kneel-folded',
+    lateralLimit: 0.5,
+    depthLimit: 0.3,
+    rotationLimit: 0.4,
+    telegraphMultiplier: 0.86,
+    // POSE_15 is authored against a target at 0.38m.
+    anchorHeight: 0.38,
+    proxyForward: 0.16,
+    tetherForward: 0.04,
+    proxyTilt: -38
   }
 };
 
@@ -136,7 +166,9 @@ export const POSE_IDS: PoseId[] = [
   'seated-chair',
   'spread-standing',
   'crouch-front',
-  'braced-back'
+  'braced-back',
+  'all-fours',
+  'kneel-folded'
 ];
 /**
  * The measured spread of contact widths across the shoe set, so the renderer

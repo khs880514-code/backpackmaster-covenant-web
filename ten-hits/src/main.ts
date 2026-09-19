@@ -142,6 +142,13 @@ export function mountGame(root: HTMLElement, options: MountOptions = {}): GameAp
   let missesThisRun = 0;
 
   const hud = createHud(hudRoot, {
+    // The setup screen is a preview, so it has to show what is being chosen.
+    // It used to keep showing the previous run's pose until Start was pressed.
+    onSelect: (choice) => {
+      if (engine.snapshot().phase !== 'setup') return;
+      selection = choice;
+      rebuild();
+    },
     onStart: (choice) => {
       selection = choice;
       save.lastSetup = { ...choice };

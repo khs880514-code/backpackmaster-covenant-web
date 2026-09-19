@@ -77,10 +77,8 @@ describe('parseSelectionManifest', () => {
   });
 
   it('reports the postures that have no game pose yet', () => {
-    expect(imported.unmapped.map((p) => p.targetPosture).sort()).toEqual([
-      'ALL_FOURS_LATERAL',
-      'KNEELING_FOLDED'
-    ]);
+    // Every authored posture now has a game pose to land in.
+    expect(imported.unmapped).toEqual([]);
   });
 
   it('splits an authored clip into telegraph, strike, and recovery', () => {

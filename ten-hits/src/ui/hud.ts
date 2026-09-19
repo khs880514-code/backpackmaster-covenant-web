@@ -14,6 +14,8 @@ export interface HudSelection {
 }
 
 export interface HudHandlers {
+  /** A choice changed on the setup screen, before the run has begun. */
+  onSelect?: (selection: HudSelection) => void;
   onStart?: (selection: HudSelection) => void;
   onRestart?: () => void;
   onToggle?: (name: ToggleName, enabled: boolean) => void;
@@ -35,7 +37,9 @@ const POSE_LABELS: Record<PoseId, string> = {
   'seated-chair': 'ㄷ자 의자',
   'spread-standing': '대자 자세',
   'crouch-front': '웅크림',
-  'braced-back': '뒤로 기댐'
+  'braced-back': '뒤로 기댐',
+  'all-fours': '네발 자세',
+  'kneel-folded': '무릎 숙임'
 };
 
 const VIEW_LABELS: Record<ViewId, string> = {
@@ -145,6 +149,7 @@ export function createHud(root: HTMLElement, handlers: HudHandlers): HudControll
     button.addEventListener('click', () => {
       selectedPose = id;
       syncChoices();
+      handlers.onSelect?.(currentSelection());
     });
     poseGroup.append(button);
     return button;
@@ -161,6 +166,7 @@ export function createHud(root: HTMLElement, handlers: HudHandlers): HudControll
     button.addEventListener('click', () => {
       selectedShoe = id;
       syncChoices();
+      handlers.onSelect?.(currentSelection());
     });
     shoeGroup.append(button);
     return button;
@@ -177,6 +183,7 @@ export function createHud(root: HTMLElement, handlers: HudHandlers): HudControll
     button.addEventListener('click', () => {
       selectedOutfit = id;
       syncChoices();
+      handlers.onSelect?.(currentSelection());
     });
     outfitGroup.append(button);
     return button;

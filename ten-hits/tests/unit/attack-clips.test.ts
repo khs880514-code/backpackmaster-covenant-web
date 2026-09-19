@@ -118,9 +118,9 @@ describe('loadAttackClips', () => {
     }));
     const library = await loadAttackClips({ fetchImpl: fetchOk(), source: { load } });
 
-    // Four postures with their own clip, spread-standing with POSE_17, and
-    // braced-back borrowing the standing take.
-    expect(library.count()).toBe(6);
+    // Every pose is covered: five with a clip of their own, and three
+    // borrowing one until theirs is delivered.
+    expect(library.count()).toBe(8);
     expect(library.get('spread-standing')?.sourceId).toBe('POSE_17');
     expect(library.get('braced-back')?.sourceId).toBe('POSE_01');
     const standing = library.get('standing-front')!;

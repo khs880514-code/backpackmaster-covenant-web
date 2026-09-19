@@ -23,7 +23,9 @@ export type PoseId =
   | 'seated-chair'
   | 'spread-standing'
   | 'crouch-front'
-  | 'braced-back';
+  | 'braced-back'
+  | 'all-fours'
+  | 'kneel-folded';
 export type ShoeId = 'pump' | 'stiletto' | 'plateau' | 'strap' | 'platform';
 export type ImpactGrade =
   | 'miss'

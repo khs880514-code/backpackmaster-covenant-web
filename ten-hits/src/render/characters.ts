@@ -40,7 +40,10 @@ const POSE_SHAPES: Record<PoseId, PoseShape> = {
   'seated-chair': { drop: -0.27, squash: 0.94, lean: 0.05, spread: 1.15, seat: true },
   'spread-standing': { drop: -0.07, squash: 0.97, lean: -0.04, spread: 1.8, seat: false },
   'crouch-front': { drop: -0.47, squash: 0.82, lean: 0.22, spread: 1.25, seat: false },
-  'braced-back': { drop: -0.13, squash: 0.98, lean: -0.2, spread: 1.05, seat: false }
+  'braced-back': { drop: -0.13, squash: 0.98, lean: -0.2, spread: 1.05, seat: false },
+  // Only a fallback shape; both of these have an authored body of their own.
+  'all-fours': { drop: -0.52, squash: 0.74, lean: 0.62, spread: 1.18, seat: false },
+  'kneel-folded': { drop: -0.56, squash: 0.8, lean: 0.5, spread: 1.05, seat: false }
 };
 
 const INSPECT_BODY_OPACITY = 0.22;

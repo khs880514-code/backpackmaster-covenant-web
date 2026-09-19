@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { POSE_IDS } from '../../src/game/config';
 import { OUTFIT_IDS } from '../../src/render/wearables';
 import { createHud } from '../../src/ui/hud';
 import { createGameEngine } from '../../src/game/engine';
@@ -32,7 +33,7 @@ describe('HUD', () => {
   it('exposes pose, shoe, and power controls in setup', () => {
     const hud = createHud(host, {});
     hud.render(snapshotAfter(0));
-    expect(host.querySelectorAll('[data-pose-option]')).toHaveLength(6);
+    expect(host.querySelectorAll('[data-pose-option]')).toHaveLength(POSE_IDS.length);
     expect(host.querySelectorAll('[data-shoe-option]')).toHaveLength(5);
     const power = host.querySelector<HTMLInputElement>('[data-power-input]')!;
     expect(power.min).toBe('1');

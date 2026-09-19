@@ -2,14 +2,16 @@ import { describe, expect, it } from 'vitest';
 import { POSES, POSE_IDS, SHOES, powerProfile } from '../../src/game/config';
 
 describe('game configuration', () => {
-  it('ships the six approved poses and five approved shoes', () => {
+  it('ships every approved pose and shoe', () => {
     expect(POSE_IDS).toEqual([
       'standing-front',
       'kneeling-front',
       'seated-chair',
       'spread-standing',
       'crouch-front',
-      'braced-back'
+      'braced-back',
+      'all-fours',
+      'kneel-folded'
     ]);
     expect(Object.keys(POSES)).toEqual(POSE_IDS);
     expect(Object.keys(SHOES)).toEqual([

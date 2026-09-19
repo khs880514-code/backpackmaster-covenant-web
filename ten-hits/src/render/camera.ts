@@ -23,7 +23,10 @@ const PRESETS: Record<PoseId, PosePreset> = {
   // Low and close: the target is on the floor for this one.
   'spread-standing': { targetY: 0.34, targetZ: 0.58, distance: 3.0, pitch: 0.2, yaw: -2.15 },
   'crouch-front': { targetY: 0.54, targetZ: 0.56, distance: 3.3, pitch: 0.08, yaw: -2.15 },
-  'braced-back': { targetY: 0.84, targetZ: 0.62, distance: 3.8, pitch: 0.1, yaw: -2.15 }
+  'braced-back': { targetY: 0.84, targetZ: 0.62, distance: 3.8, pitch: 0.1, yaw: -2.15 },
+  // Low targets, so the camera sits low with them.
+  'all-fours': { targetY: 0.52, targetZ: 0.5, distance: 3.1, pitch: 0.16, yaw: -2.15 },
+  'kneel-folded': { targetY: 0.46, targetZ: 0.5, distance: 3.0, pitch: 0.15, yaw: -2.15 }
 };
 
 export type ViewId = 'side' | 'front' | 'back' | 'top' | 'diagonal' | 'zoom';

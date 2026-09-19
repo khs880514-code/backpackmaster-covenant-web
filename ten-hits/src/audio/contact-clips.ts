@@ -35,7 +35,10 @@ export const CLIP_BY_POSE: Record<PoseId, string> = {
   'braced-back': 'pose_16',
   'seated-chair': 'pose_16',
   'kneeling-front': 'pose_11',
-  'crouch-front': 'pose_13'
+  'crouch-front': 'pose_13',
+  // Both sit near the low kneeling take's authored height.
+  'all-fours': 'pose_13',
+  'kneel-folded': 'pose_13'
 };
 
 /** Loudness relative to the recorded take. A miss never reaches the pair. */

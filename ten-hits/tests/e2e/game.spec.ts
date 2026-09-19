@@ -92,7 +92,9 @@ test('every pose can start a run', async ({ page }) => {
     'seated-chair',
     'spread-standing',
     'crouch-front',
-    'braced-back'
+    'braced-back',
+    'all-fours',
+    'kneel-folded'
   ];
 
   for (const pose of poses) {

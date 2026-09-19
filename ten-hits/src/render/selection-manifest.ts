@@ -17,7 +17,9 @@ const POSTURE_TO_POSE: Readonly<Record<string, PoseId>> = {
   UPRIGHT_KNEELING: 'kneeling-front',
   SEATED_APERTURE: 'seated-chair',
   KNEELING_LOW: 'crouch-front',
-  PRONE_SPREAD: 'spread-standing'
+  PRONE_SPREAD: 'spread-standing',
+  ALL_FOURS_LATERAL: 'all-fours',
+  KNEELING_FOLDED: 'kneel-folded'
 };
 
 /**
@@ -52,7 +54,11 @@ const PREFERRED_SOURCE: Readonly<Partial<Record<PoseId, string>>> = {
  */
 export const BORROWED_CLIP: Readonly<Partial<Record<PoseId, PoseId>>> = {
   'spread-standing': 'standing-front',
-  'braced-back': 'standing-front'
+  'braced-back': 'standing-front',
+  // Until pose-14 and pose-15 are delivered. Their own takes are already
+  // wired, so each drops in and takes over the moment its file is there.
+  'all-fours': 'crouch-front',
+  'kneel-folded': 'crouch-front'
 };
 
 export interface AttackTiming {
