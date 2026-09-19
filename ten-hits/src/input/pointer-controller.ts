@@ -1,6 +1,12 @@
 import type { Vec2 } from '../game/types';
 
 export interface PointerHandlers {
+  /**
+   * A fresh drag has started. What `pelvisMove` reports afterwards is measured
+   * from this moment, so whatever is listening has to take its bearings here
+   * rather than assume the drag begins from centre.
+   */
+  pelvisBegin?: () => void;
   pelvisMove?: (delta: Vec2) => void;
   pelvisFlick?: (direction: Vec2) => void;
   orbit?: (delta: Vec2) => void;
@@ -85,6 +91,7 @@ export function createPointerController(
 
     if (pointers.size === 1) {
       gesture = 'pelvis';
+      handlers.pelvisBegin?.();
     } else if (pointers.size >= 2) {
       gesture = 'orbit';
       pinchDistance = currentPinch();
@@ -156,6 +163,7 @@ export function createPointerController(
       remaining.startX = remaining.x;
       remaining.startY = remaining.y;
       gesture = 'pelvis';
+      handlers.pelvisBegin?.();
     }
   }
 

@@ -136,6 +136,8 @@ export function mountGame(root: HTMLElement, options: MountOptions = {}): GameAp
   let lastTime = 0;
   let rafId = 0;
   let pelvis: Vec2 = { x: 0, y: 0 };
+  /** Where the pelvis was when the current drag started. */
+  let pelvisBase: Vec2 = { x: 0, y: 0 };
   let lastPhase: GameSnapshot['phase'] = 'setup';
   let missesThisRun = 0;
 
@@ -191,6 +193,7 @@ export function mountGame(root: HTMLElement, options: MountOptions = {}): GameAp
       seed: (options.seed ?? Math.floor(Math.random() * 0xffffffff)) >>> 0
     });
     pelvis = { x: 0, y: 0 };
+    pelvisBase = { x: 0, y: 0 };
     missesThisRun = 0;
     lastPhase = 'setup';
     hud.render(engine.snapshot());
@@ -308,9 +311,16 @@ export function mountGame(root: HTMLElement, options: MountOptions = {}): GameAp
   }
 
   const pointer: PointerController = createPointerController(canvas, {
+    // Each drag continues from where the last one left off. Reading the finger
+    // as an absolute offset from wherever it touched down meant lifting it —
+    // or just letting go of a two-finger camera turn — snapped the dodge back
+    // to centre, which is the worst possible moment for it to happen.
+    pelvisBegin: () => {
+      pelvisBase = { ...pelvis };
+    },
     pelvisMove: (delta) => {
-      pelvis = delta;
-      engine.movePelvis(delta);
+      pelvis = { x: pelvisBase.x + delta.x, y: pelvisBase.y + delta.y };
+      engine.movePelvis(pelvis);
     },
     pelvisFlick: (direction) => {
       const boosted = { x: pelvis.x + direction.x * 0.34, y: pelvis.y + direction.y * 0.34 };

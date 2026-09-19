@@ -136,3 +136,52 @@ describe('pointer controller', () => {
     expect(pelvisMove).not.toHaveBeenCalled();
   });
 });
+
+describe('holding a dodge across touches', () => {
+  it('announces the start of every fresh drag', () => {
+    const surface = makeSurface();
+    const began = vi.fn();
+    createPointerController(surface, { pelvisBegin: began });
+
+    down(surface, 1, 100, 100);
+    expect(began).toHaveBeenCalledTimes(1);
+
+    up(surface, 1, 100, 100);
+    down(surface, 2, 40, 100);
+    // Lifting and touching again is a new drag, and it has to say so: the
+    // offsets it reports afterwards start from zero all over again.
+    expect(began).toHaveBeenCalledTimes(2);
+  });
+
+  it('announces it again when a camera turn drops back to one finger', () => {
+    const surface = makeSurface();
+    const began = vi.fn();
+    createPointerController(surface, { pelvisBegin: began });
+
+    down(surface, 1, 100, 100);
+    down(surface, 2, 180, 100);
+    began.mockClear();
+
+    up(surface, 2, 180, 100);
+    // The remaining finger is restarted as a fresh drag, so letting go of a
+    // two-finger camera turn used to silently recentre the dodge.
+    expect(began).toHaveBeenCalledTimes(1);
+  });
+
+  it('reports offsets from where the drag started, not from centre', () => {
+    const surface = makeSurface();
+    const moves: Array<{ x: number; y: number }> = [];
+    createPointerController(surface, { pelvisMove: (d) => moves.push(d) });
+
+    down(surface, 1, 100, 100);
+    move(surface, 1, 60, 100);
+    expect(moves.at(-1)!.x).toBeLessThan(0);
+
+    up(surface, 1, 60, 100);
+    down(surface, 2, 60, 100);
+    move(surface, 2, 60, 100);
+    // Zero from the new touch point, which is exactly why the caller has to
+    // add it to where the dodge already was rather than treat it as a place.
+    expect(moves.at(-1)!.x).toBeCloseTo(0, 6);
+  });
+});
