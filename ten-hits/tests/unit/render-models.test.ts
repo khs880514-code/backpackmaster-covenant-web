@@ -410,7 +410,8 @@ describe('aiming the authored kick', () => {
         landsAt: { x: 0, y: 0.02 + standoff, z: 1.2 },
         base: new THREE.Vector3(),
         travel: { x: 0, y: 0, z: -1 },
-        standoff
+        standoff,
+        sink: 0
       }
     });
 
@@ -506,5 +507,92 @@ describe('coming apart while the shoe is still pressing', () => {
     // The dent settles back toward the core afterwards; the collapse does not.
     overlay.apply(ruptured(0.1));
     expect(overlay.group.scale.y).toBeCloseTo(gone, 6);
+  });
+});
+
+describe('coming down onto a target the kick was aimed above', () => {
+  /** A figure with two legs: one that kicks and one she stands on. */
+  function twoLegged(sink: number) {
+    const scene = new THREE.Group();
+    const bones: Record<string, THREE.Bone> = {};
+    for (const side of ['R', 'L'] as const) {
+      const hip = new THREE.Bone();
+      hip.name = `thigh.${side}`;
+      hip.position.set(side === 'R' ? 0.1 : -0.1, 0.9, 1.2);
+      const knee = new THREE.Bone();
+      knee.name = `shin.${side}`;
+      // Not locked straight: a leg with no bend has no plane to bend in.
+      knee.position.set(0, -0.42, 0.06);
+      const ankle = new THREE.Bone();
+      ankle.name = `foot.${side}`;
+      ankle.position.set(0, -0.42, -0.06);
+      knee.add(ankle);
+      hip.add(knee);
+      scene.add(hip);
+      bones[`hip${side}`] = hip;
+      bones[`ankle${side}`] = ankle;
+    }
+
+    const rig = createCharacters('standing-front', 'pump');
+    rig.applyAttackClip({
+      poseId: 'standing-front',
+      sourceId: 'POSE_12',
+      scene,
+      animation: null,
+      timing: {
+        fps: 25,
+        telegraphSeconds: 1,
+        strikeSeconds: 0.24,
+        recoverySeconds: 2,
+        contactFrames: [50],
+        preparationFrames: [25],
+        startMode: 'STEP_IN'
+      },
+      alignment: {
+        landsAt: { x: 0.1, y: 0.06 - sink, z: 1.2 },
+        base: new THREE.Vector3(),
+        travel: { x: 0, y: 0, z: -1 },
+        standoff: 0,
+        sink
+      }
+    });
+
+    const at = (bone: THREE.Object3D): THREE.Vector3 => {
+      scene.updateMatrixWorld(true);
+      return bone.getWorldPosition(new THREE.Vector3());
+    };
+    return { rig, scene, standing: () => at(bones['ankleL']!), kicking: () => at(bones['ankleR']!) };
+  }
+
+  it('drops her hips and leaves the standing foot where it was', () => {
+    // A clip authored against a higher target used to be reached by the
+    // kicking leg alone, which held it tens of degrees off what the animator
+    // drew for the whole strike. She comes down onto it instead, the way a
+    // person kicks lower, and the standing knee takes it.
+    const sink = 0.08;
+    const { rig, scene, standing } = twoLegged(sink);
+    const planted = standing().clone();
+
+    rig.aimAttackClip({ x: 0.1, y: 0.06 - sink, z: 1.2 }, 1);
+    expect(scene.position.y).toBeCloseTo(-sink, 6);
+    expect(standing().distanceTo(planted)).toBeLessThan(0.002);
+  });
+
+  it('takes the drop up and gives it back with the attack', () => {
+    const sink = 0.08;
+    const { rig, scene } = twoLegged(sink);
+    rig.aimAttackClip({ x: 0.1, y: 0.06 - sink, z: 1.2 }, 0);
+    expect(scene.position.y).toBeCloseTo(0, 6);
+    rig.aimAttackClip({ x: 0.1, y: 0.06 - sink, z: 1.2 }, 0.5);
+    expect(scene.position.y).toBeCloseTo(-sink / 2, 6);
+  });
+
+  it('puts the kick on the target once she is down there', () => {
+    const sink = 0.08;
+    const aim = { x: 0.14, y: 0.06 - sink, z: 1.1 };
+    const { rig, kicking } = twoLegged(sink);
+    rig.aimAttackClip(aim, 1);
+    const at = kicking();
+    expect(at.distanceTo(new THREE.Vector3(aim.x, aim.y, aim.z))).toBeLessThan(0.003);
   });
 });

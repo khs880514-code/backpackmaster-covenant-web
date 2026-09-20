@@ -46,6 +46,18 @@ export interface StrikeAlignment {
    * one that stamps downward instead.
    */
   standoff: number;
+  /**
+   * How far she has to come down for the kick to reach this pose's target,
+   * in metres, never below zero.
+   *
+   * A clip authored against a higher target is lowered by dropping her hips
+   * and letting the standing knee take it, the way a person kicks lower —
+   * rather than by the kicking leg reaching down, which holds it away from
+   * what the animator drew for the whole strike. A clip aimed *under* the
+   * target gets nothing here: rising means straightening the standing leg,
+   * which it may not have left, so the kicking leg carries that instead.
+   */
+  sink: number;
 }
 
 export interface AttackClipLibrary {
@@ -82,6 +94,9 @@ export const STRIKE_BONE = 'foot.R';
  * the hip points the leg at the target and the knee makes up the distance.
  */
 export const STRIKE_CHAIN = ['thigh.R', 'shin.R'] as const;
+/** And the leg she is standing on while that one works. */
+export const STAND_BONE = 'foot.L';
+export const STAND_CHAIN = ['thigh.L', 'shin.L'] as const;
 
 /**
  * Compares names the way they survive the loader.
@@ -123,6 +138,21 @@ export function alignToTargetGuide(scene: THREE.Group): boolean {
 
 /** How many frames back the travel direction is measured over. */
 const TRAVEL_FRAMES = 4;
+
+/**
+ * The most she will drop her hips to reach a lower target, in metres.
+ *
+ * Dropping is what a person does to kick lower and it leaves the kick itself
+ * alone. The standing leg absorbs about two thirds of it and the rest takes
+ * her that much further through the floor, which the ground hides from above
+ * — where a kicking knee held tens of degrees off what was drawn is visible
+ * from everywhere. Measured, capping this at 6cm put that knee back to 14
+ * degrees to save 3cm of floor, which is the wrong way round.
+ *
+ * It is a bound rather than a budget: nothing delivered needs more than 9.5cm,
+ * and a clip that wanted far more would be the wrong clip for the pose.
+ */
+const MAX_SINK = 0.1;
 
 /**
  * Stands the attacker at the right distance and records what her kick hits.
@@ -220,7 +250,8 @@ export function alignContactToTarget(
   // And where that puts it, now that she is standing where she stands.
   poseAt(contact);
   ankleBone.getWorldPosition(ankle);
-  const landsAt: Vec3 = { x: ankle.x, y: ankle.y + standoff, z: ankle.z };
+  const sink = Math.min(MAX_SINK, Math.max(0, ankle.y + standoff - target.y));
+  const landsAt: Vec3 = { x: ankle.x, y: ankle.y + standoff - sink, z: ankle.z };
 
   // Leave the clip parked at its start; the engine owns the clock from here.
   poseAt(0);
@@ -228,7 +259,7 @@ export function alignContactToTarget(
   mixer.uncacheClip(clip);
   scene.updateMatrixWorld(true);
 
-  return { landsAt, base, travel: heading, standoff };
+  return { landsAt, base, travel: heading, standoff, sink };
 }
 
 /**

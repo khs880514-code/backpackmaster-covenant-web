@@ -11,6 +11,8 @@ import {
 import { POSES } from '../game/config';
 import { proxyForwardFor, proxyTiltFor, tetherForwardFor } from '../game/engine';
 import {
+  STAND_BONE,
+  STAND_CHAIN,
   STRIKE_BONE,
   STRIKE_CHAIN,
   clipTimeForPhase,
@@ -378,13 +380,14 @@ export function createCharacters(poseId: PoseId, shoeId: ShoeId): CharacterRig {
   let wornOutfit: Dressed = NOTHING;
   let mixer: THREE.AnimationMixer | null = null;
   let action: THREE.AnimationAction | null = null;
-  /** The kicking leg, hip first, and its ankle, so the strike can be aimed. */
-  let strikeChain: THREE.Object3D[] = [];
-  let strikeAnkle: THREE.Object3D | null = null;
+  /** The kicking leg, and the one she is standing on while it works. */
+  let kickLeg: Leg | null = null;
+  let standLeg: Leg | null = null;
 
-  /** Where the shoe strikes: off the ankle by what the animator aimed at. */
-  function contactOf(standoff: number): void {
-    strikeAnkle?.getWorldPosition(FOOT_WORLD);
+  /** Where a leg's end lands: its ankle, lifted by however far off the bone
+   * the part that touches sits. */
+  function endOf(ankle: THREE.Object3D, standoff: number): void {
+    ankle.getWorldPosition(FOOT_WORLD);
     CONTACT.copy(FOOT_WORLD).setY(FOOT_WORLD.y + standoff);
   }
 
@@ -404,15 +407,15 @@ export function createCharacters(poseId: PoseId, shoeId: ShoeId): CharacterRig {
    * left; a third is worth under a millimetre.
    */
   function solve(
+    leg: Leg,
     standoff: number,
     travel: Vec3,
-    hipBone: THREE.Object3D,
-    kneeBone: THREE.Object3D,
     blend: number
   ): void {
+    const { hip: hipBone, knee: kneeBone, ankle } = leg;
     hipBone.getWorldPosition(HIP_WORLD);
     kneeBone.getWorldPosition(KNEE_WORLD);
-    contactOf(standoff);
+    endOf(ankle, standoff);
 
     const upper = HIP_WORLD.distanceTo(KNEE_WORLD);
     const lower = KNEE_WORLD.distanceTo(CONTACT);
@@ -440,7 +443,7 @@ export function createCharacters(poseId: PoseId, shoeId: ShoeId): CharacterRig {
 
     // Now the leg is the right length, point it.
     hipBone.getWorldPosition(HIP_WORLD);
-    contactOf(standoff);
+    endOf(ankle, standoff);
     FROM.subVectors(CONTACT, HIP_WORLD);
     TO.subVectors(TARGET, HIP_WORLD);
     if (FROM.lengthSq() < 1e-8 || TO.lengthSq() < 1e-8) return;
@@ -512,19 +515,24 @@ export function createCharacters(poseId: PoseId, shoeId: ShoeId): CharacterRig {
       action = null;
     }
     attackClip = clip;
-    strikeChain = [];
-    strikeAnkle = null;
+    kickLeg = null;
+    standLeg = null;
     if (clip) {
       const found = new Map<string, THREE.Object3D>();
+      const wanted = [...STRIKE_CHAIN, STRIKE_BONE, ...STAND_CHAIN, STAND_BONE];
       clip.scene.traverse((node) => {
-        for (const name of STRIKE_CHAIN) {
+        for (const name of wanted) {
           if (!found.has(name) && sameName(node.name, name)) found.set(name, node);
         }
-        if (!strikeAnkle && sameName(node.name, STRIKE_BONE)) strikeAnkle = node;
       });
-      strikeChain = STRIKE_CHAIN.map((name) => found.get(name)).filter(
-        (bone): bone is THREE.Object3D => bone !== undefined
-      );
+      const legOf = (chain: readonly string[], end: string): Leg | null => {
+        const hip = found.get(chain[0]!);
+        const knee = found.get(chain[1]!);
+        const ankle = found.get(end);
+        return hip && knee && ankle ? { hip, knee, ankle } : null;
+      };
+      kickLeg = legOf(STRIKE_CHAIN, STRIKE_BONE);
+      standLeg = legOf(STAND_CHAIN, STAND_BONE);
       root.add(clip.scene);
       if (clip.animation) {
         mixer = new THREE.AnimationMixer(clip.scene);
@@ -597,11 +605,28 @@ export function createCharacters(poseId: PoseId, shoeId: ShoeId): CharacterRig {
     },
     aimAttackClip(aim, reach): void {
       const clip = attackClip;
-      const hipBone = strikeChain[0];
-      const kneeBone = strikeChain[1];
-      if (!clip?.alignment || !strikeAnkle || !hipBone || !kneeBone) return;
+      if (!clip?.alignment || !kickLeg) return;
       const blend = Math.min(1, Math.max(0, reach));
+      clip.scene.position.y = clip.alignment.base.y - clip.alignment.sink * blend;
       if (blend <= 0) return;
+
+      // She comes down onto a target the clip was aimed above, rather than
+      // reaching down to it with the kicking leg.
+      //
+      // A clip authored against a target 8cm higher than this pose's had the
+      // kicking knee held 33 degrees off what the animator drew, for the whole
+      // strike — a visibly different kick. Dropping her hips that 8cm and
+      // letting the standing knee take it is what a person does to kick lower,
+      // and it leaves the kick itself alone.
+      if (standLeg && clip.alignment.sink > 0) {
+        clip.scene.updateMatrixWorld(true);
+        standLeg.ankle.getWorldPosition(PLANTED);
+        PLANTED.y += clip.alignment.sink * blend;
+        TARGET.copy(PLANTED);
+        for (let pass = 0; pass < AIM_PASSES; pass += 1) {
+          solve(standLeg, 0, clip.alignment.travel, 1);
+        }
+      }
 
       // The leg is moved by how far this attack differs from where the clip
       // already lands, not onto the target outright.
@@ -630,10 +655,10 @@ export function createCharacters(poseId: PoseId, shoeId: ShoeId): CharacterRig {
       // a body placed at wind-up cannot.
       //
       clip.scene.updateMatrixWorld(true);
-      contactOf(clip.alignment.standoff);
+      endOf(kickLeg.ankle, clip.alignment.standoff);
       TARGET.copy(CONTACT).addScaledVector(OFFSET, blend);
       for (let pass = 0; pass < AIM_PASSES; pass += 1) {
-        solve(clip.alignment.standoff, clip.alignment.travel, hipBone, kneeBone, 1);
+        solve(kickLeg, clip.alignment.standoff, clip.alignment.travel, 1);
       }
     },
 
@@ -670,12 +695,20 @@ const KNEE_WORLD = new THREE.Vector3();
 const BEND_AXIS = new THREE.Vector3();
 const ARRIVAL = new THREE.Vector3();
 const OFFSET = new THREE.Vector3();
+const PLANTED = new THREE.Vector3();
 
 /**
  * How far short of locked straight, and of folded shut, the knee is held.
  * Either end is a place where the leg has no bend plane to solve in.
  */
 const JOINT_GUARD = 0.004;
+
+/** One leg's chain: the two joints that aim it and the end that lands. */
+interface Leg {
+  hip: THREE.Object3D;
+  knee: THREE.Object3D;
+  ankle: THREE.Object3D;
+}
 
 /** How many rounds the aim takes. See the note on `solve`. */
 const AIM_PASSES = 2;
