@@ -103,7 +103,7 @@ describe('applySnapshot', () => {
       squash: 0.8,
       cracking: 0.6,
       imprint: null,
-      press: 0,
+      offset: { x: 0, y: 0, z: 0 },
       core: 0.5,
       position: { x: 0, y: 0 }
     });
@@ -405,7 +405,9 @@ describe('aiming the authored kick', () => {
         startMode: 'STEP_IN'
       },
       alignment: {
-        aimedAt: { x: 0, y: 0.02, z: 1.2 },
+        // Where this leg's contact sits when it hangs straight down: the
+        // ankle at 0.02, plus however far off the bone the shoe strikes.
+        landsAt: { x: 0, y: 0.02 + standoff, z: 1.2 },
         base: new THREE.Vector3(),
         travel: { x: 0, y: 0, z: -1 },
         standoff
@@ -475,7 +477,7 @@ describe('coming apart while the shoe is still pressing', () => {
       squash: 1,
       cracking: 1,
       core: 1,
-      press: 0,
+      offset: { x: 0, y: 0, z: 0 },
       imprint: { x: 0, y: 0, z: -1, width: 0.2, depth },
       position: { x: 0, y: 0 }
     };

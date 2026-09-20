@@ -382,21 +382,14 @@ export function createTargetOverlay(): TargetOverlay {
       const sized = 1 - lean * 0.5;
       mesh.scale.setScalar(sized);
       core.scale.multiplyScalar(sized);
-      // Driven back by whatever is on it. The shoe shoves it toward the bone
-      // before it crushes it against it, so it gives way first and only then
-      // starts to dent — which is the difference between a kick arriving and
-      // a dent being switched on.
-      const shove = proxy.imprint ? Math.max(0, proxy.press) : 0;
-      const along =
-        proxy.imprint && shove > 0
-          ? Math.hypot(proxy.imprint.x, proxy.imprint.y, proxy.imprint.z) || 1
-          : 1;
+      // Driven off where it hangs by whatever is on it. The shoe shoves it
+      // toward the bone before it crushes it against it, so it gives way
+      // first and only then starts to dent — which is the difference between
+      // a kick arriving and a dent being switched on.
       group.position.set(
-        proxy.position.x + (proxy.imprint ? (proxy.imprint.x / along) * shove : 0),
-        proxy.position.y +
-          lean * TARGET_RADIUS * 0.9 +
-          (proxy.imprint ? (proxy.imprint.y / along) * shove : 0),
-        proxy.imprint ? (proxy.imprint.z / along) * shove : 0
+        proxy.position.x + proxy.offset.x,
+        proxy.position.y + lean * TARGET_RADIUS * 0.9 + proxy.offset.y,
+        proxy.offset.z
       );
     },
     dispose(): void {
@@ -550,18 +543,31 @@ export function createTargetShell(): TargetShell {
     apply(left: ProxySnapshot, right: ProxySnapshot): void {
       const pair = [left, right];
 
-      // Envelope: centred between the two, wide enough to contain both.
-      const cx = (left.position.x + right.position.x) / 2;
-      const cy = (left.position.y + right.position.y) / 2;
-      const spread = Math.abs(right.position.x - left.position.x);
-      const drop = Math.abs(right.position.y - left.position.y);
-      envelope.position.set(cx, cy, 0);
+      // Envelope: centred between the two, wide enough to contain both —
+      // including wherever a shoe has driven them. It used to be fitted to
+      // where they hang, so a kick that shoved them eight centimetres left
+      // them outside it: the pair appeared to pass straight through the skin
+      // holding it.
+      const at = (proxy: ProxySnapshot): { x: number; y: number; z: number } => ({
+        x: proxy.position.x + proxy.offset.x,
+        y: proxy.position.y + proxy.offset.y,
+        z: proxy.offset.z
+      });
+      const nearer = at(left);
+      const further = at(right);
+      const cx = (nearer.x + further.x) / 2;
+      const cy = (nearer.y + further.y) / 2;
+      const cz = (nearer.z + further.z) / 2;
+      const spread = Math.abs(further.x - nearer.x);
+      const drop = Math.abs(further.y - nearer.y);
+      const depth = Math.abs(further.z - nearer.z);
+      envelope.position.set(cx, cy, cz);
       envelope.scale.set(
         spread / 2 + TARGET_RADIUS * 1.5,
         // Close around the pair rather than reaching up to the anchor, so the
         // cords are seen descending into it instead of being hidden by it.
         TARGET_RADIUS * PROXY_HEIGHT_RATIO * 1.2 + drop / 2,
-        TARGET_RADIUS * 1.45
+        TARGET_RADIUS * 1.45 + depth / 2
       );
 
       // Cords: each from its own attachment to the body it carries. When the
@@ -571,10 +577,12 @@ export function createTargetShell(): TargetShell {
       tethers.forEach((tether, i) => {
         const proxy = pair[i]!;
         const root = attachment(i === 0 ? 'left' : 'right');
+        // Stretched to wherever the body it carries has been driven, so the
+        // cord is seen taking up the slack instead of the pair leaving it.
         to.set(
-          proxy.position.x - root.x,
-          proxy.position.y - root.y - rootY,
-          -rootZ
+          proxy.position.x + proxy.offset.x - root.x,
+          proxy.position.y + proxy.offset.y - root.y - rootY,
+          proxy.offset.z - rootZ
         );
         const length = Math.max(0.004, to.length());
         tether.position.set(root.x, root.y + rootY, rootZ);

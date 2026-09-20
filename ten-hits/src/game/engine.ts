@@ -111,6 +111,12 @@ const ESCAPE_SPAN = 0.056;
  */
 const IMPRINT_RELAX = 0.55;
 
+/**
+ * How quickly the pair swings back to where it hangs once the shoe is off it,
+ * as a fraction of the remaining distance per second.
+ */
+const SHOVE_RELEASE = 4.5;
+
 const GRADE_PRESS: Record<ImpactGrade, number> = {
   miss: 0,
   graze: 0.3,
@@ -352,7 +358,11 @@ export function createGameEngine(options: EngineOptions): GameEngine {
   };
   /** What the shoe currently on each side is doing to it, while it is on it. */
   const drives: Record<TargetSide, CrushDrive | null> = { left: null, right: null };
-  const pressed: Record<TargetSide, number> = { left: 0, right: 0 };
+  /** How far each side has been shoved off where it hangs, in its own frame. */
+  const shoved: Record<TargetSide, Vec3> = {
+    left: { x: 0, y: 0, z: 0 },
+    right: { x: 0, y: 0, z: 0 }
+  };
   let pelvis: Vec2 = { x: 0, y: 0 };
   let drift: Vec2 = { x: 0, y: 0 };
 
@@ -529,7 +539,30 @@ export function createGameEngine(options: EngineOptions): GameEngine {
       const now = crushAt(drive, progress);
       // Only ever deeper while the shoe is still going in.
       mark.depth = Math.max(mark.depth, now.depth);
-      pressed[side] = now.press;
+      // Along the line the shoe is travelling, which is the line the dent is
+      // pressed along too — so what the player sees being shoved and what
+      // they see being dented are the same shoe doing both.
+      shoved[side] = { x: mark.x * now.press, y: mark.y * now.press, z: mark.z * now.press };
+    }
+  }
+
+  /**
+   * Lets each side swing back to where it hangs once the shoe has left.
+   *
+   * Not instantly. It used to be zeroed the moment the impact ended, so the
+   * pair snapped home from wherever the shoe had driven it — which is not what
+   * anything on a cord does, and read as the displacement being a separate
+   * effect rather than the shoe having moved it.
+   */
+  function releaseShove(dt: number): void {
+    const ease = Math.min(1, dt * SHOVE_RELEASE);
+    for (const side of ['left', 'right'] as const) {
+      const at = shoved[side];
+      shoved[side] = {
+        x: at.x - at.x * ease,
+        y: at.y - at.y * ease,
+        z: at.z - at.z * ease
+      };
     }
   }
 
@@ -695,11 +728,10 @@ export function createGameEngine(options: EngineOptions): GameEngine {
         lastGrade = null;
         contactPoint = null;
         // The shoe is off it. What is left springs back toward the crush the
-        // core has taken, which is the recovery's job from here.
+        // core has taken, and swings home on its cord, which is the recovery's
+        // job from here.
         drives.left = null;
         drives.right = null;
-        pressed.left = 0;
-        pressed.right = 0;
         break;
       case 'recovery':
         beginTelegraph();
@@ -746,15 +778,26 @@ export function createGameEngine(options: EngineOptions): GameEngine {
         // pair could not get out of the way of.
         const drive = Math.min(1, phaseTime / impactHold(lastGrade, pendingResult !== null));
         const end = sampleFootPath(plan, 1);
+        // Along the line the foot is already travelling, not straight back
+        // into the body. Driving it along -Z sent the shoe one way and the
+        // pair it is pushing another, because what the pair is shoved along
+        // is the direction of the blow.
+        const [, , approach] = plan.path;
+        const tx = end.x - approach.x;
+        const ty = end.y - approach.y;
+        const tz = end.z - approach.z;
+        const span = Math.hypot(tx, ty, tz) || 1;
+        const through = followThroughDepth(power.level) * drive;
         footWorld = {
-          x: end.x,
-          y: end.y,
-          z: end.z - followThroughDepth(power.level) * drive
+          x: end.x + (tx / span) * through,
+          y: end.y + (ty / span) * through,
+          z: end.z + (tz / span) * through
         };
         updateInstep(plan);
         crushProgress(drive);
       } else {
         relaxImprints(dt);
+        releaseShove(dt);
       }
       if (run.phase === 'recovery' && plan) {
         const ease = Math.min(1, phaseTime / Math.max(dt, plan.recoveryDuration));
@@ -780,7 +823,7 @@ export function createGameEngine(options: EngineOptions): GameEngine {
       cracking: crackingFactor(state),
       core: Math.min(1, Math.max(0, state.permanent)),
       imprint: imprints[side] ? { ...imprints[side]! } : null,
-      press: pressed[side],
+      offset: { ...shoved[side] },
       position: { x: body.position.x, y: body.position.y }
     };
   }

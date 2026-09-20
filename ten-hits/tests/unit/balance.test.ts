@@ -5,8 +5,8 @@ import {
   followThroughDepth,
   PROXY_FORWARD
 } from '../../src/game/engine';
-import { SHOES, SHOE_IDS } from '../../src/game/config';
-import { createTargetOverlay } from '../../src/render/targets';
+import { POSE_IDS, SHOES, SHOE_IDS } from '../../src/game/config';
+import { createTargetOverlay, createTargetShell } from '../../src/render/targets';
 import type { GameSnapshot, ImpactGrade, ShoeId } from '../../src/game/types';
 
 /**
@@ -184,7 +184,7 @@ describe('damage progression', () => {
         squash,
         cracking: 0,
         imprint: null,
-        press: 0,
+        offset: { x: 0, y: 0, z: 0 },
         core: 0,
         position: { x: 0, y: 0 }
       });
@@ -528,7 +528,8 @@ describe('the kick that lands', () => {
       if (snapshot.phase !== 'impact') continue;
       for (const proxy of snapshot.proxies) {
         const depth = proxy.imprint?.depth ?? 0;
-        if (proxy.press > 0 && depth === 0) shovedBeforeDenting = true;
+        const shove = Math.hypot(proxy.offset.x, proxy.offset.y, proxy.offset.z);
+        if (shove > 0 && depth === 0) shovedBeforeDenting = true;
         if (depth > 0) denting = true;
       }
       if (denting) break;
@@ -683,5 +684,83 @@ describe('the kick that lands', () => {
       }
     }
     throw new Error('no contact was reviewed');
+  });
+});
+
+describe('what the shoe does to where the pair sits', () => {
+  it('eases it home instead of snapping it back', () => {
+    // A thing on a cord does not teleport. The displacement used to be zeroed
+    // the moment the impact ended, so the pair jumped home from wherever the
+    // shoe had driven it — which read as the shove being a separate effect
+    // rather than the shoe having moved it.
+    const engine = createGameEngine({
+      pose: 'standing-front',
+      shoe: 'stiletto',
+      power: 9,
+      seed: 4
+    });
+    engine.start();
+
+    const reach = (snapshot: ReturnType<typeof engine.snapshot>): number =>
+      Math.max(
+        ...snapshot.proxies.map((proxy) =>
+          Math.hypot(proxy.offset.x, proxy.offset.y, proxy.offset.z)
+        )
+      );
+
+    let shoved = 0;
+    const releasing: number[] = [];
+    for (let i = 0; i < 60 * 300; i += 1) {
+      const snapshot = engine.update(1 / 60);
+      if (snapshot.phase === 'impact' && releasing.length === 0) {
+        shoved = Math.max(shoved, reach(snapshot));
+        continue;
+      }
+      // Only the one recovery that follows: the attack after it shoves the
+      // pair again, which is not this coming home.
+      if (shoved > 0 && snapshot.phase === 'recovery') releasing.push(reach(snapshot));
+      if (releasing.length > 0 && snapshot.phase !== 'recovery') break;
+    }
+
+    expect(shoved).toBeGreaterThan(0.02);
+    // Still most of the way out on the frame after the shoe leaves, coming
+    // home every frame after that, and nearly back by the next attack.
+    expect(releasing.length).toBeGreaterThan(20);
+    expect(releasing[0]!).toBeGreaterThan(shoved * 0.8);
+    for (let i = 1; i < releasing.length; i += 1) {
+      expect(releasing[i]!).toBeLessThan(releasing[i - 1]!);
+    }
+    expect(releasing[releasing.length - 1]!).toBeLessThan(shoved * 0.2);
+  });
+
+  it('keeps the pair inside the envelope that is holding it', () => {
+    // The envelope used to be fitted to where the pair hangs while the pair
+    // itself was being driven off it, so a kick put it two envelope-widths
+    // out — it appeared to pass straight through the skin around it.
+    for (const pose of POSE_IDS) {
+      const shell = createTargetShell();
+      const envelope = shell.group.children.find((child) => child.name !== 'tether')!;
+      const engine = createGameEngine({ pose, shoe: 'stiletto', power: 9, seed: 4 });
+      engine.start();
+
+      let furthest = 0;
+      for (let i = 0; i < 60 * 300; i += 1) {
+        const snapshot = engine.update(1 / 60);
+        shell.apply(snapshot.proxies[0], snapshot.proxies[1]);
+        for (const proxy of snapshot.proxies) {
+          furthest = Math.max(
+            furthest,
+            Math.hypot(
+              (proxy.position.x + proxy.offset.x - envelope.position.x) / envelope.scale.x,
+              (proxy.position.y + proxy.offset.y - envelope.position.y) / envelope.scale.y,
+              (proxy.offset.z - envelope.position.z) / envelope.scale.z
+            )
+          );
+        }
+        if (snapshot.phase === 'won' || snapshot.phase === 'lost') break;
+      }
+      expect(furthest).toBeLessThanOrEqual(1);
+      shell.dispose();
+    }
   });
 });

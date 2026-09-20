@@ -603,6 +603,22 @@ export function createCharacters(poseId: PoseId, shoeId: ShoeId): CharacterRig {
       const blend = Math.min(1, Math.max(0, reach));
       if (blend <= 0) return;
 
+      // The leg is moved by how far this attack differs from where the clip
+      // already lands, not onto the target outright.
+      //
+      // The clip is stood so its contact falls on the pair's resting place, so
+      // the only thing left to correct is the player having moved it — a few
+      // centimetres, a few degrees of leg. Solving for the absolute point
+      // instead dragged the foot onto the contact from the first frame of the
+      // strike, while the authored leg was still cocked behind her: measured,
+      // 61 degrees at the hip, 57 at the knee, and 29-degree jumps between
+      // frames. That is the awkward leg.
+      OFFSET.set(
+        aim.x - clip.alignment.landsAt.x,
+        aim.y - clip.alignment.landsAt.y,
+        aim.z - clip.alignment.landsAt.z
+      );
+
       // Bend the kicking leg until the part of the shoe that arrives is on
       // what this attack is aimed at.
       //
@@ -614,9 +630,10 @@ export function createCharacters(poseId: PoseId, shoeId: ShoeId): CharacterRig {
       // a body placed at wind-up cannot.
       //
       clip.scene.updateMatrixWorld(true);
-      TARGET.set(aim.x, aim.y, aim.z);
+      contactOf(clip.alignment.standoff);
+      TARGET.copy(CONTACT).addScaledVector(OFFSET, blend);
       for (let pass = 0; pass < AIM_PASSES; pass += 1) {
-        solve(clip.alignment.standoff, clip.alignment.travel, hipBone, kneeBone, blend);
+        solve(clip.alignment.standoff, clip.alignment.travel, hipBone, kneeBone, 1);
       }
     },
 
@@ -652,6 +669,7 @@ const TARGET = new THREE.Vector3();
 const KNEE_WORLD = new THREE.Vector3();
 const BEND_AXIS = new THREE.Vector3();
 const ARRIVAL = new THREE.Vector3();
+const OFFSET = new THREE.Vector3();
 
 /**
  * How far short of locked straight, and of folded shut, the knee is held.
@@ -725,16 +743,20 @@ function solveKnee(hip: THREE.Vector3, foot: THREE.Vector3): THREE.Vector3 {
 }
 
 /**
- * How much of the aim correction the leg is carrying right now.
+ * How much of the dodge the leg is following.
  *
- * Nothing before the wind-up starts, all of it from the moment the strike
- * begins until the foot is back under her, and handed back over the recovery.
+ * Taken up over the wind-up, held through the strike and the impact so the
+ * shoe stays on what it is hitting, and given back as she recovers.
  */
 function aimReach(snapshot: GameSnapshot): number {
   switch (snapshot.phase) {
-    case 'telegraph':
-      return snapshot.phaseProgress;
+    // Eased in across the strike rather than held at full strength through
+    // it. The same offset needs a bigger turn of the leg the straighter the
+    // leg is, so carrying all of it from the first frame makes the wind-up
+    // wrench rather than the contact adjust. All of it by the contact, which
+    // is the only frame that has to be exact.
     case 'strike':
+      return snapshot.phaseProgress * snapshot.phaseProgress;
     case 'impact':
       return 1;
     case 'recovery':
@@ -743,6 +765,8 @@ function aimReach(snapshot: GameSnapshot): number {
       return 0;
   }
 }
+
+
 
 /** Copies one immutable snapshot onto the rig. Pure presentation, no logic. */
 export function applySnapshot(rig: CharacterRig, snapshot: GameSnapshot): void {
