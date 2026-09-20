@@ -85,6 +85,10 @@ test('the review menu drives the camera without page errors', async ({ page }) =
 });
 
 test('every pose can start a run', async ({ page }) => {
+  // Eight full boots of the app, each loading the authored figure and clip.
+  // On the tallest viewport, software-rendered, that is more than the default
+  // budget allows and it was timing out on a game that was working fine.
+  test.slow();
   const errors = collectPageErrors(page);
   const poses = [
     'standing-front',

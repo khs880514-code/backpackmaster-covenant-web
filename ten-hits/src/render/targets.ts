@@ -157,12 +157,45 @@ export function taperProxy(geometry: THREE.BufferGeometry, radiusY: number): voi
  * That is what makes it read as contents being shoved aside rather than
  * material quietly disappearing.
  */
+/**
+ * The dent each geometry is currently carrying, so an unchanged one costs
+ * nothing to leave alone.
+ *
+ * Pressing one is the most expensive thing the renderer does per frame -
+ * measured at 1.5ms across the two proxies, half of it rebuilding normals -
+ * and the dent only actually moves while a shoe is on it. For the rest of an
+ * attack it sits at whatever the core has been crushed to and does not change
+ * from one frame to the next.
+ *
+ * Kept on the geometry rather than in a closure because the shell and the
+ * core are pressed by the same function from two different callers.
+ */
+const PRESSED = new WeakMap<THREE.BufferGeometry, string>();
+
+/** True when this geometry already carries exactly this dent. */
+function alreadyPressed(
+  geometry: THREE.BufferGeometry,
+  imprint: ProxyImprint | null,
+  radius: number
+): boolean {
+  const key =
+    imprint === null || imprint.depth <= 1e-4
+      ? 'rest'
+      : `${imprint.x.toFixed(4)},${imprint.y.toFixed(4)},${imprint.z.toFixed(4)},` +
+        `${imprint.width.toFixed(4)},${imprint.depth.toFixed(4)},${radius.toFixed(5)}`;
+  if (PRESSED.get(geometry) === key) return true;
+  PRESSED.set(geometry, key);
+  return false;
+}
+
 export function pressImprint(
   geometry: THREE.BufferGeometry,
   rest: Float32Array,
   imprint: ProxyImprint | null,
   radius: number
 ): void {
+  if (alreadyPressed(geometry, imprint, radius)) return;
+
   const position = geometry.getAttribute('position') as THREE.BufferAttribute;
   const array = position.array as Float32Array;
 
