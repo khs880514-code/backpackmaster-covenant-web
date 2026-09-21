@@ -20,6 +20,10 @@ body {
 
 #canvas {
 	display: block;
+	position: absolute;
+	top: 0;
+	left: 0;
+	touch-action: none;
 }
 
 #canvas:focus {
@@ -117,6 +121,247 @@ GODOT_CONFIG.locale = requestedLocale || navigator.language || 'en';
 document.documentElement.lang = GODOT_CONFIG.locale.toLowerCase().startsWith('ko') ? 'ko' : 'en';
 const GODOT_THREADS_ENABLED = false;
 const SPLIT_PACK_MANIFEST = 'index.pck.d7c0d1d7c915871a.parts.json';
+// The shell drives canvas sizing so the render resolution is not tied to CSS pixels.
+GODOT_CONFIG.canvasResizePolicy = 0;
+
+const RenderQuality = (function () {
+	const canvas = document.getElementById('canvas');
+	const STORAGE_KEY = 'bmc.renderScale';
+	const MIN_SCALE = 0.5;
+	const MAX_SCALE = 4;
+	// 'low' pins one render pixel per CSS pixel, 'native' follows the display
+	// density, and the supersampling presets aim above it when there is headroom.
+	const PRESETS = ['low', 'native', 'high', 'ultra'];
+	const SUPERSAMPLE_TARGETS = { high: 2, ultra: 3 };
+	const DEFAULT_PRESET = 'high';
+	const params = new URLSearchParams(window.location.search);
+
+	let requested = DEFAULT_PRESET;
+	let current = null;
+	let resizeHandle = 0;
+	let guardRunning = false;
+
+	function clamp(value, low, high) {
+		return Math.min(high, Math.max(low, value));
+	}
+
+	function readStored() {
+		try {
+			return window.localStorage.getItem(STORAGE_KEY);
+		} catch (err) {
+			return null;
+		}
+	}
+
+	function writeStored(value) {
+		try {
+			window.localStorage.setItem(STORAGE_KEY, String(value));
+		} catch (err) {
+			// Private browsing and blocked storage are not fatal.
+		}
+	}
+
+	function normalize(value) {
+		if (value === null || value === undefined) {
+			return null;
+		}
+		const text = String(value).trim().toLowerCase();
+		if (PRESETS.indexOf(text) !== -1) {
+			return text;
+		}
+		const numeric = Number.parseFloat(text);
+		if (Number.isFinite(numeric) && numeric > 0) {
+			return clamp(numeric, MIN_SCALE, MAX_SCALE);
+		}
+		return null;
+	}
+
+	function devicePixelScale() {
+		return clamp(window.devicePixelRatio || 1, 1, MAX_SCALE);
+	}
+
+	function isHandheld() {
+		const coarse = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+		return !!coarse || Math.min(window.innerWidth, window.innerHeight) < 600;
+	}
+
+	function pixelBudget() {
+		return isHandheld() ? 2500000 : 5000000;
+	}
+
+	function resolveScale(cssWidth, cssHeight) {
+		if (typeof requested === 'number') {
+			return requested;
+		}
+		const devicePixels = devicePixelScale();
+		if (requested === 'low') {
+			return 1;
+		}
+		if (requested === 'native') {
+			return devicePixels;
+		}
+		// Supersample beyond the display density when the GPU budget allows it, but
+		// never drop below what the display itself asks for.
+		const budget = pixelBudget();
+		let scale = Math.max(devicePixels, SUPERSAMPLE_TARGETS[requested]);
+		while (scale > devicePixels && cssWidth * cssHeight * scale * scale > budget) {
+			scale -= 0.25;
+		}
+		return clamp(scale, devicePixels, MAX_SCALE);
+	}
+
+	function apply() {
+		const cssWidth = Math.max(1, Math.round(window.innerWidth));
+		const cssHeight = Math.max(1, Math.round(window.innerHeight));
+		const scale = resolveScale(cssWidth, cssHeight);
+		const width = Math.max(1, Math.round(cssWidth * scale));
+		const height = Math.max(1, Math.round(cssHeight * scale));
+		if (canvas.style.width !== `${cssWidth}px` || canvas.style.height !== `${cssHeight}px`) {
+			canvas.style.width = `${cssWidth}px`;
+			canvas.style.height = `${cssHeight}px`;
+		}
+		if (canvas.width !== width || canvas.height !== height) {
+			canvas.width = width;
+			canvas.height = height;
+		}
+		current = {
+			requested: requested,
+			scale: scale,
+			devicePixelRatio: window.devicePixelRatio || 1,
+			cssSize: [cssWidth, cssHeight],
+			renderSize: [width, height],
+		};
+		return current;
+	}
+
+	function scheduleApply() {
+		if (resizeHandle) {
+			return;
+		}
+		resizeHandle = window.requestAnimationFrame(() => {
+			resizeHandle = 0;
+			apply();
+		});
+	}
+
+	function watchPixelRatio() {
+		if (!window.matchMedia) {
+			return;
+		}
+		const query = window.matchMedia(`(resolution: ${window.devicePixelRatio || 1}dppx)`);
+		const onChange = () => {
+			scheduleApply();
+			watchPixelRatio();
+		};
+		if (query.addEventListener) {
+			query.addEventListener('change', onChange, { once: true });
+		} else if (query.addListener) {
+			query.addListener(onChange);
+		}
+	}
+
+	// Supersampling is the first thing to go if the device cannot keep a smooth
+	// frame rate; auto mode never falls below the display's own pixel density,
+	// so the worst case is exactly what the browser would render without it.
+	function startPerformanceGuard() {
+		if (guardRunning || typeof requested !== 'string' || requested === 'low' || requested === 'native') {
+			return;
+		}
+		guardRunning = true;
+		const SAMPLE_MS = 4000;
+		const MIN_FPS = 45;
+		let windowStart = 0;
+		let frames = 0;
+		let slowWindows = 0;
+		let downgrades = 0;
+
+		function tick(now) {
+			if (!current || current.scale <= devicePixelScale() || downgrades >= 3) {
+				guardRunning = false;
+				return;
+			}
+			if (document.visibilityState !== 'visible') {
+				windowStart = 0;
+				frames = 0;
+			} else if (windowStart === 0) {
+				windowStart = now;
+				frames = 0;
+			} else {
+				frames += 1;
+				const elapsed = now - windowStart;
+				if (elapsed >= SAMPLE_MS) {
+					const fps = (frames * 1000) / elapsed;
+					slowWindows = fps < MIN_FPS ? slowWindows + 1 : 0;
+					if (slowWindows >= 2) {
+						slowWindows = 0;
+						downgrades += 1;
+						set(Math.max(devicePixelScale(), current.scale - 0.5), { persist: false });
+					}
+					windowStart = now;
+					frames = 0;
+				}
+			}
+			window.requestAnimationFrame(tick);
+		}
+
+		window.requestAnimationFrame(tick);
+	}
+
+	function set(value, options) {
+		const normalized = normalize(value);
+		if (normalized === null) {
+			return current;
+		}
+		requested = normalized;
+		if (!options || options.persist !== false) {
+			writeStored(normalized);
+		}
+		return apply();
+	}
+
+	const fromUrl = normalize(params.get('render_scale')) ?? normalize(params.get('quality'));
+	requested = fromUrl ?? normalize(readStored()) ?? DEFAULT_PRESET;
+	if (fromUrl !== null) {
+		// A shared "?quality=..." link should survive a reload.
+		writeStored(fromUrl);
+	}
+
+	apply();
+	window.addEventListener('resize', scheduleApply, false);
+	window.addEventListener('orientationchange', scheduleApply, false);
+	['fullscreenchange', 'webkitfullscreenchange', 'mozfullscreenchange', 'MSFullscreenChange'].forEach((name) => {
+		document.addEventListener(name, scheduleApply, false);
+	});
+	// Mobile browsers do not always fire 'resize' for toolbar and keyboard
+	// transitions, so reconcile periodically as well. apply() is a no-op when
+	// nothing changed.
+	window.setInterval(scheduleApply, 2000);
+	watchPixelRatio();
+
+	return {
+		apply: apply,
+		set: set,
+		startPerformanceGuard: startPerformanceGuard,
+		status: () => current,
+	};
+}());
+
+// Ask for the discrete GPU on multi-GPU machines; the engine only requests a
+// default-power context, which often lands on the integrated chip.
+(function preferHighPerformanceGPU() {
+	const canvas = document.getElementById('canvas');
+	const getContext = canvas.getContext.bind(canvas);
+	canvas.getContext = function (type, attributes) {
+		if (typeof type === 'string' && type.startsWith('webgl')) {
+			return getContext(type, Object.assign({}, attributes, { powerPreference: 'high-performance' }));
+		}
+		return getContext(type, attributes);
+	};
+}());
+
+window.set_render_scale = (value) => RenderQuality.set(value);
+window.get_render_scale = () => RenderQuality.status();
+
 const engine = new Engine(GODOT_CONFIG);
 const WEB_STATE = {
 	mode: 'loading',
@@ -131,6 +376,7 @@ window.render_game_to_text = () => JSON.stringify({
 		width: document.getElementById('canvas').width,
 		height: document.getElementById('canvas').height,
 	},
+	render: RenderQuality.status(),
 	package: {
 		loaded: WEB_STATE.packageBytesLoaded,
 		total: WEB_STATE.packageBytesTotal,
@@ -284,6 +530,7 @@ window.render_game_to_text = () => JSON.stringify({
 		})).then(() => {
 			WEB_STATE.mode = 'running';
 			setStatusMode('hidden');
+			RenderQuality.startPerformanceGuard();
 		}, displayFailureNotice);
 	}
 }());
