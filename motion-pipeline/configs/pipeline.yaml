@@ -1,0 +1,86 @@
+# Defaults for every source. A file in configs/sources/ overrides any of it,
+# and --set key=value on the command line overrides that. The resolved result
+# is written into each run directory, so a report can always be traced back to
+# the settings that produced it.
+
+source:
+  # Path to the reference footage, relative to the project root. Leave unset
+  # to run on the built-in fixture instead of video.
+  video: null
+  title: ""
+  # trim: {start: 2.5, end: 6.0}   # seconds into the source
+
+preprocess:
+  fps: 30              # every later stage assumes a constant rate
+  height: 1080         # scale to this height; null keeps the source size
+  deinterlace: false   # older camcorder footage
+  stabilize: false     # hand-held; crops as it works
+  crf: 16              # quality of the normalized copy, lower is better
+
+pose2d:
+  backend: synthetic   # mediapipe | openpose_json | synthetic
+  every: 1             # detect on every Nth frame
+  mediapipe:
+    complexity: 2      # 0,1,2 — 2 is slowest and steadiest
+    min_confidence: 0.5
+
+pose3d:
+  backend: synthetic   # synthetic | npz_import | subprocess
+  # npz_import:
+  #   path: data/recovered/take01.npz
+  #   up: y            # y | -y | z  — the axis the source calls up
+  #   forward: z       # z | -z
+  #   scale: 1.0       # multiply into metres
+  # subprocess:
+  #   command: ["python", "-m", "hmr2.demo", "--video", "{video}", "--out", "{out}"]
+  #   output: motion.npz
+  #   up: y
+
+contact:
+  # When a foot counts as planted. Metres and metres per second.
+  height: 0.06
+  enter_speed: 0.25
+  exit_speed: 0.45     # above enter_speed, so contact cannot flicker
+  min_duration: 0.08
+  max_gap: 0.05
+
+quality:
+  allow_poor: false    # true continues past a FAIL
+  thresholds: {}       # e.g. jitter: {warn_above: 8, fail_above: 20}
+
+cleanup:
+  rigidify: true
+  smooth_seconds: 0.23 # measured: 0.10 is 3 frames at 30fps and makes it worse
+  smooth_order: 2
+  pelvis_seconds: 0.25
+  pelvis_strength: 0.7
+  drift: level         # none | level | stationary
+  foot_lock: true
+  lock_blend: 0.08
+  lock_ik: 1.0
+
+retarget:
+  name: Demonstrator
+  stand_in: true       # build a legible body when no character is given
+  export: motion.glb   # .glb or .fbx beside the .blend; null to skip
+
+presets:
+  use: [standing, kneeling, turned_away, prone, seated]
+
+cameras:
+  use: [front, side]
+
+scene:
+  stature: 1.75        # the partner's height in metres
+  ground: 10.0
+  character: null      # a .blend whose armature uses the pipeline's joint names
+
+render:
+  quality: final       # playblast | final
+  width: 1920
+  height: 1080
+  samples: 32
+  step: 1
+  crf: 18
+  side_by_side: true
+  keep_frames: false

@@ -1,0 +1,5 @@
+# Back turned. The geometry changes more than the distance does, which is the
+# point of having it as its own preset rather than a camera angle.
+posture: turned_away
+description: "upright, back to the demonstrator"
+distance: 0.90

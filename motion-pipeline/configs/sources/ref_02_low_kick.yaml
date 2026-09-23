@@ -1,0 +1,13 @@
+# One reference take. Point `video` at the footage and switch the backends
+# to the ones `mocap doctor` says are installed.
+source:
+  title: "Low kick to the thigh"
+  video: null        # e.g. data/reference/ref_02_low_kick.mp4
+  # trim: {start: 0.0, end: 4.0}
+
+pose2d:
+  backend: synthetic   # -> mediapipe once it is installed
+pose3d:
+  backend: synthetic   # -> subprocess or npz_import for a real recovery
+  synthetic:
+    target_height: 0.52

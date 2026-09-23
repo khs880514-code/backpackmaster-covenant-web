@@ -1,0 +1,6 @@
+# The partner upright and square on. The reference situation: everything else
+# is a departure from it.
+posture: standing
+description: "upright, square on, weight even"
+distance: 1.05      # metres between the two figures
+offset: 0.0         # sideways, for a technique taken off the line

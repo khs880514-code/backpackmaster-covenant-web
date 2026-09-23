@@ -1,0 +1,10 @@
+# The built-in reference motion. No video, no model weights, no network:
+# this is what `mocap demo` runs, and what every change should be exercised
+# against before it goes near real footage.
+source:
+  title: "Front kick — generated fixture"
+  video: null
+pose2d:
+  backend: synthetic
+pose3d:
+  backend: synthetic

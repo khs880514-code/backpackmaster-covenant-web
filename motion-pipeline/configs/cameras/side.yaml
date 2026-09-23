@@ -1,0 +1,6 @@
+# From the demonstrator's left. Reads the distance and the depth, which the
+# front camera flattens.
+yaw: 90
+pitch: 5
+distance: 4.0
+lens: 50
