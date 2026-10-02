@@ -20,6 +20,7 @@
   --z2: #e3b44f;
   --z3: #ee8a4a;
   --z4: #e5534b;
+  --z5: #b455d6;
   --font-body: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
   color-scheme: dark;
@@ -86,6 +87,17 @@ select { font: inherit; font-size: 13.5px; background: var(--panel-2); color: va
 .after ol { margin: 0; padding: 0; list-style: none; display: grid; gap: 4px; }
 .after li { font-size: 13.5px; padding: 6px 10px; border-radius: 6px; background: var(--panel-2); border-left: 4px solid var(--z1); }
 
+.load { display: grid; gap: 8px; }
+.meter { position: relative; height: 16px; border-radius: 8px; background: var(--panel-2); overflow: hidden; display: flex; }
+.meter .seg5 { height: 100%; opacity: .35; }
+.meter .fill { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: rgba(255,255,255,.9); mix-blend-mode: overlay; border-right: 3px solid var(--fg); transition: width .25s; }
+.meter-ticks { display: flex; font-size: 11px; color: var(--muted); }
+.meter-ticks span { text-align: center; }
+.warnbox { font-size: 13.5px; padding: 9px 12px; border-radius: 8px; background: var(--panel-2); border-left: 4px solid var(--z2); }
+.todo { font-size: 13.5px; padding: 9px 12px; border-radius: 8px; background: var(--panel-2); border-left: 4px solid var(--accent); }
+.two { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+.two ul { margin: 0; padding-left: 18px; font-size: 13.5px; color: var(--muted); display: grid; gap: 3px; }
+.two h3 { margin: 0 0 6px; font-size: 14px; }
 .chart { display: grid; gap: 6px; }
 .bars { position: relative; height: 130px; display: grid; grid-template-columns: repeat(11, 1fr); gap: 4px; align-items: end; padding-top: 4px; }
 .bars button { all: unset; cursor: pointer; display: flex; flex-direction: column; justify-content: flex-end; align-items: stretch; height: 100%; position: relative; z-index: 1; }
@@ -186,10 +198,25 @@ h2 { font-size: 17px; margin: 0; text-wrap: balance; }
       </div>
       <input type="range" id="power" min="1" max="11" step="1" value="6">
     </div>
+    <div class="row" id="repRow">
+      <div class="power-head">
+        <label class="label" for="reps">연속 타격 횟수 (누적에만 반영돼요)</label>
+        <div class="power-val" id="repsVal">1<small>회</small></div>
+      </div>
+      <input type="range" id="reps" min="1" max="6" step="1" value="1">
+    </div>
+    <div class="row" id="holdRow" hidden>
+      <div class="power-head">
+        <label class="label" for="hold">쥐고 있는 시간</label>
+        <div class="power-val" id="holdVal">2<small>초</small></div>
+      </div>
+      <input type="range" id="hold" min="1" max="10" step="1" value="2">
+    </div>
     <div class="controls">
       <button class="play" id="play">▶ 재생</button>
       <label class="toggle"><input type="checkbox" id="autoSlow" checked> 맞는 순간 자동 슬로우</label>
       <label class="toggle"><input type="checkbox" id="xray"> 항상 투시</label>
+      <label class="toggle"><input type="checkbox" id="accident"> 수업 중 사고 상황으로 보기</label>
       <select id="speed" aria-label="재생 속도">
         <option value="1">실제 속도</option>
         <option value="0.25">1/4 속도</option>
@@ -212,6 +239,12 @@ h2 { font-size: 17px; margin: 0; text-wrap: balance; }
       <div class="stat"><div class="k">최대 눌림</div><div class="v" id="vSquash">-</div></div>
     </div>
     <div class="verdict" id="verdict"><b id="vZone">-</b><span id="vZoneDesc">-</span></div>
+    <div class="load">
+      <div class="label">누적 부담 · 힘 × 횟수(또는 쥐고 있는 시간)를 합친 값</div>
+      <div class="meter" id="meter"></div>
+      <div class="meter-ticks" id="meterTicks"></div>
+      <div class="warnbox" id="loadWarn"></div>
+    </div>
     <div class="surface" id="surface">-</div>
     <div class="after">
       <div class="label">맞은 뒤 몸에서 일어나는 일 (이 힘일 때)</div>
@@ -226,6 +259,37 @@ h2 { font-size: 17px; margin: 0; text-wrap: balance; }
         <span><i style="background:var(--z2)"></i>강한 통증</span>
         <span><i style="background:var(--z3)"></i>행동불능 가능</span>
         <span><i style="background:var(--z4)"></i>부상 위험</span>
+        <span><i style="background:var(--z5)"></i>중대한 부상 위험(누적)</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" aria-label="수업 중 사고">
+    <h2 id="accTitle">수업 중 실수로 맞았다면 (남성 수강생 기준)</h2>
+    <p class="note" style="border:0;padding:0">연습 중 보호대 없이, 또는 통제를 잃은 힘으로 급소를 맞는 사고를 가정한 화면이에요. 위에서 고른 힘·횟수·시간 그대로 적용돼요.</p>
+    <div class="verdict" id="accVerdict"><b id="accStage">-</b><span id="accDesc">-</span></div>
+    <div class="todo" id="accTodo">-</div>
+    <div class="two">
+      <div>
+        <h3>이런 신호가 있으면 바로 병원(응급실)</h3>
+        <ul>
+          <li>통증이 1시간 넘게 이어지거나 점점 심해져요</li>
+          <li>구토·식은땀이 반복되거나 정신이 아찔해요</li>
+          <li>한쪽이 크게 붓거나 시퍼렇게 멍이 번져요</li>
+          <li>한쪽 고환이 위로 올라붙거나 비틀린 느낌이 있어요</li>
+          <li>소변에 피가 섞이거나 소변을 못 봐요</li>
+        </ul>
+        <p class="note" style="border:0;padding:6px 0 0">혈관이 꼬이는 염전은 대략 6시간 안에 처치해야 고환을 지킬 확률이 높아요. "참아 보자"가 가장 위험해요.</p>
+      </div>
+      <div>
+        <h3>수업에서 막는 방법</h3>
+        <ul>
+          <li>급소 연습은 반드시 보호컵 + 타깃 패드로만 해요</li>
+          <li>사람 대상 연습은 힘 1~3, "닿기 직전에 멈추기"로 해요</li>
+          <li>힘 10~11은 패드에만, 사람에게 쓰지 않아요</li>
+          <li>쥐고 비틀기는 "닿는 것"까지만 하고 실제로 쥐지 않아요</li>
+          <li>"스톱" 신호가 나오면 즉시 멈추고, 시작 전에 파트너와 신호를 정해요</li>
+        </ul>
       </div>
     </div>
   </section>
@@ -288,6 +352,20 @@ h2 { font-size: 17px; margin: 0; text-wrap: balance; }
     { max: 1e9, name: "부상 위험",     color: "--z4", desc: "고환이 다칠(파열 등) 수 있는 구간이에요. 실제 위협 상황에서만 쓰는 힘이에요.",
       after: ["즉시 · 극심한 통증으로 쓰러져요", "수 초 · 구토·식은땀·정신이 아찔해질 수 있어요", "그 뒤 · 심한 부기가 생길 수 있어 의료 처치가 필요할 수 있어요"] }
   ];
+  // 5th stage only reachable through accumulated load (many hits, or gripping too long)
+  const ZONE5 = { name: "중대한 부상 위험(누적)", color: "--z5", desc: "힘을 너무 크게, 너무 여러 번, 또는 너무 오래 가했을 때예요. 어떤 호신술 상황에서도 '필요 이상'이고, 수업 중이면 사고예요.",
+    after: ["즉시 · 극심한 통증으로 쓰러지고 구토·실신이 올 수 있어요", "수 분 · 음낭 안에서 출혈(혈종)이 생겨 크게 붓고 시퍼렇게 멍들 수 있어요", "고환을 감싼 막이 찢어지는 파열, 혈관이 꼬이는 염전이 생길 수 있어요 — 수술이 필요하고 늦으면 고환을 잃을 수 있어요", "그 뒤 · 소변에 피, 감염, 장기적으로는 회복 후에도 통증·위축이 남을 수 있어요"] };
+  ZONES.forEach((z, i) => { z.todo = [
+    "특별한 조치는 필요 없어요. 잠깐 쉬었다가 다시 해도 돼요.",
+    "훈련을 멈추고 1~2분 쉬어요. 통증이 가라앉는지 지켜봐요. 천으로 감싼 얼음찜질이 도움이 돼요.",
+    "즉시 중단하고 눕거나 무릎을 굽혀 쉬어요. 천으로 감싼 냉찜질 10~15분. 1시간 넘게 아프거나 붓기·구토가 있으면 병원에 가요.",
+    "바로 병원(응급실)에 가요. 심한 붓기, 반복 구토, 한쪽이 올라붙는 느낌은 염전·파열 신호일 수 있어요."][i]; });
+  ZONE5.todo = "119 또는 응급실로 즉시 가요. 기다리지 말고 바로요. 가는 동안 움직이지 말고 얼음은 천으로 감싸 올려요.";
+  const ZONES5 = ZONES.concat([ZONE5]);
+  const STAGE_COLOR = [0xd98a95, 0xd9707a, 0xa85a78, 0x7a3f66, 0x4a2a52];
+  const STAGE_SWELL = [0.04, 0.08, 0.16, 0.28, 0.5];
+  const LOAD_AT = [0.05, 0.25, 1.0, 2.0]; // load needed to enter stage 1..4
+  const stageOfLoad = L => LOAD_AT.reduce((n, th) => n + (L >= th ? 1 : 0), 0);
   const POWER_WORDS = ["", "살짝", "가볍게", "가볍게", "조금 세게", "보통", "보통 세게", "세게", "아주 세게", "거의 전력", "전력", "젖먹던 힘"];
   const SURFACE = {
     sneaker:  { up: "발등·정강이 아래쪽으로 차 올려요. 밑창이 미끄러지지 않아 가장 안정적이에요.", straight: "발끝(앞꿈치)으로 곧게 밀어 차요. 누워 있을 때처럼 발바닥 쪽이 닿는 상황에 맞아요." },
@@ -378,14 +456,24 @@ h2 { font-size: 17px; margin: 0; text-wrap: balance; }
     }
     r.squash = 0.6 * (1 - Math.exp(-r.Ft / 300));
     r.zone = ZONES.find(z => r.Ft < z.max);
-    // 0..1 how hard the person reacts (drives the attacker's body in the scene view)
-    const f = r.Ft;
-    r.sev = f < 60 ? 0.05 + 0.15 * f / 60 : f < 180 ? 0.2 + 0.35 * (f - 60) / 120 : f < 450 ? 0.55 + 0.35 * (f - 180) / 270 : 0.9 + 0.1 * Math.min(1, (f - 450) / 300);
+    r.sev = sevOf(r.Ft);
     return r;
+  }
+  // 0..1 how hard the person reacts (drives the attacker's body in the scene view)
+  function sevOf(f) {
+    return f < 60 ? 0.05 + 0.15 * f / 60 : f < 180 ? 0.2 + 0.35 * (f - 60) / 120 : f < 450 ? 0.55 + 0.35 * (f - 180) / 270 : 0.9 + 0.1 * Math.min(1, (f - 450) / 300);
+  }
+  // cumulative load: each hit counts (Ft/450)^1.5; a grip counts per second. 1.0 = one hit at the injury threshold
+  function applyLoad() {
+    const per = P.v == null ? Math.pow(P.Ft / 250, 1.5) * S.hold / 4 : Math.pow(P.Ft / 450, 1.5) * S.reps;
+    P.load = per;
+    P.stageIdx = stageOfLoad(per);
+    P.stage = ZONES5[P.stageIdx];
+    P.sev = sevOf(450 * Math.pow(Math.max(per, 1e-4), 2 / 3));
   }
 
   // ---------- state ----------
-  const S = { mode: "scenario", scn: "front", shoe: "sneaker", striker: "sneaker", angle: "up", power: 6, t: 0.5, playing: false };
+  const S = { mode: "scenario", scn: "front", shoe: "sneaker", striker: "sneaker", angle: "up", power: 6, reps: 1, hold: 2, t: 0.5, playing: false };
   const $ = id => document.getElementById(id);
   const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
   const clamp = (x, a, b) => Math.min(b, Math.max(a, x));
@@ -451,7 +539,7 @@ h2 { font-size: 17px; margin: 0; text-wrap: balance; }
   const sacMat = ghost(0xb88c7a, 0.95);
   const sac = new THREE.Mesh(sphere, sacMat);
   scene.add(sac);
-  const TESTIS_PINK = new THREE.Color(0xd98a95), TESTIS_BRUISE = new THREE.Color(0x8a4668);
+  const TESTIS_PINK = new THREE.Color(0xd98a95), TESTIS_STAGE = new THREE.Color();
   const testisMat = solid(0xd98a95, { emissive: new THREE.Color(0x000000), roughness: 0.4 });
   const testes = [1, -1].map(side => {
     const m = new THREE.Mesh(sphere, testisMat);
@@ -607,13 +695,19 @@ h2 { font-size: 17px; margin: 0; text-wrap: balance; }
     const ball = () => { const m = new THREE.Mesh(sphere, mat); g.add(m); return m; };
     const P = { torso: cyl(), shoulders: cyl(), hips: cyl(), head: ball(), uaL: cyl(), faL: cyl(), uaR: cyl(), faR: cyl(), thL: cyl(), shL: cyl(), thR: cyl(), shR: cyl(), ftL: cyl(), ftR: cyl(), hdL: ball(), hdR: ball() };
     // name tag
-    const cv = document.createElement("canvas"); cv.width = 128; cv.height = 48;
+    const cv = document.createElement("canvas"); cv.width = 224; cv.height = 48;
     const cx = cv.getContext("2d");
-    cx.fillStyle = "rgba(13,19,22,.85)"; cx.fillRect(0, 0, 128, 48);
-    cx.strokeStyle = labelColor; cx.lineWidth = 3; cx.strokeRect(1.5, 1.5, 125, 45);
-    cx.fillStyle = "#e2e9ec"; cx.font = "bold 26px sans-serif"; cx.textAlign = "center"; cx.textBaseline = "middle"; cx.fillText(labelText, 64, 25);
-    const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(cv), depthTest: false, transparent: true }));
-    sp.scale.set(0.32, 0.12, 1); sp.renderOrder = 10; g.add(sp);
+    const tex = new THREE.CanvasTexture(cv);
+    function setLabel(text, col) {
+      cx.clearRect(0, 0, 224, 48);
+      cx.fillStyle = "rgba(13,19,22,.85)"; cx.fillRect(0, 0, 224, 48);
+      cx.strokeStyle = col; cx.lineWidth = 3; cx.strokeRect(1.5, 1.5, 221, 45);
+      cx.fillStyle = "#e2e9ec"; cx.font = "bold 26px sans-serif"; cx.textAlign = "center"; cx.textBaseline = "middle"; cx.fillText(text, 112, 25);
+      tex.needsUpdate = true;
+    }
+    setLabel(labelText, labelColor);
+    const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, depthTest: false, transparent: true }));
+    sp.scale.set(0.5, 0.107, 1); sp.renderOrder = 10; g.add(sp);
     const crotch = new THREE.Vector3();
 
     function seg(m, A, B, r) {
@@ -656,7 +750,7 @@ h2 { font-size: 17px; margin: 0; text-wrap: balance; }
       crotch.copy(hip).addScaledVector(tdir, -0.09 * s).addScaledVector(front, 0.06 * s);
       sp.position.copy(hc).add(V(0, 0.22, 0));
     }
-    return { group: g, update, crotch };
+    return { group: g, update, crotch, setLabel };
   }
 
   const attacker = makeFigure(0xd08a78, 0.55, 1.03, "치한", "#e5534b");
@@ -873,7 +967,8 @@ h2 { font-size: 17px; margin: 0; text-wrap: balance; }
     const up = S.angle === "up" || STRIKERS[S.striker].type === "knee" || STRIKERS[S.striker].type === "hand";
     // after the hit: tissue slowly swells and darkens (compressed from minutes/hours into a few frames)
     const hitEnd = isScn() ? scn().react[0] + 0.1 : 0.66;
-    const aft = smooth(hitEnd, hitEnd + 0.22, t) * P.sev;
+    const aft = smooth(hitEnd, hitEnd + 0.22, t);
+    const stI = P.stageIdx;
     testes.forEach(m => {
       const d = m.userData;
       m.position.copy(d.p);
@@ -892,9 +987,9 @@ h2 { font-size: 17px; margin: 0; text-wrap: balance; }
         m.position.y += sg * 0.008;
         m.position.x += d.side * Math.max(0, sg) * 0.01;
       }
-      m.scale.multiplyScalar(1 + 0.16 * aft);
+      m.scale.multiplyScalar(1 + STAGE_SWELL[stI] * aft);
     });
-    testisMat.color.copy(TESTIS_PINK).lerp(TESTIS_BRUISE, aft);
+    testisMat.color.copy(TESTIS_PINK).lerp(TESTIS_STAGE.set(STAGE_COLOR[stI]), aft * (stI ? 1 : 0.3));
     const ss = sg * 0.6, sk = 1 / Math.sqrt(1 - ss);
     sac.position.copy(SAC_BASE.p);
     if (rig.kind === "grab") {
@@ -907,7 +1002,7 @@ h2 { font-size: 17px; margin: 0; text-wrap: balance; }
       sac.scale.set(SAC_BASE.s.x * sk, SAC_BASE.s.y * sk, SAC_BASE.s.z * (1 - ss));
       sac.position.z -= sg * 0.02;
     }
-    sac.scale.multiplyScalar(1 + 0.12 * aft);
+    sac.scale.multiplyScalar(1 + STAGE_SWELL[stI] * 0.8 * aft);
     cords.forEach(cd => {
       const top = tmp.copy(cd.t.position); top.y += cd.t.scale.y * 0.9;
       const pos = cd.line.geometry.attributes.position;
@@ -916,8 +1011,8 @@ h2 { font-size: 17px; margin: 0; text-wrap: balance; }
     });
 
     // colour + x-ray
-    const zc = new THREE.Color(css(P.zone.color) || "#e5534b");
-    testisMat.emissive.copy(zc).multiplyScalar(0.85 * strength + 0.25 * aft);
+    const zc = new THREE.Color(css(P.stage.color) || "#e5534b");
+    testisMat.emissive.copy(zc).multiplyScalar(0.85 * strength + 0.06 * stI * aft);
     const [w0, w1] = slowWindow();
     const reveal = $("xray").checked || isScn() ? 1 : smooth(w0 - 0.1, w0 + 0.02, t) * (1 - smooth(w1 + 0.06, w1 + 0.16, t));
     sacMat.opacity = 0.95 - 0.75 * reveal;
@@ -969,7 +1064,7 @@ h2 { font-size: 17px; margin: 0; text-wrap: balance; }
     if (isScn()) {
       const showInset = t > 0.3 && t < 0.97;
       $("inset").style.visibility = showInset ? "visible" : "hidden";
-      $("insetPhase").textContent = t < 0.5 ? "접근 중" : inHit ? "충격 순간 · 급소가 눌려요" : t < hitEnd ? "되튐 · 원래 모양으로" : "수 분~수 시간 뒤 · 붓기·멍 (압축해서 표현)";
+      $("insetPhase").textContent = t < 0.5 ? "접근 중" : inHit ? "충격 순간 · 급소가 눌려요" : t < hitEnd ? "되튐 · 원래 모양으로" : (stI >= 3 ? "수 분~수 시간 뒤 · 심한 붓기·출혈 (압축 표현)" : "수 분~수 시간 뒤 · 붓기·멍 (압축해서 표현)");
       const steps = sc_steps();
       const idx = steps.reduce((acc, st, i) => (t >= st.t ? i : acc), 0);
       $("cap").textContent = steps[idx].txt;
@@ -998,6 +1093,7 @@ h2 { font-size: 17px; margin: 0; text-wrap: balance; }
 
   function refresh() {
     P = physics(S.striker, S.angle, S.power);
+    applyLoad();
     const s = STRIKERS[S.striker];
     const sm = isScn();
     stage.classList.toggle("scn", sm);
@@ -1005,6 +1101,10 @@ h2 { font-size: 17px; margin: 0; text-wrap: balance; }
     $("shoeRow").hidden = !(sm && scn().kind === "kick");
     $("strikerRow").hidden = sm;
     $("angleRow").hidden = sm || s.type !== "kick";
+    $("repRow").hidden = s.type === "grab";
+    $("holdRow").hidden = s.type !== "grab";
+    $("repsVal").innerHTML = S.reps + "<small>회</small>";
+    $("holdVal").innerHTML = S.hold + "<small>초</small>";
     $("powerVal").innerHTML = S.power + "<small>" + POWER_WORDS[S.power] + "</small>";
     const modeLabel = s.type === "kick" ? (S.angle === "up" ? "올려차기" : "앞차기") : s.type === "knee" ? "올려치기" : s.type === "hand" ? "쳐올리기" : "쥐고 비틀기";
     $("hudMode").textContent = (sm ? scn().name + " · " : "") + s.name + " · " + modeLabel + " · 힘 " + S.power;
@@ -1020,15 +1120,43 @@ h2 { font-size: 17px; margin: 0; text-wrap: balance; }
     $("vForce").innerHTML = fmt(P.F, 0) + "<small>N</small>";
     $("vTrans").innerHTML = fmt(P.Ft, 0) + "<small>N ≈ " + fmt(P.Ft / 9.81, 0) + "kg</small>";
     $("vSquash").innerHTML = fmt(P.squash * 100, 0) + "<small>%</small>";
-    $("vZone").textContent = P.zone.name;
-    $("vZoneDesc").textContent = P.zone.desc;
-    $("verdict").style.borderLeftColor = "var(" + P.zone.color + ")";
-    $("afterList").innerHTML = P.zone.after.map(x => "<li style=\"border-left-color:var(" + P.zone.color + ")\">" + esc(x) + "</li>").join("");
+    const st = P.stage;
+    $("vZone").textContent = st.name;
+    $("vZoneDesc").textContent = st.desc;
+    $("verdict").style.borderLeftColor = "var(" + st.color + ")";
+    $("afterList").innerHTML = st.after.map(x => "<li style=\"border-left-color:var(" + st.color + ")\">" + esc(x) + "</li>").join("");
     const banner = $("banner");
-    banner.textContent = P.zone.name;
-    banner.style.borderLeftColor = "var(" + P.zone.color + ")";
+    banner.textContent = st.name;
+    banner.style.borderLeftColor = "var(" + st.color + ")";
+    renderLoad();
     $("surface").textContent = SURFACE[S.striker][s.type === "kick" ? S.angle : "up"];
     renderBars();
+  }
+
+  function renderLoad() {
+    const MAXL = 3, st = P.stage;
+    if (!$("meter").children.length) {
+      const edges = [0, 0.05, 0.25, 1.0, 2.0, MAXL];
+      $("meter").innerHTML = ZONES5.map((z, i) => "<div class=\"seg5\" style=\"width:" + ((edges[i + 1] - edges[i]) / MAXL * 100) + "%;background:var(" + z.color + ")\"></div>").join("") + "<div class=\"fill\" id=\"meterFill\"></div>";
+      $("meterTicks").innerHTML = ZONES5.map((z, i) => "<span style=\"width:" + ((([0, 0.05, 0.25, 1.0, 2.0, MAXL][i + 1]) - [0, 0.05, 0.25, 1.0, 2.0, MAXL][i]) / MAXL * 100) + "%\">" + (i === 4 ? "중대" : i === 3 ? "부상" : "") + "</span>").join("");
+    }
+    $("meterFill").style.width = Math.min(100, P.load / MAXL * 100) + "%";
+    const grab = P.v == null;
+    let msg = "누적 부담 " + P.load.toFixed(2) + " → " + st.name + ". ";
+    if (grab) {
+      msg += "이 힘으로 쥐고 있으면 약 " + Math.max(1, Math.floor(0.99 * 4 / Math.pow(P.Ft / 250, 1.5))) + "초까지는 '행동불능' 이내, " + Math.max(1, Math.ceil(2 * 4 / Math.pow(P.Ft / 250, 1.5))) + "초를 넘기면 '중대한 부상' 구간이에요. 힘 11로는 3초 안에 끝내요.";
+    } else {
+      const per = Math.pow(P.Ft / 450, 1.5);
+      msg += "이 힘의 타격 " + S.reps + "회가 합쳐진 값이에요. " + (per > 0 ? "같은 세기로 약 " + Math.max(1, Math.ceil(2 / per)) + "회 이상 맞으면 '중대한 부상' 구간이에요. " : "") + "첫 타격 뒤에 상대가 쓰러지면 멈춰요.";
+    }
+    $("loadWarn").textContent = msg;
+    $("loadWarn").style.borderLeftColor = "var(" + st.color + ")";
+    // accident panel
+    $("accStage").textContent = st.name;
+    $("accDesc").textContent = st.after.join(" → ");
+    $("accDesc").parentElement.style.borderLeftColor = "var(" + st.color + ")";
+    $("accTodo").textContent = "지금 해야 할 일 — " + st.todo;
+    $("accTodo").style.borderLeftColor = "var(" + st.color + ")";
   }
 
   function renderBars() {
@@ -1105,6 +1233,14 @@ h2 { font-size: 17px; margin: 0; text-wrap: balance; }
   });
   $("power").addEventListener("input", e => { S.power = +e.target.value; refresh(); });
   $("power").addEventListener("change", play);
+  $("reps").addEventListener("input", e => { S.reps = +e.target.value; refresh(); });
+  $("hold").addEventListener("input", e => { S.hold = +e.target.value; refresh(); });
+  $("reps").addEventListener("change", play);
+  $("hold").addEventListener("change", play);
+  $("accident").addEventListener("change", e => {
+    attacker.setLabel(e.target.checked ? "수강생(사고)" : "치한", e.target.checked ? "#e3b44f" : "#e5534b");
+    $("accTitle").textContent = e.target.checked ? "수업 중 실수로 맞았다면 (남성 수강생 기준) · 사고 상황 보기 중" : "수업 중 실수로 맞았다면 (남성 수강생 기준)";
+  });
   $("play").addEventListener("click", play);
   $("scrub").addEventListener("input", e => { S.playing = false; S.t = e.target.value / 1000; });
 
