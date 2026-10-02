@@ -1,0 +1,1184 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>급소 타격 슬로우뷰</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: 3D viewer on top (full scene + zoomed x-ray inset), controls + readout beneath, technique notes at the end. Single dark "lightbox" look by choice. */
+:root {
+  --bg: #0d1316;
+  --panel: #141c20;
+  --panel-2: #1a242a;
+  --line: #26343c;
+  --fg: #e2e9ec;
+  --muted: #8d9ea6;
+  --accent: #7cc6d6;
+  --z1: #6cc28a;
+  --z2: #e3b44f;
+  --z3: #ee8a4a;
+  --z4: #e5534b;
+  --font-body: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  color-scheme: dark;
+}
+html, body { background: var(--bg); color: var(--fg); margin: 0; }
+[hidden] { display: none !important; }
+body { font-family: var(--font-body); font-size: 15px; line-height: 1.55; }
+.wrap { max-width: 980px; margin: 0 auto; padding: 18px 16px 40px; display: grid; gap: 16px; }
+header h1 { font-size: 22px; margin: 0; font-weight: 700; letter-spacing: -0.01em; text-wrap: balance; }
+header p { margin: 4px 0 0; color: var(--muted); font-size: 13.5px; }
+.stage { position: relative; background: radial-gradient(120% 90% at 50% 40%, #16232a 0%, var(--bg) 70%); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; height: min(62vh, 560px); min-height: 320px; }
+.stage canvas { display: block; width: 100%; height: 100%; touch-action: none; }
+.hud { position: absolute; left: 10px; top: 10px; display: flex; flex-wrap: wrap; gap: 6px; pointer-events: none; max-width: calc(100% - 20px); }
+.stage.scn .hud { max-width: 52%; }
+.tag { font-family: var(--font-mono); font-size: 11.5px; padding: 3px 7px; border-radius: 4px; background: rgba(13,19,22,.78); border: 1px solid var(--line); color: var(--fg); }
+.tag.slow { color: var(--accent); border-color: var(--accent); }
+.hint { position: absolute; right: 10px; bottom: 8px; font-size: 11.5px; color: var(--muted); pointer-events: none; }
+.stage.scn .hint { display: none; }
+.zone-banner { position: absolute; left: 10px; bottom: 10px; font-weight: 700; font-size: 14px; padding: 5px 10px; border-radius: 6px; background: rgba(13,19,22,.82); border-left: 4px solid var(--z1); opacity: 0; transition: opacity .25s; pointer-events: none; }
+.stage.scn .zone-banner { bottom: 62px; }
+.zone-banner.on { opacity: 1; }
+.cap { position: absolute; left: 10px; right: 10px; bottom: 10px; min-height: 40px; display: none; align-items: center; padding: 7px 12px; border-radius: 8px; background: rgba(13,19,22,.86); border: 1px solid var(--line); font-size: 14px; font-weight: 500; pointer-events: none; }
+.stage.scn .cap { display: flex; }
+.inset { position: absolute; right: 10px; top: 10px; border: 1px solid var(--accent); border-radius: 8px; pointer-events: none; display: none; }
+.stage.scn .inset { display: block; }
+.inset .lbl { position: absolute; left: 6px; top: 5px; font-size: 11px; font-family: var(--font-mono); color: var(--accent); background: rgba(13,19,22,.75); padding: 1px 5px; border-radius: 3px; }
+.inset .phase { position: absolute; left: 6px; right: 6px; bottom: 5px; font-size: 11.5px; color: var(--fg); background: rgba(13,19,22,.8); padding: 2px 6px; border-radius: 3px; }
+
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px; display: grid; gap: 14px; }
+.row { display: grid; gap: 6px; }
+.label { font-size: 12px; color: var(--muted); letter-spacing: .04em; }
+.seg { display: flex; flex-wrap: wrap; gap: 6px; }
+.seg button { font: inherit; font-size: 14px; padding: 8px 12px; border-radius: 7px; border: 1px solid var(--line); background: var(--panel-2); color: var(--fg); cursor: pointer; }
+.seg button[aria-pressed="true"] { border-color: var(--accent); color: var(--bg); background: var(--accent); font-weight: 600; }
+.seg button:focus-visible, .play:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.power-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.power-val { font-family: var(--font-mono); font-size: 20px; font-weight: 600; }
+.power-val small { font-family: var(--font-body); font-size: 12.5px; color: var(--muted); font-weight: 400; margin-left: 6px; }
+input[type=range] { width: 100%; accent-color: var(--accent); }
+.controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.play { font: inherit; font-weight: 700; font-size: 15px; padding: 10px 18px; border-radius: 8px; border: 0; background: var(--accent); color: var(--bg); cursor: pointer; }
+.toggle { display: inline-flex; gap: 6px; align-items: center; font-size: 13.5px; color: var(--fg); padding: 6px 4px; }
+.toggle input { accent-color: var(--accent); width: 17px; height: 17px; }
+select { font: inherit; font-size: 13.5px; background: var(--panel-2); color: var(--fg); border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; }
+
+.scn-info { background: var(--panel-2); border-radius: 8px; padding: 12px; display: grid; gap: 8px; }
+.scn-info h3 { margin: 0; font-size: 15px; }
+.scn-info p { margin: 0; font-size: 13.5px; color: var(--muted); }
+.scn-info ol { margin: 0; padding: 0; list-style: none; display: grid; gap: 4px; }
+.scn-info li { font-size: 13.5px; color: var(--muted); padding: 5px 9px; border-left: 3px solid var(--line); border-radius: 0 6px 6px 0; }
+.scn-info li.now { color: var(--fg); border-left-color: var(--accent); background: rgba(124,198,214,.1); }
+.scn-info .warn { color: var(--z2); font-size: 13px; }
+
+.readout { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; }
+.stat { background: var(--panel-2); border-radius: 8px; padding: 9px 11px; min-width: 0; }
+.stat .k { font-size: 11.5px; color: var(--muted); }
+.stat .v { font-family: var(--font-mono); font-size: 18px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.stat .v small { font-size: 12px; color: var(--muted); font-weight: 400; margin-left: 3px; }
+.verdict { display: grid; gap: 4px; padding: 10px 12px; border-radius: 8px; background: var(--panel-2); border-left: 4px solid var(--z1); }
+.verdict b { font-size: 15px; }
+.verdict span { font-size: 13.5px; color: var(--muted); }
+.surface { font-size: 13.5px; color: var(--fg); background: transparent; border: 1px dashed var(--line); border-radius: 8px; padding: 9px 11px; }
+.after { display: grid; gap: 6px; }
+.after ol { margin: 0; padding: 0; list-style: none; display: grid; gap: 4px; }
+.after li { font-size: 13.5px; padding: 6px 10px; border-radius: 6px; background: var(--panel-2); border-left: 4px solid var(--z1); }
+
+.chart { display: grid; gap: 6px; }
+.bars { position: relative; height: 130px; display: grid; grid-template-columns: repeat(11, 1fr); gap: 4px; align-items: end; padding-top: 4px; }
+.bars button { all: unset; cursor: pointer; display: flex; flex-direction: column; justify-content: flex-end; align-items: stretch; height: 100%; position: relative; z-index: 1; }
+.bars button .b { border-radius: 3px 3px 0 0; min-height: 2px; opacity: .55; }
+.bars button.cur .b { opacity: 1; outline: 2px solid var(--fg); outline-offset: 1px; }
+.bars button:focus-visible .b { outline: 2px solid var(--accent); }
+.thr { position: absolute; left: 0; right: 0; border-top: 1px dashed var(--line); z-index: 0; }
+.thr span { position: absolute; right: 0; top: -15px; font-size: 10.5px; color: var(--muted); font-family: var(--font-mono); background: var(--panel); padding: 0 3px; }
+.ticks { display: grid; grid-template-columns: repeat(11, 1fr); gap: 4px; font-family: var(--font-mono); font-size: 11px; color: var(--muted); text-align: center; }
+.legend { display: flex; flex-wrap: wrap; gap: 10px; font-size: 12px; color: var(--muted); }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 4px; vertical-align: -1px; }
+
+h2 { font-size: 17px; margin: 0; text-wrap: balance; }
+.tech { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+.tech article { background: var(--panel-2); border-radius: 8px; padding: 12px; display: grid; gap: 6px; align-content: start; min-width: 0; }
+.tech article h3 { margin: 0; font-size: 15px; }
+.tech article .when { font-size: 12px; color: var(--accent); }
+.tech article p { margin: 0; font-size: 13.5px; color: var(--muted); }
+.shoes { display: grid; gap: 8px; }
+.shoes div { font-size: 13.5px; }
+.shoes b { color: var(--fg); margin-right: 6px; }
+.shoes span { color: var(--muted); }
+.note { font-size: 12.5px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 12px; margin: 0; }
+@media (prefers-reduced-motion: reduce) { .zone-banner { transition: none; } }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <h1>급소 타격 슬로우뷰</h1>
+    <p>키 168cm · 체중 48kg 성인 여성 기준. 치한을 만났을 때의 호신술 장면을 고르고 힘(1~11)을 정하면, 전체 동작과 함께 맞는 순간이 슬로우모션 투시 화면으로 보여요.</p>
+  </header>
+
+  <div class="stage" id="stage">
+    <div class="hud">
+      <span class="tag" id="hudMode"></span>
+      <span class="tag" id="hudTime">실제 0.000초</span>
+      <span class="tag slow" id="hudSlow" hidden>슬로우</span>
+    </div>
+    <div class="inset" id="inset">
+      <span class="lbl">급소 확대 · 투시</span>
+      <span class="phase" id="insetPhase"></span>
+    </div>
+    <div class="zone-banner" id="banner">행동불능 가능</div>
+    <div class="cap" id="cap"></div>
+    <div class="hint">한 손가락: 돌리기 · 두 손가락: 확대</div>
+  </div>
+
+  <section class="panel" aria-label="조작">
+    <div class="row">
+      <div class="label">보기 방식</div>
+      <div class="seg" id="modeSeg">
+        <button data-v="scenario" aria-pressed="true">상황별 호신술 (실전 장면)</button>
+        <button data-v="compare" aria-pressed="false">도구별 비교 (급소 확대만)</button>
+      </div>
+    </div>
+
+    <div class="row" id="scnRow">
+      <div class="label">치한을 만난 상황</div>
+      <div class="seg" id="scnSeg"></div>
+      <div class="scn-info" id="scnInfo"></div>
+    </div>
+    <div class="row" id="shoeRow">
+      <div class="label">신을 신고 있다면 (발차기 장면일 때)</div>
+      <div class="seg" id="shoeSeg">
+        <button data-v="sneaker" aria-pressed="true">운동화</button>
+        <button data-v="boot" aria-pressed="false">롱부츠</button>
+        <button data-v="platform" aria-pressed="false">플랫폼힐</button>
+        <button data-v="heel" aria-pressed="false">하이힐</button>
+      </div>
+    </div>
+
+    <div class="row" id="strikerRow" hidden>
+      <div class="label">공격 방식</div>
+      <div class="seg" id="strikerSeg">
+        <button data-v="sneaker" aria-pressed="false">운동화</button>
+        <button data-v="heel" aria-pressed="true">하이힐</button>
+        <button data-v="platform" aria-pressed="false">플랫폼힐</button>
+        <button data-v="boot" aria-pressed="false">롱부츠</button>
+        <button data-v="knee" aria-pressed="false">무릎</button>
+        <button data-v="hand" aria-pressed="false">손 쳐올리기</button>
+        <button data-v="grab" aria-pressed="false">손으로 쥐기</button>
+      </div>
+    </div>
+    <div class="row" id="angleRow" hidden>
+      <div class="label">차는 방향</div>
+      <div class="seg" id="angleSeg">
+        <button data-v="up" aria-pressed="true">올려차기 (발등·정강이)</button>
+        <button data-v="straight" aria-pressed="false">앞차기 (앞코)</button>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="power-head">
+        <label class="label" for="power">힘</label>
+        <div class="power-val" id="powerVal">6<small>보통 세게</small></div>
+      </div>
+      <input type="range" id="power" min="1" max="11" step="1" value="6">
+    </div>
+    <div class="controls">
+      <button class="play" id="play">▶ 재생</button>
+      <label class="toggle"><input type="checkbox" id="autoSlow" checked> 맞는 순간 자동 슬로우</label>
+      <label class="toggle"><input type="checkbox" id="xray"> 항상 투시</label>
+      <select id="speed" aria-label="재생 속도">
+        <option value="1">실제 속도</option>
+        <option value="0.25">1/4 속도</option>
+        <option value="0.1">1/10 속도</option>
+        <option value="0.025">1/40 속도</option>
+      </select>
+    </div>
+    <div class="row">
+      <label class="label" for="scrub">장면 위치 (끌어서 한 장면씩 보기)</label>
+      <input type="range" id="scrub" min="0" max="1000" value="500">
+    </div>
+  </section>
+
+  <section class="panel" aria-label="결과">
+    <div class="readout">
+      <div class="stat"><div class="k" id="kSpeed">발 속도</div><div class="v" id="vSpeed">-</div></div>
+      <div class="stat"><div class="k">실린 무게(유효 질량)</div><div class="v" id="vMass">-</div></div>
+      <div class="stat"><div class="k">타격면 충격력</div><div class="v" id="vForce">-</div></div>
+      <div class="stat"><div class="k">고환에 전달된 힘</div><div class="v" id="vTrans">-</div></div>
+      <div class="stat"><div class="k">최대 눌림</div><div class="v" id="vSquash">-</div></div>
+    </div>
+    <div class="verdict" id="verdict"><b id="vZone">-</b><span id="vZoneDesc">-</span></div>
+    <div class="surface" id="surface">-</div>
+    <div class="after">
+      <div class="label">맞은 뒤 몸에서 일어나는 일 (이 힘일 때)</div>
+      <ol id="afterList"></ol>
+    </div>
+    <div class="chart">
+      <div class="label">힘 1~11 비교 · 고환에 전달된 힘 (막대를 누르면 그 힘으로 바뀌어요)</div>
+      <div class="bars" id="bars"></div>
+      <div class="ticks" id="ticks"></div>
+      <div class="legend">
+        <span><i style="background:var(--z1)"></i>경미한 통증</span>
+        <span><i style="background:var(--z2)"></i>강한 통증</span>
+        <span><i style="background:var(--z3)"></i>행동불능 가능</span>
+        <span><i style="background:var(--z4)"></i>부상 위험</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" aria-label="급소 공격 원칙">
+    <h2>크라브마가 급소 공격 4가지 원칙</h2>
+    <div class="tech">
+      <article>
+        <div class="when">원칙 1</div>
+        <h3>손으로 시선을 먼저 빼앗기</h3>
+        <p>두 손을 들어 "오지 마세요!"라고 외쳐요. 손이 상대의 눈과 팔을 묶어 두는 동안 급소가 비어요. 공격 의도를 들키지 않는 게 핵심이에요.</p>
+      </article>
+      <article>
+        <div class="when">원칙 2</div>
+        <h3>가장 가까운 무기로, 몸무게를 실어서</h3>
+        <p>거리가 있으면 정강이·발등, 붙으면 무릎, 완전히 밀착되면 손이에요. 체격이 작아도 몸무게가 실리면 힘이 커져요.</p>
+      </article>
+      <article>
+        <div class="when">원칙 3</div>
+        <h3>한 번이 아니라 연속으로</h3>
+        <p>첫 타격 뒤에도 상대가 서 있으면 멈추지 말고 한 번 더 이어요. 첫 타격은 시작일 뿐 끝이 아니에요.</p>
+      </article>
+      <article>
+        <div class="when">원칙 4</div>
+        <h3>맞힌 뒤에는 바로 탈출</h3>
+        <p>이기는 게 목표가 아니라 도망치는 게 목표예요. 큰 소리로 도움을 요청하며 사람 많은 곳으로 달려가요.</p>
+      </article>
+    </div>
+    <div class="shoes">
+      <div><b>운동화</b><span>가장 안정적이에요. 발등·정강이로 곧게 차올릴 수 있어요.</span></div>
+      <div><b>롱부츠</b><span>정강이가 단단히 감싸져서 올려차기에 좋아요. 발목도 안전해요.</span></div>
+      <div><b>플랫폼힐</b><span>밑창 무게가 힘을 더해요. 발목이 꺾이지 않게 발등을 쭉 펴고 차요.</span></div>
+      <div><b>하이힐</b><span>발목이 불안정해요. 앞코로 차면 발가락이 꺾이니 발등이나 정강이로 차거나, 벗고 도망쳐요.</span></div>
+    </div>
+    <p class="note">숫자와 장면은 수업 설명용으로 단순화한 추정치예요. 실제 결과는 각도, 옷, 상대 움직임에 따라 크게 달라요. 연습할 때는 실제 사람을 때리지 말고 보호컵이나 타깃 더미를 쓰세요. 맞는 순간은 실제로 0.01~0.02초라서 슬로우로 늘려서 보여줘요.</p>
+  </section>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+(function () {
+  // ---------- physics (illustrative estimates) ----------
+  const STRIKERS = {
+    sneaker:  { name: "운동화",   type: "kick", mass: 4.0, shoe: 0.35, vmax: 8.5, t: 0.014, toe: 1.05, color: 0xeef0f2 },
+    heel:     { name: "하이힐",   type: "kick", mass: 4.0, shoe: 0.30, vmax: 8.5, t: 0.015, toe: 1.15, color: 0xf2f2f4 },
+    platform: { name: "플랫폼힐", type: "kick", mass: 4.0, shoe: 0.65, vmax: 8.0, t: 0.013, toe: 1.05, color: 0x22252b },
+    boot:     { name: "롱부츠",   type: "kick", mass: 4.0, shoe: 0.90, vmax: 8.0, t: 0.011, toe: 1.0,  color: 0x4a3326 },
+    knee:     { name: "무릎",     type: "knee", mass: 9.0, shoe: 0,    vmax: 4.5, t: 0.020 },
+    hand:     { name: "손 쳐올리기", type: "hand", mass: 2.2, shoe: 0, vmax: 6.0, t: 0.012 },
+    grab:     { name: "손으로 쥐기", type: "grab", grip: 255 }
+  };
+  const ZONES = [
+    { max: 60,  name: "경미한 통증",   color: "--z1", desc: "따끔하게 아파요. 상대가 멈추지 않을 수 있어요.",
+      after: ["0초 · 따끔한 충격", "1~3초 · 얼얼하지만 상대는 계속 움직일 수 있어요", "수 초 뒤 · 거의 회복 → 한 번 더 이어서 타격해요"] },
+    { max: 180, name: "강한 통증",     color: "--z2", desc: "몸이 움츠러들고 잠깐 멈칫해요. 도망칠 틈이 생겨요.",
+      after: ["0초 · 충격과 함께 아랫배로 통증이 퍼져요", "1~5초 · 몸이 웅크려지고 두 손이 급소로 가요", "10~30초 · 서서히 가라앉지만 그 사이 도망칠 수 있어요"] },
+    { max: 450, name: "행동불능 가능", color: "--z3", desc: "숨이 막히고 주저앉을 수 있어요. 몇 초에서 수십 초 동안 반격이 어려워요.",
+      after: ["0초 · 숨이 턱 막히고 몸이 굳어요", "1~3초 · 아랫배·허리로 통증이 퍼지고 메스꺼움이 와요", "수 초~수십 초 · 주저앉아 반격이 어려워요", "수 분 · 통증이 남고, 몇 시간에 걸쳐 붓고 멍이 들 수 있어요"] },
+    { max: 1e9, name: "부상 위험",     color: "--z4", desc: "고환이 다칠(파열 등) 수 있는 구간이에요. 실제 위협 상황에서만 쓰는 힘이에요.",
+      after: ["즉시 · 극심한 통증으로 쓰러져요", "수 초 · 구토·식은땀·정신이 아찔해질 수 있어요", "그 뒤 · 심한 부기가 생길 수 있어 의료 처치가 필요할 수 있어요"] }
+  ];
+  const POWER_WORDS = ["", "살짝", "가볍게", "가볍게", "조금 세게", "보통", "보통 세게", "세게", "아주 세게", "거의 전력", "전력", "젖먹던 힘"];
+  const SURFACE = {
+    sneaker:  { up: "발등·정강이 아래쪽으로 차 올려요. 밑창이 미끄러지지 않아 가장 안정적이에요.", straight: "발끝(앞꿈치)으로 곧게 밀어 차요. 누워 있을 때처럼 발바닥 쪽이 닿는 상황에 맞아요." },
+    heel:     { up: "발등으로 차 올려요. 앞코로 차면 발가락이 꺾이고 굽은 미끄러져요.", straight: "뾰족한 앞코가 힘을 한 점에 모아요. 대신 발목과 발가락이 꺾이기 쉬워요." },
+    platform: { up: "무거운 밑창이 힘을 더해요. 발목이 꺾이지 않게 발등을 쭉 펴고 차요.", straight: "두꺼운 앞코로 찔러요. 각도가 빗나가면 허벅지에 맞기 쉬워요." },
+    boot:     { up: "단단한 부츠 정강이로 올려차요. 가장 강하고 발목도 안전해요.", straight: "단단한 앞코로 앞차기. 발목이 고정돼서 힘이 덜 새요." },
+    knee:     { up: "상대 어깨를 끌어당기며 무릎을 위로 쳐 올려요. 몸무게가 실려요." },
+    hand:     { up: "손바닥 또는 망치주먹(주먹 아랫면)으로 아래에서 위로 쳐 올려요. 몸 뒤쪽에서도 쓸 수 있어요." },
+    grab:     { up: "감싸 잡고 → 쥐고 → 비틀며 아래로 당겨요. 순간 충격 대신 계속 누르는 힘이에요." }
+  };
+
+  // ---------- self-defense scenarios (attacker stands at origin facing +z) ----------
+  // steps[].t is the scene position (0..1) where the step starts. kind "kick" lets the user pick a shoe.
+  const SCN = {
+    front: {
+      name: "① 정면에서 다가올 때", kind: "kick", striker: "sneaker", angle: "up", dur: 3.0, win: [0.46, 0.68], react: [0.58, 0.88],
+      situation: "낯선 사람이 말을 걸며 점점 가까이 다가와요. 손이 닿기 전, 상대가 팔 닿는 거리에 막 들어올 때가 타이밍이에요.",
+      steps: [
+        { t: 0.00, txt: "① 두 손을 가슴 높이로 들고 \"가까이 오지 마세요!\" — 손바닥으로 시선을 빼앗아요" },
+        { t: 0.30, txt: "② 상대가 팔 닿는 거리에 들어오면 무릎을 접어 차올릴 준비" },
+        { t: 0.42, txt: "③ 정강이·발등으로 급소를 곧게 차올려요 (발끝으로 찌르지 않기)" },
+        { t: 0.62, txt: "④ 찬 발을 바로 거두고 두 손으로 방어 자세로 돌아와요" },
+        { t: 0.80, txt: "⑤ 뒤돌아보지 말고 큰 소리로 도움을 요청하며 도망가요" }
+      ],
+      mistakes: "발끝으로 찌르면 발가락이 다쳐요 · 너무 멀리서 차면 피하거나 다리를 잡혀요 · 한 번 차고 멈추지 말고 도망까지 이어요"
+    },
+    grabbed: {
+      name: "② 멱살·어깨를 잡혔을 때", kind: "fixed", striker: "knee", angle: "up", dur: 3.2, win: [0.46, 0.68], react: [0.58, 0.88],
+      situation: "치한이 멱살이나 어깨를 잡고 끌어당겨요. 팔이 닿은 거리라 발차기보다 무릎이 빨라요.",
+      steps: [
+        { t: 0.00, txt: "① 두 손을 들어 시선을 끌며 뒤로 물러나요" },
+        { t: 0.30, txt: "② 잡히면 당기는 힘을 이용해 상대 어깨·옷깃을 같이 붙잡아요 (몸을 고정)" },
+        { t: 0.42, txt: "③ 끌어당기면서 무릎을 아래에서 위로 급소에 쳐올려요" },
+        { t: 0.62, txt: "④ 상대가 서 있으면 무릎을 2~3번 더 이어요" },
+        { t: 0.78, txt: "⑤ 상대를 밀치며 거리를 벌리고 도망가요" }
+      ],
+      mistakes: "무릎을 옆으로 휘두르면 허벅지에 맞아요 · 상체를 숙이면 목이 잡혀요 · 첫 타격만 하고 멈추면 다시 붙잡혀요"
+    },
+    rear: {
+      name: "③ 뒤에서 껴안겼을 때", kind: "fixed", striker: "hand", angle: "up", dur: 3.2, win: [0.46, 0.68], react: [0.58, 0.88],
+      situation: "걷는 도중 뒤에서 팔째로 껴안겼어요. 팔은 못 써도 손목 아래는 움직일 수 있어요.",
+      steps: [
+        { t: 0.00, txt: "① 길을 걷는 중, 뒤에서 상대가 다가와요" },
+        { t: 0.28, txt: "② 껴안기는 순간 소리치며 무릎을 굽혀 몸을 낮추고 다리를 벌려요 (무게중심 낮추기)" },
+        { t: 0.42, txt: "③ 엉덩이를 살짝 뒤로 빼 공간을 만들고 손으로 뒤쪽 급소를 쳐올려요" },
+        { t: 0.62, txt: "④ 힘이 풀리면 한 번 더 — 쥐고 비틀면 더 효과적이에요" },
+        { t: 0.78, txt: "⑤ 풀려나면 앞으로 빠져나가 도망가요" }
+      ],
+      mistakes: "서서 버티면 들어올려져요 · 몸을 앞으로 너무 숙이면 손이 안 닿아요 · 풀려나도 돌아보면 다시 잡혀요"
+    },
+    ground: {
+      name: "④ 넘어져 누웠을 때", kind: "kick", striker: "sneaker", angle: "straight", dur: 3.2, win: [0.46, 0.68], react: [0.58, 0.88],
+      situation: "넘어지거나 눕혀진 상태에서 상대가 다가와요. 일어나려고 서두르지 말고 다리로 거리를 지켜요.",
+      steps: [
+        { t: 0.00, txt: "① 등을 바닥에 대고 두 발을 상대 쪽으로 들어 올려 방패처럼 써요" },
+        { t: 0.30, txt: "② 몸을 틀어 계속 상대를 마주 보며 손으로 바닥을 짚어 버텨요" },
+        { t: 0.42, txt: "③ 상대가 발이 닿는 거리에 오면 급소를 곧게 밀어 차요" },
+        { t: 0.62, txt: "④ 상대가 서 있으면 연속으로 차요" },
+        { t: 0.78, txt: "⑤ 거리가 벌어지면 일어나서 뒤로 물러나 도망가요" }
+      ],
+      mistakes: "등을 돌리고 일어나면 잡혀요 · 다리를 내리면 다리가 잡혀요 · 발만 믿고 손으로 바닥을 짚지 않으면 균형을 잃어요"
+    },
+    clinch: {
+      name: "⑤ 완전히 붙잡혔을 때", kind: "fixed", striker: "grab", angle: "up", dur: 3.6, win: [0.46, 0.9], react: [0.82, 1.0],
+      situation: "껴안겨 몸이 완전히 붙었어요. 발도 무릎도 쓸 틈이 없지만 손 한쪽은 아래로 내릴 수 있어요.",
+      steps: [
+        { t: 0.00, txt: "① 상대가 다가와 끌어안아요" },
+        { t: 0.30, txt: "② 큰 소리로 외치며 몸을 살짝 뒤로 빼 한쪽 손이 내려갈 틈을 만들어요" },
+        { t: 0.45, txt: "③ 급소를 손바닥으로 감싸 쥐고 → 비틀고 → 아래로 당겨요" },
+        { t: 0.80, txt: "④ 상대 힘이 풀리면 계속 쥐고 있다가 밀치며 빠져나와요" },
+        { t: 0.90, txt: "⑤ 거리를 벌리고 도움을 요청하며 도망가요" }
+      ],
+      mistakes: "손을 내릴 틈이 없다고 포기하지 않기 · 쥐기만 하고 비틀지 않으면 효과가 작아요 · 풀려난 뒤 돌아보면 안 돼요"
+    }
+  };
+
+  function speedFactor(p) { return p <= 10 ? 0.25 + 0.075 * p : 1.08; }
+  function physics(key, angle, p) {
+    const s = STRIKERS[key];
+    let r;
+    if (s.type === "grab") {
+      const F = s.grip * (p <= 10 ? p / 10 : 1.12);
+      r = { v: null, m: null, F, Ft: F * 0.9 };
+    } else {
+      const m = s.mass + s.shoe, v = s.vmax * speedFactor(p), F = m * v / s.t;
+      const tr = s.type === "knee" ? 0.17 : s.type === "hand" ? 0.14 : angle === "up" ? 0.15 : 0.07 * s.toe;
+      r = { v, m, F, Ft: F * tr };
+    }
+    r.squash = 0.6 * (1 - Math.exp(-r.Ft / 300));
+    r.zone = ZONES.find(z => r.Ft < z.max);
+    // 0..1 how hard the person reacts (drives the attacker's body in the scene view)
+    const f = r.Ft;
+    r.sev = f < 60 ? 0.05 + 0.15 * f / 60 : f < 180 ? 0.2 + 0.35 * (f - 60) / 120 : f < 450 ? 0.55 + 0.35 * (f - 180) / 270 : 0.9 + 0.1 * Math.min(1, (f - 450) / 300);
+    return r;
+  }
+
+  // ---------- state ----------
+  const S = { mode: "scenario", scn: "front", shoe: "sneaker", striker: "sneaker", angle: "up", power: 6, t: 0.5, playing: false };
+  const $ = id => document.getElementById(id);
+  const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  const clamp = (x, a, b) => Math.min(b, Math.max(a, x));
+  const isScn = () => S.mode === "scenario";
+
+  // ---------- three.js scenes ----------
+  const stage = $("stage");
+  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.autoClear = false;
+  stage.prepend(renderer.domElement);
+  const scene = new THREE.Scene();        // zoomed anatomy detail (also the main view in "compare" mode)
+  const sceneFull = new THREE.Scene();    // two-person self-defense scene
+  const camera = new THREE.PerspectiveCamera(32, 1, 0.01, 30);
+  const insetCam = new THREE.PerspectiveCamera(32, 1, 0.01, 5);
+  insetCam.position.set(0.62, 0.9, 0.46);
+  insetCam.lookAt(0, 0.82, 0.07);
+  const controls = new THREE.OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+
+  function addLights(sc) {
+    sc.add(new THREE.HemisphereLight(0xdfe9ee, 0x1a2228, 0.95));
+    const sun = new THREE.DirectionalLight(0xffffff, 0.85); sun.position.set(1, 2, 1.5); sc.add(sun);
+    const rim = new THREE.DirectionalLight(0x7cc6d6, 0.4); rim.position.set(-1, 0.5, -1); sc.add(rim);
+  }
+  addLights(scene); addLights(sceneFull);
+
+  const ghost = (color, opacity) => new THREE.MeshStandardMaterial({ color, transparent: true, opacity, depthWrite: false, roughness: 0.6 });
+  const solid = (color, extra) => new THREE.MeshStandardMaterial(Object.assign({ color, roughness: 0.55 }, extra || {}));
+  const sphere = new THREE.SphereGeometry(1, 32, 24);
+
+  function limb(a, b, r1, r2, mat) {
+    const A = new THREE.Vector3(...a), B = new THREE.Vector3(...b);
+    const len = A.distanceTo(B);
+    const m = new THREE.Mesh(new THREE.CylinderGeometry(r2, r1, len, 20), mat);
+    m.position.copy(A).add(B).multiplyScalar(0.5);
+    m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), B.clone().sub(A).normalize());
+    return m;
+  }
+
+  // defender in the detail view (schematic, translucent)
+  const bodyMat = ghost(0xc9a58f, 0.26);
+  const body = new THREE.Group();
+  const pelvis = new THREE.Mesh(sphere, bodyMat); pelvis.scale.set(0.17, 0.12, 0.11); pelvis.position.set(0, 0.98, -0.01);
+  body.add(pelvis);
+  body.add(limb([0, 1.02, -0.01], [0, 1.45, -0.02], 0.15, 0.16, bodyMat));
+  body.add(limb([0.1, 0.93, 0], [0.12, 0.45, 0.01], 0.078, 0.05, bodyMat));
+  body.add(limb([-0.1, 0.93, 0], [-0.12, 0.45, 0.01], 0.078, 0.05, bodyMat));
+  scene.add(body);
+
+  // pubic bone arc
+  const arc = Math.PI * 0.85;
+  const pubGeo = new THREE.TorusGeometry(0.075, 0.012, 10, 40, arc);
+  pubGeo.rotateZ(Math.PI / 2 - arc / 2);
+  pubGeo.rotateX(Math.PI / 2);
+  const pubic = new THREE.Mesh(pubGeo, solid(0xe8e2d0, { roughness: 0.8 }));
+  pubic.position.set(0, 0.9, -0.01);
+  pubic.rotation.x = -0.25;
+  scene.add(pubic);
+
+  // sac + testes
+  const SAC_BASE = { p: new THREE.Vector3(0, 0.815, 0.06), s: new THREE.Vector3(0.038, 0.045, 0.036) };
+  const sacMat = ghost(0xb88c7a, 0.95);
+  const sac = new THREE.Mesh(sphere, sacMat);
+  scene.add(sac);
+  const TESTIS_PINK = new THREE.Color(0xd98a95), TESTIS_BRUISE = new THREE.Color(0x8a4668);
+  const testisMat = solid(0xd98a95, { emissive: new THREE.Color(0x000000), roughness: 0.4 });
+  const testes = [1, -1].map(side => {
+    const m = new THREE.Mesh(sphere, testisMat);
+    m.userData = { side, p: new THREE.Vector3(0.016 * side, 0.81, 0.06), s: new THREE.Vector3(0.013, 0.021, 0.015) };
+    scene.add(m);
+    return m;
+  });
+  const cordMat = new THREE.LineBasicMaterial({ color: 0xd98a95, transparent: true, opacity: 0.8 });
+  const cords = testes.map(t => {
+    const g = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3()]);
+    const l = new THREE.Line(g, cordMat);
+    scene.add(l);
+    return { line: l, anchor: new THREE.Vector3(0.022 * t.userData.side, 0.9, 0.05), t };
+  });
+
+  // impact ring (detail view)
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(1, 0.06, 8, 48), new THREE.MeshBasicMaterial({ color: 0x7cc6d6, transparent: true, opacity: 0, depthWrite: false }));
+  scene.add(ring);
+
+  // ---------- strikers (detail view) ----------
+  const skin = solid(0xe6c4ae);
+  function buildFoot(key) {
+    // canonical frame: ankle at origin, foot points -z, sole faces -y, shin goes toward +z and down
+    const s = STRIKERS[key];
+    const g = new THREE.Group();
+    const shoeMat = solid(s.color, { roughness: key === "heel" ? 0.25 : 0.6 });
+    const L = 0.23;
+    const foot = new THREE.Mesh(new THREE.BoxGeometry(0.075, 0.05, L), shoeMat);
+    foot.position.set(0, 0, -L / 2 + 0.03);
+    g.add(foot);
+    const toe = new THREE.Mesh(sphere, shoeMat);
+    toe.scale.set(0.034, 0.022, key === "heel" ? 0.055 : 0.035);
+    toe.position.set(0, -0.004, -L + 0.03);
+    g.add(toe);
+    if (key === "heel") {
+      g.add(limb([0, -0.02, 0.02], [0, -0.12, 0.035], 0.006, 0.012, shoeMat));
+      g.add(limb([0, 0.0, 0.04], [0, -0.18, 0.42], 0.042, 0.05, skin));
+    } else if (key === "sneaker") {
+      const sole = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.024, L + 0.01), solid(0xf7f7f7, { roughness: 0.8 }));
+      sole.position.set(0, -0.036, -L / 2 + 0.03);
+      g.add(sole);
+      g.add(limb([0, 0.0, 0.04], [0, -0.18, 0.42], 0.042, 0.05, skin));
+    } else if (key === "platform") {
+      const sole = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.035, L), shoeMat);
+      sole.position.set(0, -0.042, -L / 2 + 0.03);
+      g.add(sole);
+      const blk = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.1, 0.06), shoeMat);
+      blk.position.set(0, -0.1, 0.015);
+      g.add(blk);
+      g.add(limb([0, 0.0, 0.04], [0, -0.18, 0.42], 0.042, 0.05, skin));
+    } else {
+      const heelBlk = new THREE.Mesh(new THREE.BoxGeometry(0.065, 0.05, 0.05), shoeMat);
+      heelBlk.position.set(0, -0.045, 0.01);
+      g.add(heelBlk);
+      g.add(limb([0, 0.0, 0.03], [0, -0.17, 0.4], 0.052, 0.058, shoeMat));
+      g.add(limb([0, -0.17, 0.4], [0, -0.2, 0.47], 0.05, 0.05, skin));
+    }
+    return { g, instep: new THREE.Vector3(0, 0.026, -0.08), toeTip: new THREE.Vector3(0, -0.004, -L + 0.03 - (key === "heel" ? 0.055 : 0.035)) };
+  }
+  function buildKnee() {
+    const g = new THREE.Group();
+    const cap = new THREE.Mesh(sphere, skin); cap.scale.set(0.058, 0.055, 0.06);
+    g.add(cap);
+    g.add(limb([0, 0, 0.0], [0, -0.14, 0.42], 0.06, 0.075, skin));
+    g.add(limb([0, -0.02, -0.01], [0, -0.42, 0.04], 0.05, 0.04, skin));
+    return { g, contact: new THREE.Vector3(0, 0.05, -0.02) };
+  }
+  function buildFist() {
+    const g = new THREE.Group();
+    const fist = new THREE.Mesh(new THREE.BoxGeometry(0.085, 0.06, 0.09), skin);
+    g.add(fist);
+    g.add(limb([0, -0.03, 0.05], [0, -0.14, 0.34], 0.036, 0.046, skin));
+    return { g, contact: new THREE.Vector3(0, 0.032, -0.01) };
+  }
+  function buildHand() {
+    const g = new THREE.Group();
+    const palm = new THREE.Mesh(new THREE.BoxGeometry(0.085, 0.09, 0.024), skin);
+    g.add(palm);
+    g.add(limb([0, 0.0, 0.015], [0, -0.1, 0.3], 0.03, 0.04, skin));
+    const fingers = [];
+    [-0.03, -0.01, 0.01, 0.03].forEach((x, i) => {
+      const f1 = new THREE.Group(); f1.position.set(x, -0.045, -0.004);
+      const l1 = i === 0 || i === 3 ? 0.038 : 0.045;
+      const m1 = new THREE.Mesh(new THREE.CylinderGeometry(0.009, 0.0095, l1, 10), skin); m1.position.y = -l1 / 2; f1.add(m1);
+      const f2 = new THREE.Group(); f2.position.y = -l1;
+      const m2 = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.009, 0.035, 10), skin); m2.position.y = -0.0175; f2.add(m2);
+      f1.add(f2); g.add(f1); fingers.push([f1, f2]);
+    });
+    const th = new THREE.Group(); th.position.set(0.045, 0.02, 0);
+    const tm = new THREE.Mesh(new THREE.CylinderGeometry(0.01, 0.011, 0.05, 10), skin); tm.position.y = -0.025; th.add(tm);
+    th.rotation.set(0.6, 0, 0.5);
+    g.add(th);
+    return { g, fingers, thumb: th };
+  }
+
+  const holder = new THREE.Group();
+  scene.add(holder);
+  let rig = null;
+
+  function buildRig() {
+    holder.clear();
+    const s = STRIKERS[S.striker];
+    if (s.type === "kick") {
+      const f = buildFoot(S.striker);
+      const off = S.angle === "up" ? f.instep : f.toeTip;
+      f.g.position.copy(off).multiplyScalar(-1);
+      const pivot = new THREE.Group(); pivot.add(f.g); holder.add(pivot);
+      if (S.angle === "up") {
+        rig = { kind: "kick", pivot, contact: new THREE.Vector3(0, SAC_BASE.p.y - SAC_BASE.s.y, 0.06), dir: new THREE.Vector3(0, 1, -0.22).normalize(), D: 0.35 };
+      } else {
+        pivot.rotation.x = 0.12;
+        rig = { kind: "kick", pivot, contact: new THREE.Vector3(0, 0.81, SAC_BASE.p.z + SAC_BASE.s.z), dir: new THREE.Vector3(0, 0.12, -1).normalize(), D: 0.35 };
+      }
+    } else if (s.type === "knee") {
+      const k = buildKnee();
+      k.g.position.copy(k.contact).multiplyScalar(-1);
+      const pivot = new THREE.Group(); pivot.add(k.g); holder.add(pivot);
+      rig = { kind: "kick", pivot, contact: new THREE.Vector3(0, SAC_BASE.p.y - SAC_BASE.s.y, 0.07), dir: new THREE.Vector3(0, 1, -0.35).normalize(), D: 0.25 };
+    } else if (s.type === "hand") {
+      const k = buildFist();
+      k.g.position.copy(k.contact).multiplyScalar(-1);
+      const pivot = new THREE.Group(); pivot.add(k.g); holder.add(pivot);
+      rig = { kind: "kick", pivot, contact: new THREE.Vector3(0, SAC_BASE.p.y - SAC_BASE.s.y, 0.07), dir: new THREE.Vector3(0, 1, -0.3).normalize(), D: 0.22 };
+    } else {
+      const h = buildHand();
+      holder.add(h.g);
+      rig = { kind: "grab", hand: h, contact: new THREE.Vector3(0, 0.79, SAC_BASE.p.z + SAC_BASE.s.z + 0.014) };
+    }
+  }
+
+  // ---------- two-person scene: jointed figures driven by keyframes + 2-bone IK ----------
+  const V = (x, y, z) => new THREE.Vector3(x, y, z);
+  const UP = V(0, 1, 0);
+  const ease = x => { x = Math.min(1, Math.max(0, x)); return x * x * (3 - 2 * x); };
+  const smooth = (a, b, x) => ease((x - a) / (b - a));
+
+  function ik(A, T, l1, l2, pole) {
+    const d = T.clone().sub(A);
+    const L = clamp(d.length(), Math.abs(l1 - l2) + 0.02, l1 + l2 - 0.002);
+    const dir = d.lengthSq() > 1e-9 ? d.normalize() : V(0, -1, 0);
+    const a = (l1 * l1 - l2 * l2 + L * L) / (2 * L), h = Math.sqrt(Math.max(0, l1 * l1 - a * a));
+    let p = pole.clone().addScaledVector(dir, -pole.dot(dir));
+    if (p.lengthSq() < 1e-6) p = V(0, 0, 1).addScaledVector(dir, -dir.z);
+    p.normalize();
+    return { J: A.clone().addScaledVector(dir, a).addScaledVector(p, h), end: A.clone().addScaledVector(dir, L) };
+  }
+
+  const cylGeo = new THREE.CylinderGeometry(1, 1, 1, 14);
+  function makeFigure(color, opacity, scale, labelText, labelColor) {
+    const g = new THREE.Group();
+    const mat = new THREE.MeshStandardMaterial({ color, roughness: 0.6, transparent: opacity < 1, opacity, depthWrite: opacity >= 1 });
+    const cyl = () => { const m = new THREE.Mesh(cylGeo, mat); g.add(m); return m; };
+    const ball = () => { const m = new THREE.Mesh(sphere, mat); g.add(m); return m; };
+    const P = { torso: cyl(), shoulders: cyl(), hips: cyl(), head: ball(), uaL: cyl(), faL: cyl(), uaR: cyl(), faR: cyl(), thL: cyl(), shL: cyl(), thR: cyl(), shR: cyl(), ftL: cyl(), ftR: cyl(), hdL: ball(), hdR: ball() };
+    // name tag
+    const cv = document.createElement("canvas"); cv.width = 128; cv.height = 48;
+    const cx = cv.getContext("2d");
+    cx.fillStyle = "rgba(13,19,22,.85)"; cx.fillRect(0, 0, 128, 48);
+    cx.strokeStyle = labelColor; cx.lineWidth = 3; cx.strokeRect(1.5, 1.5, 125, 45);
+    cx.fillStyle = "#e2e9ec"; cx.font = "bold 26px sans-serif"; cx.textAlign = "center"; cx.textBaseline = "middle"; cx.fillText(labelText, 64, 25);
+    const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(cv), depthTest: false, transparent: true }));
+    sp.scale.set(0.32, 0.12, 1); sp.renderOrder = 10; g.add(sp);
+    const crotch = new THREE.Vector3();
+
+    function seg(m, A, B, r) {
+      const len = A.distanceTo(B);
+      m.position.copy(A).add(B).multiplyScalar(0.5);
+      m.scale.set(r, Math.max(len, 1e-4), r);
+      m.quaternion.setFromUnitVectors(UP, B.clone().sub(A).normalize());
+    }
+    function update(p) {
+      const s = scale;
+      const f = V(Math.sin(p.yaw), 0, Math.cos(p.yaw)), side = V(Math.cos(p.yaw), 0, -Math.sin(p.yaw));
+      const tdir = f.clone().multiplyScalar(Math.sin(p.lean)).addScaledVector(UP, Math.cos(p.lean));
+      const front = f.clone().multiplyScalar(Math.cos(p.lean)).addScaledVector(UP, -Math.sin(p.lean));
+      const hip = p.hip;
+      const neck = hip.clone().addScaledVector(tdir, 0.5 * s);
+      const shLp = neck.clone().addScaledVector(side, 0.19 * s).addScaledVector(tdir, -0.03 * s);
+      const shRp = neck.clone().addScaledVector(side, -0.19 * s).addScaledVector(tdir, -0.03 * s);
+      const hpL = hip.clone().addScaledVector(side, 0.09 * s), hpR = hip.clone().addScaledVector(side, -0.09 * s);
+      seg(P.torso, hip, neck, 0.125 * s);
+      seg(P.shoulders, shLp, shRp, 0.055 * s);
+      seg(P.hips, hpL, hpR, 0.075 * s);
+      const hc = neck.clone().addScaledVector(tdir, 0.14 * s).addScaledVector(front, 0.015 * s);
+      P.head.position.copy(hc); P.head.scale.setScalar(0.095 * s);
+      // legs: knees bend toward the body's front
+      [[hpL, p.lf, P.thL, P.shL, P.ftL], [hpR, p.rf, P.thR, P.shR, P.ftR]].forEach(([H, T, th, sh, ft]) => {
+        const r = ik(H, T, 0.44 * s, 0.44 * s, front);
+        seg(th, H, r.J, 0.065 * s); seg(sh, r.J, r.end, 0.05 * s);
+        const shinDir = r.end.clone().sub(r.J).normalize();
+        const lift = clamp((r.end.y - 0.09) / 0.3, 0, 1);
+        const fd = V(f.x, 0, f.z).lerp(shinDir, lift).normalize();
+        seg(ft, r.end, r.end.clone().addScaledVector(fd, 0.2 * s), 0.036 * s);
+      });
+      // arms: elbows bend down/outward
+      [[shLp, p.lh, P.uaL, P.faL, P.hdL, 1], [shRp, p.rh, P.uaR, P.faR, P.hdR, -1]].forEach(([Sh, T, ua, fa, hd, sg]) => {
+        const pole = tdir.clone().multiplyScalar(-0.6).addScaledVector(side, 0.5 * sg).addScaledVector(front, -0.15);
+        const r = ik(Sh, T, 0.29 * s, 0.27 * s, pole);
+        seg(ua, Sh, r.J, 0.042 * s); seg(fa, r.J, r.end, 0.036 * s);
+        hd.position.copy(r.end); hd.scale.setScalar(0.043 * s);
+      });
+      crotch.copy(hip).addScaledVector(tdir, -0.09 * s).addScaledVector(front, 0.06 * s);
+      sp.position.copy(hc).add(V(0, 0.22, 0));
+    }
+    return { group: g, update, crotch };
+  }
+
+  const attacker = makeFigure(0xd08a78, 0.55, 1.03, "치한", "#e5534b");
+  const defender = makeFigure(0x7cc6d6, 0.95, 0.95, "나", "#7cc6d6");
+  sceneFull.add(attacker.group, defender.group);
+  const grid = new THREE.GridHelper(8, 32, 0x2f444e, 0x1b2a32); sceneFull.add(grid);
+  const flash = new THREE.Mesh(sphere, new THREE.MeshBasicMaterial({ color: 0xe5534b, transparent: true, opacity: 0, depthWrite: false, depthTest: false }));
+  flash.renderOrder = 9; sceneFull.add(flash);
+  const ring2 = new THREE.Mesh(new THREE.TorusGeometry(1, 0.05, 8, 48), new THREE.MeshBasicMaterial({ color: 0xe5534b, transparent: true, opacity: 0, depthWrite: false, depthTest: false }));
+  ring2.renderOrder = 9; sceneFull.add(ring2);
+
+  // keyframes: world coordinates. Attacker faces +z (yaw 0), defender usually faces -z (yaw PI).
+  const BASE = { yaw: 0, lean: 0.05, hip: [0, 0.93, 0], lf: [0.11, 0.06, 0], rf: [-0.11, 0.06, 0], lh: [0.2, 1.1, 0.2], rh: [-0.2, 1.1, 0.2] };
+  const PI = Math.PI;
+  function track(list) {
+    let cur = Object.assign({}, BASE);
+    return list.map(k => { cur = Object.assign({}, cur, k); return cur; });
+  }
+  // walk away / run: alternating steps between t0..t1 along z
+  function run(t0, t1, zA, zB, y, yaw) {
+    const out = [], n = 5;
+    for (let i = 1; i <= n; i++) {
+      const t = t0 + (t1 - t0) * i / n, z = zA + (zB - zA) * i / n;
+      const lead = (i % 2 ? 0.32 : -0.32) * Math.sign(zB - zA || 1);
+      out.push({ t, yaw, lean: 0.12, hip: [0, y, z], lf: [0.11, 0.06, z + lead], rf: [-0.11, 0.06, z - lead], lh: [0.2, 1.0, z + (i % 2 ? -0.1 : 0.1)], rh: [-0.2, 1.0, z + (i % 2 ? 0.1 : -0.1)] });
+    }
+    return out;
+  }
+  const dGuard = (z, dz) => ({ lh: [-0.2, 1.4, z - 0.38 + (dz || 0)], rh: [0.17, 1.35, z - 0.36 + (dz || 0)] });
+
+  const TRACKS = {
+    front: {
+      T: track([
+        { t: 0.00, hip: [0, 0.93, -1.05], lf: [0.1, 0.06, -0.85], rf: [-0.1, 0.06, -1.2], lh: [0.25, 1.1, -0.75], rh: [-0.25, 1.1, -0.75] },
+        { t: 0.20, hip: [0, 0.93, -0.72], rf: [-0.1, 0.06, -0.45] },
+        { t: 0.36, hip: [0, 0.93, -0.36], lf: [0.1, 0.06, -0.12], lh: [0.25, 1.22, 0.1], rh: [-0.25, 1.22, 0.1] },
+        { t: 0.50, hip: [0, 0.93, 0], rf: [-0.1, 0.06, 0.22], lean: 0.12, lh: [0.22, 1.28, 0.38], rh: [-0.22, 1.28, 0.38] }
+      ]),
+      D: track([
+        { t: 0.00, yaw: PI, lean: 0.03, hip: [0, 0.9, 1.6], lf: [-0.12, 0.06, 1.55], rf: [0.12, 0.06, 1.85], ...dGuard(1.6) },
+        { t: 0.30, hip: [0, 0.9, 1.1], lf: [-0.12, 0.06, 1.05], rf: [0.12, 0.06, 1.38], ...dGuard(1.1) },
+        { t: 0.42, hip: [0.0, 0.88, 0.9], lean: -0.08, lf: [-0.12, 0.55, 0.62], rf: [0.13, 0.06, 1.05], ...dGuard(0.9) },
+        { t: 0.50, hip: [0.0, 0.9, 0.86], lean: -0.14, lf: [0.0, 0.67, 0.2], rf: [0.13, 0.06, 1.05], lh: [-0.3, 1.2, 1.0], rh: [0.3, 1.2, 1.0] },
+        { t: 0.60, lean: -0.05, lf: [-0.12, 0.45, 0.7], ...dGuard(0.86) },
+        { t: 0.70, hip: [0, 0.9, 0.95], lf: [-0.12, 0.06, 0.85], rf: [0.12, 0.06, 1.2], lean: 0.03 },
+        ...run(0.75, 1.0, 1.0, 2.8, 0.9, 0)
+      ])
+    },
+    grabbed: {
+      T: track([
+        { t: 0.00, hip: [0, 0.93, -0.8], lf: [0.1, 0.06, -0.65], rf: [-0.1, 0.06, -1.0], lh: [0.25, 1.1, -0.5], rh: [-0.25, 1.1, -0.5] },
+        { t: 0.18, hip: [0, 0.93, -0.45], rf: [-0.1, 0.06, -0.3], lh: [0.22, 1.28, 0.1], rh: [-0.22, 1.28, 0.1] },
+        { t: 0.34, hip: [0, 0.93, -0.12], lf: [0.1, 0.06, 0.15], lean: 0.1, lh: [0.19, 1.38, 0.55], rh: [-0.19, 1.38, 0.55] },
+        { t: 0.50, hip: [0, 0.93, 0], rf: [-0.1, 0.06, -0.25], lean: 0.15, lh: [0.19, 1.38, 0.56], rh: [-0.19, 1.38, 0.56] }
+      ]),
+      D: track([
+        { t: 0.00, yaw: PI, lean: 0.03, hip: [0, 0.9, 1.3], lf: [-0.12, 0.06, 1.25], rf: [0.12, 0.06, 1.5], ...dGuard(1.3) },
+        { t: 0.18, hip: [0, 0.9, 1.05], lf: [-0.12, 0.06, 1.0], rf: [0.12, 0.06, 1.28], ...dGuard(1.05) },
+        { t: 0.34, hip: [0, 0.9, 0.78], lean: -0.1, lf: [-0.12, 0.06, 0.66], rf: [0.12, 0.06, 0.65], lh: [-0.17, 1.4, 0.38], rh: [0.17, 1.4, 0.38] },
+        { t: 0.50, hip: [0, 0.9, 0.56], lean: -0.1, lf: [0.0, 0.42, 0.3], rf: [0.12, 0.06, 0.66], lh: [-0.2, 1.43, 0.12], rh: [0.2, 1.43, 0.12] },
+        { t: 0.58, lf: [-0.1, 0.12, 0.35], lh: [-0.2, 1.43, 0.12], rh: [0.2, 1.43, 0.12] },
+        { t: 0.66, lean: -0.1, lf: [0.0, 0.42, 0.3] },
+        { t: 0.72, lf: [-0.12, 0.06, 0.66], lean: 0.0, lh: [-0.18, 1.3, 0.25], rh: [0.18, 1.3, 0.25] },
+        ...run(0.78, 1.0, 0.7, 2.6, 0.9, 0)
+      ])
+    },
+    rear: {
+      T: track([
+        { t: 0.00, hip: [0, 0.93, -1.0], lf: [0.1, 0.06, -0.85], rf: [-0.1, 0.06, -1.2], lh: [0.25, 1.1, -0.7], rh: [-0.25, 1.1, -0.7] },
+        { t: 0.18, hip: [0, 0.93, -0.7], rf: [-0.1, 0.06, -0.4] },
+        { t: 0.30, hip: [0, 0.93, -0.3], lf: [0.1, 0.06, -0.1], lh: [0.2, 1.22, 0.3], rh: [-0.2, 1.22, 0.3], lean: 0.1 },
+        { t: 0.42, hip: [0, 0.93, -0.06], rf: [-0.1, 0.06, -0.3], lh: [0.12, 1.2, 0.5], rh: [-0.12, 1.2, 0.5] },
+        { t: 0.50, hip: [0, 0.93, 0.0], lf: [0.14, 0.06, -0.02], lean: 0.14, lh: [0.12, 1.2, 0.5], rh: [-0.12, 1.2, 0.5] }
+      ]),
+      D: track([
+        { t: 0.00, yaw: 0, lean: 0.04, hip: [0, 0.9, 0.95], lf: [0.1, 0.06, 1.1], rf: [-0.1, 0.06, 0.8], lh: [0.2, 1.0, 0.85], rh: [-0.2, 1.0, 1.05] },
+        { t: 0.18, hip: [0, 0.9, 1.2], lf: [0.1, 0.06, 1.1], rf: [-0.1, 0.06, 1.45], lh: [0.2, 1.0, 1.25], rh: [-0.2, 1.0, 1.1] },
+        { t: 0.30, hip: [0, 0.9, 0.66], lf: [0.1, 0.06, 0.75], rf: [-0.1, 0.06, 0.55], lh: [0.2, 1.0, 0.7], rh: [-0.2, 1.0, 0.6] },
+        { t: 0.42, hip: [0, 0.8, 0.36], lean: 0.12, lf: [0.26, 0.06, 0.42], rf: [-0.26, 0.06, 0.4], lh: [0.22, 0.95, 0.35], rh: [-0.22, 0.95, 0.35] },
+        { t: 0.50, hip: [0, 0.78, 0.31], lean: 0.2, lh: [0.22, 0.95, 0.3], rh: [-0.03, 0.82, 0.12] },
+        { t: 0.58, rh: [-0.2, 0.9, 0.3] },
+        { t: 0.66, lh: [0.2, 0.9, 0.3], rh: [-0.03, 0.82, 0.12] },
+        { t: 0.74, hip: [0, 0.85, 0.5], lean: 0.12, lf: [0.12, 0.06, 0.7], rf: [-0.12, 0.06, 0.45], lh: [0.2, 1.0, 0.6], rh: [-0.2, 1.0, 0.6] },
+        ...run(0.8, 1.0, 0.9, 2.8, 0.9, 0)
+      ])
+    },
+    ground: {
+      T: track([
+        { t: 0.00, hip: [0, 0.93, -0.95], lf: [0.1, 0.06, -0.8], rf: [-0.1, 0.06, -1.15], lh: [0.25, 1.1, -0.65], rh: [-0.25, 1.1, -0.65] },
+        { t: 0.20, hip: [0, 0.93, -0.62], rf: [-0.1, 0.06, -0.38], lean: 0.2 },
+        { t: 0.36, hip: [0, 0.92, -0.22], lf: [0.1, 0.06, -0.05], lean: 0.32, lh: [0.2, 0.8, 0.3], rh: [-0.2, 0.8, 0.3] },
+        { t: 0.50, hip: [0, 0.9, 0.0], rf: [-0.1, 0.06, 0.25], lean: 0.36, lh: [0.22, 0.7, 0.5], rh: [-0.22, 0.7, 0.5] }
+      ]),
+      D: track([
+        { t: 0.00, yaw: PI, lean: -1.45, hip: [0, 0.13, 1.35], lf: [-0.14, 0.52, 0.65], rf: [0.14, 0.52, 0.65], lh: [-0.3, 0.08, 1.5], rh: [0.3, 0.08, 1.5] },
+        { t: 0.30, hip: [0, 0.13, 1.05], lf: [-0.14, 0.52, 0.45], rf: [0.14, 0.52, 0.45], lh: [-0.32, 0.08, 1.2], rh: [0.32, 0.08, 1.2] },
+        { t: 0.42, hip: [0, 0.13, 0.82], lf: [-0.1, 0.5, 0.45], rf: [0.15, 0.56, 0.4], lh: [-0.32, 0.08, 1.0], rh: [0.32, 0.08, 1.0] },
+        { t: 0.50, hip: [0, 0.13, 0.78], lf: [0.0, 0.7, 0.17], rf: [0.15, 0.58, 0.42], lh: [-0.32, 0.08, 0.98], rh: [0.32, 0.08, 0.98] },
+        { t: 0.58, lf: [-0.1, 0.5, 0.45] },
+        { t: 0.66, lf: [0.0, 0.7, 0.17] },
+        { t: 0.72, hip: [0, 0.13, 0.9], lf: [-0.1, 0.5, 0.55], rf: [0.14, 0.5, 0.55] },
+        { t: 0.82, hip: [0, 0.5, 1.0], lean: -0.7, lf: [-0.12, 0.06, 0.95], rf: [0.12, 0.06, 1.2], lh: [-0.3, 0.7, 1.15], rh: [0.3, 0.7, 1.15] },
+        { t: 0.90, hip: [0, 0.88, 1.15], lean: 0.0, lh: [-0.2, 1.3, 0.8], rh: [0.2, 1.3, 0.8] },
+        ...run(0.92, 1.0, 1.15, 1.9, 0.9, 0)
+      ])
+    },
+    clinch: {
+      T: track([
+        { t: 0.00, hip: [0, 0.93, -0.8], lf: [0.1, 0.06, -0.65], rf: [-0.1, 0.06, -1.0], lh: [0.25, 1.1, -0.5], rh: [-0.25, 1.1, -0.5] },
+        { t: 0.20, hip: [0, 0.93, -0.4], rf: [-0.1, 0.06, -0.25], lh: [0.22, 1.28, 0.15], rh: [-0.22, 1.28, 0.15] },
+        { t: 0.34, hip: [0, 0.93, -0.06], lf: [0.1, 0.06, 0.16], lean: 0.12, lh: [0.14, 1.3, 0.62], rh: [-0.14, 1.3, 0.62] },
+        { t: 0.50, hip: [0, 0.93, 0.0], rf: [-0.1, 0.06, -0.2], lean: 0.12, lh: [0.14, 1.28, 0.64], rh: [-0.14, 1.28, 0.64] }
+      ]),
+      D: track([
+        { t: 0.00, yaw: PI, lean: 0.03, hip: [0, 0.9, 1.4], lf: [-0.12, 0.06, 1.35], rf: [0.12, 0.06, 1.6], ...dGuard(1.4) },
+        { t: 0.20, hip: [0, 0.9, 1.0], lf: [-0.12, 0.06, 0.95], rf: [0.12, 0.06, 1.25], ...dGuard(1.0) },
+        { t: 0.34, hip: [0, 0.9, 0.5], lean: -0.05, lf: [-0.12, 0.06, 0.42], rf: [0.12, 0.06, 0.66], lh: [-0.2, 1.2, 0.2], rh: [0.2, 1.2, 0.2] },
+        { t: 0.50, hip: [0, 0.9, 0.38], lean: 0.2, lf: [-0.12, 0.06, 0.4], rf: [0.12, 0.06, 0.62], lh: [-0.2, 1.2, 0.24], rh: [0.03, 0.82, 0.12] },
+        { t: 0.80, rh: [0.03, 0.8, 0.1] },
+        { t: 0.88, lean: 0.0, hip: [0, 0.9, 0.55], lh: [-0.18, 1.3, 0.25], rh: [0.18, 1.3, 0.25] },
+        ...run(0.92, 1.0, 0.7, 1.7, 0.9, 0)
+      ])
+    }
+  };
+
+  function toV(a) { return V(a[0], a[1], a[2]); }
+  function poseAt(tk, t) {
+    let i = 0;
+    while (i < tk.length - 1 && t >= tk[i + 1].t) i++;
+    const a = tk[i], b = tk[Math.min(i + 1, tk.length - 1)];
+    const span = b.t - a.t, u = span > 1e-6 ? clamp((t - a.t) / span, 0, 1) : 1, e = ease(u);
+    const mix = (x, y) => x + (y - x) * e;
+    const lerpA = (x, y) => V(mix(x[0], y[0]), mix(x[1], y[1]), mix(x[2], y[2]));
+    const p = { yaw: mix(a.yaw, b.yaw), lean: mix(a.lean, b.lean), hip: lerpA(a.hip, b.hip), lh: lerpA(a.lh, b.lh), rh: lerpA(a.rh, b.rh), lf: lerpA(a.lf, b.lf), rf: lerpA(a.rf, b.rf) };
+    // lift a foot while it travels between two different spots
+    ["lf", "rf"].forEach(k => {
+      const d = Math.hypot(b[k][0] - a[k][0], b[k][2] - a[k][2]);
+      if (d > 0.03) p[k].y += Math.sin(Math.PI * u) * Math.min(0.14, d * 0.5);
+    });
+    return p;
+  }
+  function mixPose(a, b, e) {
+    return { yaw: a.yaw + (b.yaw - a.yaw) * e, lean: a.lean + (b.lean - a.lean) * e, hip: a.hip.clone().lerp(b.hip, e), lh: a.lh.clone().lerp(b.lh, e), rh: a.rh.clone().lerp(b.rh, e), lf: a.lf.clone().lerp(b.lf, e), rf: a.rf.clone().lerp(b.rf, e) };
+  }
+  // how the person who was hit ends up (s = 0..1 severity)
+  function reactedPose(p0, s) {
+    const hip = V(p0.hip.x, p0.hip.y * (1 - 0.74 * s), p0.hip.z - 0.14 * s);
+    const hw = clamp(s / 0.25, 0, 1), k = ease((s - 0.4) / 0.4);
+    const lh = p0.lh.clone().lerp(hip.clone().add(V(0.08, -0.08, 0.1)), hw);
+    const rh = p0.rh.clone().lerp(hip.clone().add(V(-0.08, -0.08, 0.1)), hw);
+    const lf = V(p0.lf.x, p0.lf.y + (0.08 - p0.lf.y) * k, p0.lf.z + (hip.z - 0.42 - p0.lf.z) * k);
+    const rf = V(p0.rf.x, p0.rf.y + (0.08 - p0.rf.y) * k, p0.rf.z + (hip.z - 0.3 - p0.rf.z) * k);
+    return { yaw: p0.yaw, lean: p0.lean * (1 - s) + 0.2 + 1.1 * s, hip, lh, rh, lf, rf };
+  }
+
+  // ---------- timeline ----------
+  let P = physics(S.striker, S.angle, S.power);
+  const scn = () => SCN[S.scn];
+
+  function duration() {
+    if (isScn()) return scn().dur;
+    if (rig.kind === "grab") return 1.6;
+    return 2 * rig.D / P.v;
+  }
+  function slowWindow() { return isScn() ? scn().win : rig.kind === "grab" ? [0.45, 0.85] : [0.42, 0.8]; }
+
+  function compressionAt(t) {
+    const q = P.squash;
+    if (rig.kind === "grab") {
+      if (t < 0.5) return 0;
+      if (t < 0.62) return q * ease((t - 0.5) / 0.12);
+      if (t < 0.8) return q * (1 + 0.04 * Math.sin((t - 0.62) * 70));
+      if (t < 0.88) return q * (1 - ease((t - 0.8) / 0.08));
+      return 0;
+    }
+    if (t < 0.5) return 0;
+    if (t < 0.56) return q * ease((t - 0.5) / 0.06);
+    if (t < 0.66) return q * (1 - ease((t - 0.56) / 0.1));
+    const k = t - 0.66;
+    return -q * 0.22 * Math.exp(-k * 18) * Math.sin(k * 75);
+  }
+
+  const tmp = new THREE.Vector3();
+  function applyPose(t) {
+    const c = compressionAt(t);
+    const q = P.squash || 0.0001;
+    const strength = Math.min(1, Math.abs(c) / q);
+    const detailCam = isScn() ? insetCam : camera;
+
+    // striker
+    if (rig.kind === "kick") {
+      const depth = P.squash * 0.035;
+      let along;
+      if (t < 0.5) along = -rig.D * (1 - t / 0.5);
+      else if (t < 0.56) along = depth * ease((t - 0.5) / 0.06);
+      else if (t < 0.66) along = depth * (1 - ease((t - 0.56) / 0.1));
+      else along = -rig.D * 0.7 * ease((t - 0.66) / 0.34);
+      rig.pivot.position.copy(rig.contact).addScaledVector(rig.dir, along);
+    } else {
+      const h = rig.hand;
+      const start = rig.contact.clone().add(new THREE.Vector3(0, -0.04, 0.3));
+      const app = smooth(0, 0.35, t) * (1 - smooth(0.9, 1, t));
+      h.g.position.lerpVectors(start, rig.contact, app);
+      h.g.position.y -= 0.016 * smooth(0.55, 0.75, t) * (1 - smooth(0.8, 0.9, t));
+      h.g.rotation.z = 0.35 * smooth(0.55, 0.75, t) * (1 - smooth(0.8, 0.9, t));
+      const curl = smooth(0.35, 0.5, t) * (1 - smooth(0.85, 0.95, t));
+      const press = 1 + 0.25 * strength;
+      h.fingers.forEach(([f1, f2]) => { f1.rotation.x = 1.15 * curl * press; f2.rotation.x = 1.1 * curl * press; });
+    }
+
+    // deformation
+    const sg = Math.max(-0.4, Math.min(0.75, c));
+    const keep = 1 / Math.sqrt(1 - sg);
+    const up = S.angle === "up" || STRIKERS[S.striker].type === "knee" || STRIKERS[S.striker].type === "hand";
+    // after the hit: tissue slowly swells and darkens (compressed from minutes/hours into a few frames)
+    const hitEnd = isScn() ? scn().react[0] + 0.1 : 0.66;
+    const aft = smooth(hitEnd, hitEnd + 0.22, t) * P.sev;
+    testes.forEach(m => {
+      const d = m.userData;
+      m.position.copy(d.p);
+      m.scale.copy(d.s);
+      if (rig.kind === "grab") {
+        m.scale.set(d.s.x * (1 - sg * 0.5), d.s.y / ((1 - sg * 0.8) * (1 - sg * 0.5)) * 0.9, d.s.z * (1 - sg * 0.8));
+        m.position.x *= 1 - sg * 0.55;
+        m.position.y -= sg * 0.02;
+      } else if (up) {
+        m.scale.set(d.s.x * keep, d.s.y * (1 - sg), d.s.z * keep);
+        m.position.y = Math.min(d.p.y + sg * 0.03, 0.86);
+        m.position.x += d.side * Math.max(0, sg) * 0.012;
+      } else {
+        m.scale.set(d.s.x * keep, d.s.y * keep, d.s.z * (1 - sg));
+        m.position.z -= sg * 0.022;
+        m.position.y += sg * 0.008;
+        m.position.x += d.side * Math.max(0, sg) * 0.01;
+      }
+      m.scale.multiplyScalar(1 + 0.16 * aft);
+    });
+    testisMat.color.copy(TESTIS_PINK).lerp(TESTIS_BRUISE, aft);
+    const ss = sg * 0.6, sk = 1 / Math.sqrt(1 - ss);
+    sac.position.copy(SAC_BASE.p);
+    if (rig.kind === "grab") {
+      sac.scale.set(SAC_BASE.s.x * (1 - ss * 0.6), SAC_BASE.s.y * (1 + ss * 0.7), SAC_BASE.s.z * (1 - ss * 0.8));
+      sac.position.y -= sg * 0.02;
+    } else if (up) {
+      sac.scale.set(SAC_BASE.s.x * sk, SAC_BASE.s.y * (1 - ss), SAC_BASE.s.z * sk);
+      sac.position.y += sg * 0.025;
+    } else {
+      sac.scale.set(SAC_BASE.s.x * sk, SAC_BASE.s.y * sk, SAC_BASE.s.z * (1 - ss));
+      sac.position.z -= sg * 0.02;
+    }
+    sac.scale.multiplyScalar(1 + 0.12 * aft);
+    cords.forEach(cd => {
+      const top = tmp.copy(cd.t.position); top.y += cd.t.scale.y * 0.9;
+      const pos = cd.line.geometry.attributes.position;
+      pos.setXYZ(0, top.x, top.y, top.z); pos.setXYZ(1, cd.anchor.x, cd.anchor.y, cd.anchor.z);
+      pos.needsUpdate = true;
+    });
+
+    // colour + x-ray
+    const zc = new THREE.Color(css(P.zone.color) || "#e5534b");
+    testisMat.emissive.copy(zc).multiplyScalar(0.85 * strength + 0.25 * aft);
+    const [w0, w1] = slowWindow();
+    const reveal = $("xray").checked || isScn() ? 1 : smooth(w0 - 0.1, w0 + 0.02, t) * (1 - smooth(w1 + 0.06, w1 + 0.16, t));
+    sacMat.opacity = 0.95 - 0.75 * reveal;
+    bodyMat.opacity = 0.26 - 0.14 * reveal;
+
+    // impact ring (detail view)
+    const ringT = rig.kind === "grab" ? (t - 0.5) / 0.2 : (t - 0.5) / 0.14;
+    if (ringT > 0 && ringT < 1) {
+      ring.position.copy(rig.contact);
+      const rr = 0.02 + ringT * 0.08 * (0.4 + P.squash);
+      ring.scale.set(rr, rr, rr);
+      ring.lookAt(detailCam.position);
+      ring.material.opacity = (1 - ringT) * 0.8;
+      ring.material.color.copy(zc);
+    } else ring.material.opacity = 0;
+
+    // two-person scene
+    if (isScn()) {
+      const sc = scn(), tk = TRACKS[S.scn];
+      let pa = poseAt(tk.T, t);
+      const [r0, r1] = sc.react;
+      if (t > 0.5) {
+        const recoil = P.sev * 0.07 * Math.sin(Math.PI * clamp((t - 0.5) / 0.14, 0, 1));
+        if (t > r0) pa = mixPose(pa, reactedPose(pa, P.sev), ease((t - r0) / (r1 - r0)));
+        pa.hip.z -= recoil;
+      }
+      attacker.update(pa);
+      defender.update(poseAt(tk.D, t));
+      // flash on the attacker's groin
+      const hitK = clamp((t - 0.5) / 0.14, 0, 1);
+      const fl = t >= 0.5 && t < 0.64 ? 0.9 * (1 - hitK) : 0;
+      const linger = smooth(0.6, 0.8, t) * 0.4 * P.sev * (1 - smooth(0.96, 1, t) * 0.0);
+      flash.position.copy(attacker.crotch);
+      flash.scale.setScalar(0.05 + 0.05 * hitK);
+      flash.material.color.copy(zc);
+      flash.material.opacity = Math.max(fl, linger);
+      if (hitK > 0 && hitK < 1) {
+        ring2.position.copy(attacker.crotch); ring2.scale.setScalar(0.05 + 0.25 * hitK);
+        ring2.lookAt(camera.position); ring2.material.color.copy(zc); ring2.material.opacity = (1 - hitK) * 0.8;
+      } else ring2.material.opacity = 0;
+    }
+
+    // inset caption + HUD
+    const real = t * duration();
+    $("hudTime").textContent = "실제 " + real.toFixed(3) + "초";
+    const hitSpan = rig.kind === "grab" ? [0.5, 0.85] : [0.5, 0.68];
+    const inHit = t > hitSpan[0] && t < hitSpan[1];
+    $("banner").classList.toggle("on", inHit && strength > 0.5);
+    if (isScn()) {
+      const showInset = t > 0.3 && t < 0.97;
+      $("inset").style.visibility = showInset ? "visible" : "hidden";
+      $("insetPhase").textContent = t < 0.5 ? "접근 중" : inHit ? "충격 순간 · 급소가 눌려요" : t < hitEnd ? "되튐 · 원래 모양으로" : "수 분~수 시간 뒤 · 붓기·멍 (압축해서 표현)";
+      const steps = sc_steps();
+      const idx = steps.reduce((acc, st, i) => (t >= st.t ? i : acc), 0);
+      $("cap").textContent = steps[idx].txt;
+      $("scnInfo").querySelectorAll("li").forEach((li, i) => li.classList.toggle("now", i === idx));
+    }
+  }
+  const sc_steps = () => scn().steps;
+
+  // ---------- UI ----------
+  function setPressed(seg, v) { seg.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.v === v))); }
+  function fmt(n, d) { return n.toLocaleString("ko-KR", { maximumFractionDigits: d, minimumFractionDigits: d }); }
+  function esc(s) { return s.replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c])); }
+
+  function syncStriker() {
+    if (!isScn()) return;
+    const sc = scn();
+    S.striker = sc.kind === "kick" ? S.shoe : sc.striker;
+    S.angle = sc.angle;
+  }
+
+  function renderScn() {
+    const sc = scn();
+    $("scnInfo").innerHTML = "<h3>" + esc(sc.name) + "</h3><p>" + esc(sc.situation) + "</p><ol>" +
+      sc.steps.map(st => "<li>" + esc(st.txt) + "</li>").join("") + "</ol><p class=\"warn\">자주 하는 실수 — " + esc(sc.mistakes) + "</p>";
+  }
+
+  function refresh() {
+    P = physics(S.striker, S.angle, S.power);
+    const s = STRIKERS[S.striker];
+    const sm = isScn();
+    stage.classList.toggle("scn", sm);
+    $("scnRow").hidden = !sm;
+    $("shoeRow").hidden = !(sm && scn().kind === "kick");
+    $("strikerRow").hidden = sm;
+    $("angleRow").hidden = sm || s.type !== "kick";
+    $("powerVal").innerHTML = S.power + "<small>" + POWER_WORDS[S.power] + "</small>";
+    const modeLabel = s.type === "kick" ? (S.angle === "up" ? "올려차기" : "앞차기") : s.type === "knee" ? "올려치기" : s.type === "hand" ? "쳐올리기" : "쥐고 비틀기";
+    $("hudMode").textContent = (sm ? scn().name + " · " : "") + s.name + " · " + modeLabel + " · 힘 " + S.power;
+    if (P.v == null) {
+      $("kSpeed").textContent = "쥐는 힘(악력)";
+      $("vSpeed").innerHTML = fmt(P.F / 9.81, 0) + "<small>kg</small>";
+      $("vMass").innerHTML = "-";
+    } else {
+      $("kSpeed").textContent = s.type === "knee" ? "무릎 속도" : s.type === "hand" ? "손 속도" : "발 속도";
+      $("vSpeed").innerHTML = fmt(P.v, 1) + "<small>m/s</small>";
+      $("vMass").innerHTML = fmt(P.m, 1) + "<small>kg</small>";
+    }
+    $("vForce").innerHTML = fmt(P.F, 0) + "<small>N</small>";
+    $("vTrans").innerHTML = fmt(P.Ft, 0) + "<small>N ≈ " + fmt(P.Ft / 9.81, 0) + "kg</small>";
+    $("vSquash").innerHTML = fmt(P.squash * 100, 0) + "<small>%</small>";
+    $("vZone").textContent = P.zone.name;
+    $("vZoneDesc").textContent = P.zone.desc;
+    $("verdict").style.borderLeftColor = "var(" + P.zone.color + ")";
+    $("afterList").innerHTML = P.zone.after.map(x => "<li style=\"border-left-color:var(" + P.zone.color + ")\">" + esc(x) + "</li>").join("");
+    const banner = $("banner");
+    banner.textContent = P.zone.name;
+    banner.style.borderLeftColor = "var(" + P.zone.color + ")";
+    $("surface").textContent = SURFACE[S.striker][s.type === "kick" ? S.angle : "up"];
+    renderBars();
+  }
+
+  function renderBars() {
+    const bars = $("bars");
+    const vals = [];
+    for (let p = 1; p <= 11; p++) vals.push(physics(S.striker, S.angle, p));
+    const top = 700;
+    bars.innerHTML = "";
+    [60, 180, 450].forEach(th => {
+      const d = document.createElement("div");
+      d.className = "thr";
+      d.style.bottom = (th / top * 100) + "%";
+      d.innerHTML = "<span>" + th + "N</span>";
+      bars.appendChild(d);
+    });
+    vals.forEach((r, i) => {
+      const b = document.createElement("button");
+      b.setAttribute("aria-label", "힘 " + (i + 1) + ": " + Math.round(r.Ft) + "N, " + r.zone.name);
+      if (i + 1 === S.power) b.className = "cur";
+      const bar = document.createElement("div");
+      bar.className = "b";
+      bar.style.height = Math.min(100, r.Ft / top * 100) + "%";
+      bar.style.background = "var(" + r.zone.color + ")";
+      b.appendChild(bar);
+      b.addEventListener("click", () => { S.power = i + 1; $("power").value = S.power; refresh(); play(); });
+      bars.appendChild(b);
+    });
+    $("ticks").innerHTML = vals.map((_, i) => "<span>" + (i + 1) + "</span>").join("");
+  }
+
+  function setCamera() {
+    if (isScn()) {
+      camera.position.set(3.9, 1.5, 1.7);
+      controls.target.set(0, 0.85, 0.55);
+      controls.minDistance = 1.2; controls.maxDistance = 9;
+    } else {
+      camera.position.set(0.95, 0.98, 0.62);
+      controls.target.set(0, 0.82, 0.06);
+      controls.minDistance = 0.2; controls.maxDistance = 2.2;
+    }
+    controls.update();
+  }
+  function rebuild() { syncStriker(); buildRig(); refresh(); }
+  function play() { S.t = 0; S.playing = true; }
+
+  function buildScnButtons() {
+    $("scnSeg").innerHTML = Object.keys(SCN).map(k => "<button data-v=\"" + k + "\" aria-pressed=\"" + (k === S.scn) + "\">" + esc(SCN[k].name) + "</button>").join("");
+  }
+  $("scnSeg").addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b) return;
+    S.scn = b.dataset.v; setPressed($("scnSeg"), S.scn);
+    renderScn(); rebuild(); play();
+  });
+  $("modeSeg").addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b) return;
+    S.mode = b.dataset.v; setPressed($("modeSeg"), S.mode);
+    if (!isScn()) { setPressed($("strikerSeg"), S.striker); setPressed($("angleSeg"), S.angle); }
+    setCamera(); resize(); rebuild(); play();
+  });
+  $("shoeSeg").addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b) return;
+    S.shoe = b.dataset.v; setPressed($("shoeSeg"), S.shoe);
+    rebuild(); play();
+  });
+  $("strikerSeg").addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b) return;
+    S.striker = b.dataset.v; setPressed($("strikerSeg"), S.striker);
+    buildRig(); refresh(); play();
+  });
+  $("angleSeg").addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b) return;
+    S.angle = b.dataset.v; setPressed($("angleSeg"), S.angle);
+    buildRig(); refresh(); play();
+  });
+  $("power").addEventListener("input", e => { S.power = +e.target.value; refresh(); });
+  $("power").addEventListener("change", play);
+  $("play").addEventListener("click", play);
+  $("scrub").addEventListener("input", e => { S.playing = false; S.t = e.target.value / 1000; });
+
+  // ---------- loop ----------
+  let insetSize = 200;
+  function resize() {
+    const w = stage.clientWidth, h = stage.clientHeight;
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h;
+    camera.fov = isScn() && camera.aspect < 1.2 ? 62 : 32; // narrow screens: widen the view so both people fit
+    camera.updateProjectionMatrix();
+    insetSize = Math.round(Math.min(w * 0.42, h * 0.5));
+    const el = $("inset");
+    el.style.width = insetSize + "px"; el.style.height = insetSize + "px";
+  }
+  new ResizeObserver(resize).observe(stage);
+
+  function render() {
+    const w = stage.clientWidth, h = stage.clientHeight;
+    renderer.setScissorTest(false);
+    renderer.setViewport(0, 0, w, h);
+    renderer.setClearColor(0x000000, 0);
+    renderer.clear();
+    renderer.render(isScn() ? sceneFull : scene, camera);
+    if (isScn() && $("inset").style.visibility !== "hidden") {
+      const x = w - insetSize - 11, y = h - insetSize - 11; // 10px offset + 1px border
+      renderer.setScissorTest(true);
+      renderer.setViewport(x, y, insetSize, insetSize);
+      renderer.setScissor(x, y, insetSize, insetSize);
+      renderer.setClearColor(0x0f181d, 1);
+      renderer.clear();
+      renderer.render(scene, insetCam);
+      renderer.setScissorTest(false);
+    }
+  }
+
+  let last = performance.now();
+  function frame(now) {
+    const dt = Math.min(0.05, (now - last) / 1000); last = now;
+    let slowShown = false;
+    if (S.playing) {
+      const dur = duration();
+      let rate = +$("speed").value;
+      const [w0, w1] = slowWindow();
+      if ($("autoSlow").checked && S.t > w0 && S.t < w1) {
+        const target = rig.kind === "grab" ? 3.2 : 3.0;
+        rate = Math.min(rate, ((w1 - w0) * dur) / target);
+        slowShown = true;
+      }
+      S.t += dt * rate / dur;
+      if (S.t >= 1) { S.t = 1; S.playing = false; }
+      $("scrub").value = Math.round(S.t * 1000);
+      const hs = $("hudSlow");
+      hs.hidden = !(slowShown || rate < 1);
+      if (!hs.hidden) hs.textContent = "슬로우 1/" + Math.max(1, Math.round(1 / rate));
+    } else {
+      $("hudSlow").hidden = true;
+    }
+    applyPose(S.t);
+    controls.update();
+    render();
+    requestAnimationFrame(frame);
+  }
+
+  buildScnButtons();
+  renderScn();
+  setCamera();
+  syncStriker();
+  buildRig();
+  refresh();
+  resize();
+  requestAnimationFrame(frame);
+  setTimeout(play, 600);
+})();
+</script>
+</body>
+</html>
