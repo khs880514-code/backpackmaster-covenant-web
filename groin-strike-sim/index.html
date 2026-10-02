@@ -98,6 +98,24 @@ select { font: inherit; font-size: 13.5px; background: var(--panel-2); color: va
 .two { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
 .two ul { margin: 0; padding-left: 18px; font-size: 13.5px; color: var(--muted); display: grid; gap: 3px; }
 .two h3 { margin: 0 0 6px; font-size: 14px; }
+.btn2 { font: inherit; font-size: 14px; font-weight: 600; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--accent); background: transparent; color: var(--accent); cursor: pointer; justify-self: start; }
+dialog { background: var(--panel); color: var(--fg); border: 1px solid var(--line); border-radius: 12px; padding: 0; width: min(920px, 96vw); max-height: 94vh; }
+dialog::backdrop { background: rgba(0,0,0,.7); }
+.dlg { padding: 14px; display: grid; gap: 12px; overflow: auto; max-height: 92vh; }
+.dlg-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.dlg-head h2 { margin: 0; }
+.dgrid { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 12px; }
+@media (max-width: 720px) { .dgrid { grid-template-columns: 1fr; } }
+.dcanvas { width: 100%; height: auto; background: #0f181d; border: 1px solid var(--line); border-radius: 8px; display: block; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font-family: var(--font-mono); font-size: 12px; padding: 3px 8px; border-radius: 999px; background: var(--panel-2); border: 1px solid var(--line); }
+.rtable { display: grid; gap: 6px; }
+.rrow { display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; padding: 7px 10px; background: var(--panel-2); border-radius: 8px; border-left: 4px solid var(--z1); }
+.rrow b { font-size: 13.5px; }
+.rrow .lv { font-size: 12.5px; font-weight: 700; text-align: right; }
+.rrow .bar { grid-column: 1 / -1; height: 5px; border-radius: 3px; background: var(--line); overflow: hidden; }
+.rrow .bar i { display: block; height: 100%; }
+.rrow span.d { grid-column: 1 / -1; font-size: 12.5px; color: var(--muted); }
 .chart { display: grid; gap: 6px; }
 .bars { position: relative; height: 130px; display: grid; grid-template-columns: repeat(11, 1fr); gap: 4px; align-items: end; padding-top: 4px; }
 .bars button { all: unset; cursor: pointer; display: flex; flex-direction: column; justify-content: flex-end; align-items: stretch; height: 100%; position: relative; z-index: 1; }
@@ -246,6 +264,7 @@ h2 { font-size: 17px; margin: 0; text-wrap: balance; }
       <div class="warnbox" id="loadWarn"></div>
     </div>
     <div class="surface" id="surface">-</div>
+    <button class="btn2" id="openDetail">🔬 상세 변화·부상 위험 창 열기 (현재 설정 그대로)</button>
     <div class="after">
       <div class="label">맞은 뒤 몸에서 일어나는 일 (이 힘일 때)</div>
       <ol id="afterList"></ol>
@@ -328,6 +347,28 @@ h2 { font-size: 17px; margin: 0; text-wrap: balance; }
   </section>
 </div>
 
+<dialog id="detail">
+  <div class="dlg">
+    <div class="dlg-head"><h2>상세 변화 · 부상 위험 (교육용 모식도)</h2><button class="btn2" id="closeDetail">닫기</button></div>
+    <div class="chips" id="dChips"></div>
+    <div class="dgrid">
+      <div class="row">
+        <canvas class="dcanvas" id="dCanvas" width="560" height="440"></canvas>
+        <div class="power-head"><label class="label" for="dPhase">시간 경과</label><div class="power-val" id="dPhaseVal" style="font-size:15px">-</div></div>
+        <input type="range" id="dPhase" min="0" max="5" step="0.05" value="2">
+        <div class="ticks" style="grid-template-columns:repeat(6,1fr)"><span>타격 전</span><span>접촉</span><span>최대 눌림</span><span>되튐</span><span>수 분 뒤</span><span>수 시간 뒤</span></div>
+        <label class="toggle"><input type="checkbox" id="dCup"> 보호컵을 착용했다고 가정 (비교용)</label>
+        <p class="note" id="dPhaseText" style="border:0;padding:0"></p>
+      </div>
+      <div class="row">
+        <div class="label">이런 일이 생길 위험이 있어요 · 현재 설정 기준</div>
+        <div class="rtable" id="rTable"></div>
+      </div>
+    </div>
+    <p class="note">교육용 단순 모델이에요. 힘 숫자는 추정치이고 실제 위험은 개인차(고환 위치·근육 긴장·옷·각도·보호대)로 크게 달라요. 진단·치료 기준이 아니에요. 임계값 근거와 한계는 SPEC.md에 정리돼 있어요.</p>
+  </div>
+</dialog>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 <script>
@@ -353,6 +394,9 @@ h2 { font-size: 17px; margin: 0; text-wrap: balance; }
       after: ["즉시 · 극심한 통증으로 쓰러져요", "수 초 · 구토·식은땀·정신이 아찔해질 수 있어요", "그 뒤 · 심한 부기가 생길 수 있어 의료 처치가 필요할 수 있어요"] }
   ];
   // 5th stage only reachable through accumulated load (many hits, or gripping too long)
+  // contact area (m^2): smaller area = higher local pressure = more tissue damage for the same force
+  const AREA = { sneaker: { up: 0.003, straight: 0.0015 }, heel: { up: 0.0025, straight: 0.0006 }, platform: { up: 0.003, straight: 0.0015 }, boot: { up: 0.0035, straight: 0.002 }, knee: 0.004, hand: 0.002 };
+  const areaOf = (key, angle) => { const a = AREA[key]; return a == null ? null : typeof a === "number" ? a : a[angle]; };
   const ZONE5 = { name: "중대한 부상 위험(누적)", color: "--z5", desc: "힘을 너무 크게, 너무 여러 번, 또는 너무 오래 가했을 때예요. 어떤 호신술 상황에서도 '필요 이상'이고, 수업 중이면 사고예요.",
     after: ["즉시 · 극심한 통증으로 쓰러지고 구토·실신이 올 수 있어요", "수 분 · 음낭 안에서 출혈(혈종)이 생겨 크게 붓고 시퍼렇게 멍들 수 있어요", "고환을 감싼 막이 찢어지는 파열, 혈관이 꼬이는 염전이 생길 수 있어요 — 수술이 필요하고 늦으면 고환을 잃을 수 있어요", "그 뒤 · 소변에 피, 감염, 장기적으로는 회복 후에도 통증·위축이 남을 수 있어요"] };
   ZONES.forEach((z, i) => { z.todo = [
@@ -465,7 +509,10 @@ h2 { font-size: 17px; margin: 0; text-wrap: balance; }
   }
   // cumulative load: each hit counts (Ft/450)^1.5; a grip counts per second. 1.0 = one hit at the injury threshold
   function applyLoad() {
-    const per = P.v == null ? Math.pow(P.Ft / 250, 1.5) * S.hold / 4 : Math.pow(P.Ft / 450, 1.5) * S.reps;
+    P.area = areaOf(S.striker, S.angle);
+    P.press = P.area ? P.Ft / P.area / 1000 : null; // kPa
+    P.FtAdj = P.area ? P.Ft * clamp(Math.pow(0.003 / P.area, 0.25), 0.85, 1.45) : P.Ft;
+    const per = P.v == null ? Math.pow(P.Ft / 250, 1.5) * S.hold / 4 : Math.pow(P.FtAdj / 450, 1.5) * S.reps;
     P.load = per;
     P.stageIdx = stageOfLoad(per);
     P.stage = ZONES5[P.stageIdx];
@@ -1073,6 +1120,114 @@ h2 { font-size: 17px; margin: 0; text-wrap: balance; }
   }
   const sc_steps = () => scn().steps;
 
+  // ---------- detail window (cross-section + risk table) ----------
+  // level thresholds are on E = equivalent single-hit force (N) after accumulation; [mild, possible, high]
+  const RISKS = [
+    { name: "일시적 통증·숨 막힘·메스꺼움", th: [30, 100, 250], d: ["거의 없어요", "따끔한 통증이 짧게 있어요", "아랫배로 퍼지는 통증, 숨이 막히고 주저앉을 수 있어요", "극심한 통증, 구토·식은땀·실신 가능"] },
+    { name: "피부·음낭 멍과 붓기", th: [70, 180, 350], d: ["거의 없어요", "옅은 멍이 생길 수 있어요", "뚜렷한 멍과 붓기가 며칠 가요", "크게 붓고 시퍼렇게 멍들어요"] },
+    { name: "부고환·정삭 타박 (며칠~몇 주 통증)", th: [120, 250, 450], d: ["거의 없어요", "뻐근한 통증이 하루 이틀 가요", "부고환이 부어 걸을 때도 아플 수 있어요", "염증·장기 통증으로 이어질 수 있어요"] },
+    { name: "음낭 안 출혈 (혈종)", th: [200, 350, 550], d: ["거의 없어요", "작은 출혈 가능", "음낭 안에 피가 고여 크게 부을 수 있어요", "큰 혈종 — 수술로 빼야 할 수 있어요"] },
+    { name: "고환 백막 파열 (고환을 감싼 단단한 막)", th: [350, 450, 650], d: ["거의 없어요", "드물게 가능", "파열 가능 구간 — 응급 수술 필요", "파열 가능성이 높아요 — 늦으면 고환을 잃어요"] },
+    { name: "혈관이 꼬임 (외상성 염전)", th: [250, 450, 700], d: ["거의 없어요", "드물게 가능", "가능 — 6시간 안 응급 처치 필요", "가능성이 높아요 — 늦으면 고환을 잃어요"], twist: true },
+    { name: "장기 후유증 (위축·통증)", th: [450, 600, 900], d: ["거의 없어요", "드물게 가능", "회복 뒤에도 통증·크기 줄어듦 가능", "가능성이 높아요"] }
+  ];
+  const LV_NAME = ["거의 없음", "낮음", "가능", "높음"], LV_COL = ["--z1", "--z1", "--z3", "--z4"];
+  function dState() {
+    const cup = $("dCup").checked;
+    let E = 450 * Math.pow(Math.max(P.load, 1e-4), 2 / 3) * (cup ? 0.15 : 1);
+    const per = Math.pow(E / 450, 1.5), st = stageOfLoad(per);
+    return { cup, E, st, q: P.squash * (cup ? 0.35 : 1) };
+  }
+  function riskLevel(r, E) {
+    let th = r.th;
+    if (r.twist && P.v == null) th = th.map(x => x * (0.55 + 0.05 * Math.min(S.hold, 8))); // twisting while gripping makes torsion easier
+    return th.reduce((n, x) => n + (E >= x ? 1 : 0), 0);
+  }
+  const lerpPts = (pts, x) => { const i = clamp(Math.floor(x), 0, pts.length - 2), u = clamp(x - i, 0, 1); return pts[i] + (pts[i + 1] - pts[i]) * u; };
+  const PHASE_TEXT = [
+    "타격 전: 고환은 음낭 안에서 느슨하게 매달려 있고, 위쪽은 치골(골반 앞 뼈)이에요.",
+    "접촉: 음낭이 먼저 눌리고 고환이 위쪽 치골 쪽으로 밀려요.",
+    "최대 눌림(약 0.01~0.02초): 고환이 치골과 타격면 사이에 끼여 납작해져요. 이 순간 압력이 백막(단단한 막)에 걸려요.",
+    "되튐: 눌렸던 조직이 튕겨 돌아오며 진동해요. 정삭(혈관·정관)이 당겨져요.",
+    "수 분 뒤: 통증이 아랫배로 퍼지고, 손상된 혈관에서 붓기·출혈이 시작돼요.",
+    "수 시간 뒤: 붓기와 멍이 가장 뚜렷해져요. 단계가 높으면 응급 처치가 필요한 시점이에요."
+  ];
+  function drawDetail() {
+    const d = dState(), cv = $("dCanvas"), g = cv.getContext("2d"), W = cv.width, H = cv.height;
+    const idx = +$("dPhase").value;
+    $("dPhaseVal").textContent = ["타격 전", "접촉", "최대 눌림", "되튐", "수 분 뒤", "수 시간 뒤"][Math.round(idx)];
+    $("dPhaseText").textContent = PHASE_TEXT[Math.round(idx)];
+    const c = d.q * lerpPts([0, 0.5, 1, 0.1, 0, 0], idx) / 0.6;       // 0..1 squash
+    const tf = lerpPts([0, 0, 0, 0, 0.5, 1], idx);                  // time-after factor
+    const sw = STAGE_SWELL[d.st] * 1.6 * tf, hem = [0, 0, 0.12, 0.5, 0.95][d.st] * tf;
+    const cx = 220, cy = 230, rx0 = 62, ry0 = 88;
+    const rx = rx0 * (1 + 0.45 * c) * (1 + sw), ry = ry0 * (1 - 0.5 * c) * (1 + sw * 0.8);
+    g.clearRect(0, 0, W, H);
+    const bruise = new THREE.Color(0xe3b9a4).lerp(new THREE.Color(STAGE_COLOR[d.st]), Math.min(1, tf * (d.st ? 1.1 : 0.25)));
+    const hex = col => "#" + col.getHexString();
+    const ell = (rxx, ryy, fill, stroke, lw) => { g.beginPath(); g.ellipse(cx, cy, rxx, ryy, 0, 0, 7); if (fill) { g.fillStyle = fill; g.fill(); } if (stroke) { g.strokeStyle = stroke; g.lineWidth = lw || 2; g.stroke(); } };
+    // pubic bone (fixed) and cord
+    const boneY = cy - ry0 - 52;
+    g.strokeStyle = "#e8e2d0"; g.lineWidth = 14; g.lineCap = "round";
+    g.beginPath(); g.moveTo(cx - 150, boneY + 14); g.quadraticCurveTo(cx, boneY - 22, cx + 150, boneY + 14); g.stroke();
+    g.strokeStyle = "#d98a95"; g.lineWidth = 6;
+    g.beginPath(); g.moveTo(cx - 14, boneY + 10); g.lineTo(cx - 10, cy - ry); g.moveTo(cx + 14, boneY + 10); g.lineTo(cx + 10, cy - ry); g.stroke();
+    // skin + dartos, tunica vaginalis, hematoma, tunica albuginea, parenchyma
+    ell(rx + 26, ry + 26, hex(bruise), "#b88c7a", 3);
+    ell(rx + 17, ry + 17, null, "rgba(120,70,60,.8)", 2);
+    ell(rx + 9, ry + 9, "rgba(200,225,235,.35)", "rgba(180,210,225,.9)", 2);
+    if (hem > 0.02) ell(rx + 8, ry + 8, "rgba(110,15,40," + (0.25 + 0.6 * hem).toFixed(2) + ")", null);
+    const par = new THREE.Color(0xd98a95).lerp(new THREE.Color(STAGE_COLOR[d.st]), Math.min(1, tf * (d.st ? 1 : 0.2)));
+    ell(rx, ry, hex(par), "#f4f1e6", 6);
+    // epididymis (crescent on the back side)
+    g.strokeStyle = d.st >= 2 && tf > 0.4 ? "#8a3a5a" : "#c46b7c"; g.lineWidth = 9;
+    g.beginPath(); g.ellipse(cx + rx * 0.62, cy, rx * 0.28, ry * 0.8, 0, -1.2, 1.2); g.stroke();
+    // striker from below
+    const sy = cy + ry + 28 - 10 * c, A = d.cup ? 0 : 0;
+    g.fillStyle = "#cfd8dc"; g.strokeStyle = "#90a4ae"; g.lineWidth = 2;
+    const key = S.striker, st0 = STRIKERS[key];
+    if (st0.type === "grab") {
+      [-1, 1].forEach(sg => { g.beginPath(); g.ellipse(cx + sg * (rx + 34 - 18 * c), cy, 22, 64, 0, 0, 7); g.fill(); g.stroke(); });
+      g.strokeStyle = "#7cc6d6"; g.lineWidth = 3; g.beginPath(); g.arc(cx, cy, rx + 54, 0.5, 1.9); g.stroke();
+      g.fillStyle = "#7cc6d6"; g.font = "13px sans-serif"; g.fillText("비틀기", cx - 24, cy + ry + 70);
+    } else if (st0.type === "knee") {
+      g.beginPath(); g.ellipse(cx, sy + 50, 66, 62, 0, 0, 7); g.fill(); g.stroke();
+    } else if (st0.type === "hand") {
+      g.beginPath(); g.roundRect ? g.roundRect(cx - 40, sy, 80, 40, 10) : g.rect(cx - 40, sy, 80, 40); g.fill(); g.stroke();
+    } else {
+      const wide = S.angle === "up" ? 100 : (key === "heel" ? 14 : 44), col = "#" + new THREE.Color(st0.color).getHexString();
+      g.fillStyle = col; g.beginPath(); g.roundRect ? g.roundRect(cx - wide, sy, wide * 2, 34, 10) : g.rect(cx - wide, sy, wide * 2, 34); g.fill(); g.stroke();
+    }
+    // force arrow + pressure
+    g.strokeStyle = "#e5534b"; g.fillStyle = "#e5534b"; g.lineWidth = 4; const ah = 36 + 40 * clamp(P.Ft / 600, 0, 1) * (c > 0.05 ? 1 : 0.35);
+    g.beginPath(); g.moveTo(cx + rx + 70, cy + ry + 90); g.lineTo(cx + rx + 70, cy + ry + 90 - ah); g.stroke();
+    g.beginPath(); g.moveTo(cx + rx + 62, cy + ry + 90 - ah + 10); g.lineTo(cx + rx + 70, cy + ry + 90 - ah - 4); g.lineTo(cx + rx + 78, cy + ry + 90 - ah + 10); g.fill();
+    // rupture marker when risk is high around peak compression
+    const rupLv = riskLevel(RISKS[4], d.E);
+    if (rupLv >= 2 && idx > 1.4 && idx < 3.6) { g.setLineDash([6, 5]); g.strokeStyle = "#ff6b6b"; g.lineWidth = 3; g.beginPath(); g.arc(cx, cy, Math.max(rx, ry) * 0.0 + ry, 1.2, 1.95); g.stroke(); g.setLineDash([]); g.fillStyle = "#ff8a8a"; g.font = "bold 13px sans-serif"; g.fillText("파열 위험 부위", cx - 48, cy + ry + 112); }
+    // labels
+    g.font = "12.5px sans-serif"; g.fillStyle = "#c9d6db"; g.strokeStyle = "rgba(200,214,219,.45)"; g.lineWidth = 1;
+    const lab = (txt, x, y, tx, ty) => { g.beginPath(); g.moveTo(x, y); g.lineTo(tx, ty); g.stroke(); g.fillText(txt, tx + 3, ty + 4); };
+    lab("피부·음낭막", cx + rx * 0.7 + 18, cy - ry * 0.7 - 18, 410, 90);
+    lab("고환초막(물주머니)", cx + rx + 10, cy - ry * 0.2, 410, 130);
+    lab("백막(단단한 막)", cx + rx * 0.9, cy + ry * 0.2, 410, 170);
+    lab("고환 조직", cx + rx * 0.2, cy - ry * 0.1, 410, 210);
+    lab("부고환", cx + rx * 0.72, cy + ry * 0.4, 410, 250);
+    lab("정삭(혈관·정관)", cx + 14, boneY + 40, 410, 50);
+    lab("치골(골반 앞 뼈)", cx + 120, boneY + 4, 410, 20);
+    g.fillStyle = "#8d9ea6"; g.fillText("※ 모식도 (실제 모양·크기 아님)", 12, H - 12);
+
+    // header chips + risk table
+    const area = P.area, ar = area ? (area * 10000).toFixed(0) + "cm²" : "손바닥 감싸기";
+    const chips = [STRIKERS[S.striker].name + (st0.type === "kick" ? (S.angle === "up" ? " · 올려차기" : " · 앞차기") : ""), "힘 " + S.power, st0.type === "grab" ? "쥐는 시간 " + S.hold + "초" : "연속 " + S.reps + "회", "충격력 " + Math.round(P.Ft) + "N", "접촉면적 " + ar, P.press ? "접촉 압력 " + Math.round(P.press) + "kPa" : "압박형(지속)", "누적 부담 " + P.load.toFixed(2), d.cup ? "보호컵 착용" : "보호대 없음"];
+    $("dChips").innerHTML = chips.map(x => "<span class=\"chip\">" + esc(x) + "</span>").join("");
+    $("rTable").innerHTML = RISKS.map(r => { const lv = riskLevel(r, d.E); return "<div class=\"rrow\" style=\"border-left-color:var(" + LV_COL[lv] + ")\"><b>" + esc(r.name) + "</b><span class=\"lv\" style=\"color:var(" + LV_COL[lv] + ")\">" + LV_NAME[lv] + "</span><div class=\"bar\"><i style=\"width:" + (lv / 3 * 100) + "%;background:var(" + LV_COL[lv] + ")\"></i></div><span class=\"d\">" + esc(r.d[lv]) + "</span></div>"; }).join("");
+  }
+  $("openDetail").addEventListener("click", () => { const dl = $("detail"); if (dl.showModal) dl.showModal(); else dl.setAttribute("open", ""); drawDetail(); });
+  $("closeDetail").addEventListener("click", () => $("detail").close());
+  $("dPhase").addEventListener("input", drawDetail);
+  $("dCup").addEventListener("change", drawDetail);
+
   // ---------- UI ----------
   function setPressed(seg, v) { seg.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.v === v))); }
   function fmt(n, d) { return n.toLocaleString("ko-KR", { maximumFractionDigits: d, minimumFractionDigits: d }); }
@@ -1129,6 +1284,7 @@ h2 { font-size: 17px; margin: 0; text-wrap: balance; }
     banner.textContent = st.name;
     banner.style.borderLeftColor = "var(" + st.color + ")";
     renderLoad();
+    if ($("detail").open) drawDetail();
     $("surface").textContent = SURFACE[S.striker][s.type === "kick" ? S.angle : "up"];
     renderBars();
   }
